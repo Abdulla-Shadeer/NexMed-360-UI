@@ -1,16 +1,5 @@
 import type { Metadata } from 'next';
-import { Roboto } from 'next/font/google';
 import './globals.css';
-
-const roboto = Roboto({
-  variable: '--font-roboto',
-  subsets: ['latin'],
-});
-
-const roboto_mono = Roboto({
-  variable: '--font-roboto-mono',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: 'HHIMS-Hospital Information Management System',
@@ -24,11 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${roboto.variable} ${roboto_mono.variable} antialiased`}
-      >
-        {children}
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
