@@ -13,8 +13,7 @@
     "*.{js,ts,jsx,tsx}": [
       "eslint --max-warnings=0",
       "prettier"
-    ],
-    "*.css": ["stylelint"]
+    ]
   },
   "dependencies": {
     "next": "15.4.5",
