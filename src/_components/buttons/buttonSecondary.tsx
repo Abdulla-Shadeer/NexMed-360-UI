@@ -1,5 +1,5 @@
 'use client';
-import { ButtonPrimary } from '@/components/buttons/buttonPrimary';
+import { PrimaryButton } from '@/components/buttons';
 
 interface ButtonSecondaryProps {
   initialState: 'active' | 'light';
@@ -12,10 +12,10 @@ interface ButtonSecondaryProps {
 }
 
 const getLightTheme = () => {
-  return 'bg-background text-text-dark border-default border-border-primary rounded-large hover:bg-panel-light';
+  return 'bg-background text-text-dark border-default border-border-primary rounded-large drop-shadow-default hover:bg-panel-light';
 };
 
-export const ButtonSecondary = ({
+const ButtonSecondary = ({
   initialState = 'active',
   withIcon = false,
   icon,
@@ -30,7 +30,7 @@ export const ButtonSecondary = ({
   };
 
   return (
-    <ButtonPrimary
+    <PrimaryButton
       disabled={disabled}
       isActive={initialState === 'active'}
       buttonText={buttonText}
@@ -41,3 +41,5 @@ export const ButtonSecondary = ({
     />
   );
 };
+
+export default ButtonSecondary;

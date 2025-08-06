@@ -87,8 +87,11 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --background: #2C2C2C;
-    --foreground: #EEFEF6;
+    --background: #010409;
+    --foreground: #F0F6FC;
+    --panel-light: #0D1117;
+    --border-primary: #2F353D;
+    --drop-shadow-default: 2px 2px 4px rgba(0, 152, 254, 0.278);
   }
 }
 

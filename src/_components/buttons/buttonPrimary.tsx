@@ -37,7 +37,7 @@ const getButtonClass = (variant: ButtonVariant) => {
   }
 };
 
-export const ButtonPrimary = ({
+const ButtonPrimary = ({
   isActive = false,
   withIcon = false,
   icon,
@@ -105,3 +105,5 @@ export const ButtonPrimary = ({
     </div>
   );
 };
+
+export default ButtonPrimary;
