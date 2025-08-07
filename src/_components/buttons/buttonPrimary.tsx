@@ -1,5 +1,5 @@
 'use client';
-import { AppIcon } from '@/components/icons/appIcon';
+import AppIcon from '@/components/icons/appIcon';
 import { IconChevronUp, IconChevronDown } from '@/components/icons/icons';
 import { useState } from 'react';
 
@@ -37,7 +37,7 @@ const getButtonClass = (variant: ButtonVariant) => {
   }
 };
 
-const ButtonPrimary = ({
+export default function ButtonPrimary({
   isActive = false,
   withIcon = false,
   icon,
@@ -47,7 +47,7 @@ const ButtonPrimary = ({
   disabled = false,
   tw_width = 'w-full',
   onClick,
-}: ButtonPrimaryProps) => {
+}: ButtonPrimaryProps) {
   const [open, setOpen] = useState(false);
   const btnVarient = getButtonClass(
     disabled
@@ -80,7 +80,7 @@ const ButtonPrimary = ({
         {
           <span className="flex items-center">
             {withIcon && icon && <AppIcon icon={icon} tw="mr-3 inline-block" />}
-            <span>{buttonText}</span>
+            <span className="text-left">{buttonText}</span>
           </span>
         }
         {withDropdown && (
@@ -90,7 +90,7 @@ const ButtonPrimary = ({
         )}
       </button>
       {withDropdown && open && (
-        <div className="flex flex-col w-full bg-transparent pl-12">
+        <div className="flex flex-col w-full bg-transparent pl-10">
           {dropdownButtons && dropdownButtons.length > 0 ? (
             dropdownButtons.map((btn, idx) => (
               <div key={idx} className="border-l border-border-primary">
@@ -104,6 +104,4 @@ const ButtonPrimary = ({
       )}
     </div>
   );
-};
-
-export default ButtonPrimary;
+}

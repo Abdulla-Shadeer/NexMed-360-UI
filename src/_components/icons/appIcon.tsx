@@ -7,14 +7,14 @@ interface IconProps {
   tw?: string;
 }
 
-export const AppIcon = ({
+export default function AppIcon({
   color = 'currentColor',
   icon: Icon,
   width = 24,
   height = 24,
   strokeWidth = 1.5,
   tw = '',
-}: IconProps) => {
+}: IconProps) {
   return (
     <Icon
       height={height}
@@ -25,4 +25,4 @@ export const AppIcon = ({
       className={tw}
     />
   );
-};
+}

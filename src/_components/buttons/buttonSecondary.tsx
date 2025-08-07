@@ -15,7 +15,7 @@ const getLightTheme = () => {
   return 'bg-background text-text-dark border-default border-border-primary rounded-large drop-shadow-default hover:bg-panel-light';
 };
 
-const ButtonSecondary = ({
+export default function ButtonSecondary({
   initialState = 'active',
   withIcon = false,
   icon,
@@ -23,7 +23,7 @@ const ButtonSecondary = ({
   disabled = false,
   tw = 'w-fit',
   onClick,
-}: ButtonSecondaryProps) => {
+}: ButtonSecondaryProps) {
   const handleClick = () => {
     if (disabled) return;
     onClick();
@@ -40,6 +40,4 @@ const ButtonSecondary = ({
       tw_width={`${tw} ${initialState === 'light' ? getLightTheme() : ''}`}
     />
   );
-};
-
-export default ButtonSecondary;
+}

@@ -45,6 +45,7 @@ import IconUserPlus from '../../../public/app_icons/user-plus.svg';
 import IconUser from '../../../public/app_icons/user.svg';
 import IconUsers from '../../../public/app_icons/users.svg';
 import IconXCircle from '../../../public/app_icons/x-circle.svg';
+import IconShieldCheck from '../../../public/app_icons/sheild-check.svg';
 export {
   IconArrowLeft,
   IconArrowRight,
@@ -93,4 +94,5 @@ export {
   IconUser,
   IconUsers,
   IconXCircle,
+  IconShieldCheck,
 };
