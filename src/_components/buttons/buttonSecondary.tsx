@@ -2,6 +2,7 @@
 import { PrimaryButton } from '@/components/buttons';
 
 interface ButtonSecondaryProps {
+  type?: 'button' | 'submit' | 'reset' | undefined;
   initialState: 'active' | 'light';
   withIcon?: boolean;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -16,6 +17,7 @@ const getLightTheme = () => {
 };
 
 export default function ButtonSecondary({
+  type = 'button',
   initialState = 'active',
   withIcon = false,
   icon,
@@ -31,6 +33,7 @@ export default function ButtonSecondary({
 
   return (
     <PrimaryButton
+      type={type}
       disabled={disabled}
       isActive={initialState === 'active'}
       buttonText={buttonText}

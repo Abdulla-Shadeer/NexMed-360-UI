@@ -9,7 +9,7 @@ interface InputProps {
   title: string;
   description?: string;
   required?: boolean;
-  errors?: InputValidationError[];
+  error: string;
   tw_width?: string;
 }
 
@@ -19,9 +19,4 @@ interface TextInputProps extends InputProps {
   onChange: (value: string) => void;
 }
 
-type InputValidationError = {
-  name: string;
-  error: string;
-};
-
-export type { NavPath, InputProps, TextInputProps, InputValidationError };
+export type { NavPath, InputProps, TextInputProps };
