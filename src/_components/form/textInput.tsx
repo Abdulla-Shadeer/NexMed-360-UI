@@ -1,10 +1,9 @@
 'use client';
 import { TextInputProps } from '@/app_interfaces';
-import { IconXCircle } from '@/components/icons/icons';
-import AppIcon from '@/components/icons/appIcon';
+import InputWrapper from './inputWrapper';
 
 export default function TextInput({
-  title,
+  name,
   description = '',
   required = false,
   error = '',
@@ -14,14 +13,13 @@ export default function TextInput({
   tw_width = '',
 }: TextInputProps) {
   return (
-    <div className={`flex flex-col gap-2 ${tw_width ? tw_width : 'w-[376px]'}`}>
-      <label className="block text-title-small capitalize">
-        {title}
-        {required && <span className="text-red-primary ml-1">*</span>}
-      </label>
-      {description && (
-        <p className="text-small text-on-disabled">{description}</p>
-      )}
+    <InputWrapper
+      name={name}
+      description={description}
+      required={required}
+      error={error}
+      tw_width={tw_width}
+    >
       <input
         type="text"
         className="border-default text-default text-text-dark border-border-primary rounded-default px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-primary"
@@ -30,14 +28,6 @@ export default function TextInput({
         onChange={(e) => onChange(e.target.value)}
         value={value}
       />
-      {error && (
-        <p className="text-small text-red-primary text-left">
-          <span>
-            <AppIcon icon={IconXCircle} tw="inline-block mr-1 w-[16px]" />
-          </span>
-          {error}
-        </p>
-      )}
-    </div>
+    </InputWrapper>
   );
 }

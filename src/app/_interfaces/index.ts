@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 interface NavPath {
   name: string;
   path?: string;
@@ -6,10 +8,11 @@ interface NavPath {
 }
 
 interface InputProps {
-  title: string;
+  name: string;
   description?: string;
   required?: boolean;
   error: string;
+  children?: ReactNode;
   tw_width?: string;
 }
 
@@ -19,4 +22,10 @@ interface TextInputProps extends InputProps {
   onChange: (value: string) => void;
 }
 
-export type { NavPath, InputProps, TextInputProps };
+interface SelectInputProps extends InputProps {
+  options: string[];
+  selected?: string;
+  onSelect: (value: string) => void;
+}
+
+export type { NavPath, InputProps, TextInputProps, SelectInputProps };
