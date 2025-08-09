@@ -11,7 +11,9 @@ export default function InputWrapper({
   tw_width,
 }: InputProps) {
   return (
-    <div className={`flex flex-col gap-2 ${tw_width ? tw_width : 'w-[376px]'}`}>
+    <div
+      className={`text-text-dark flex flex-col gap-2 ${tw_width ? tw_width : 'w-[376px]'}`}
+    >
       <label className="block text-title-small capitalize">
         {name}
         {required && <span className="text-red-primary ml-1">*</span>}

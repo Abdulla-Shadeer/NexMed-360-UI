@@ -57,7 +57,7 @@ export default function Breadcrumb({ navPaths, callback }: BreadcrumbProps) {
   }
   return (
     <nav
-      className={`text-small mb-6 w-full ${pathSegments.length > 0 ? 'border-default border-border-primary py-2 rounded-default' : ''}`}
+      className={`text-default mb-6 w-full ${pathSegments.length > 0 ? 'border-default border-border-primary py-2 rounded-default' : ''}`}
       aria-label="Breadcrumb"
     >
       <ol className="flex flex-row flex-wrap">

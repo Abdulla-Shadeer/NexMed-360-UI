@@ -13,7 +13,7 @@ interface ButtonSecondaryProps {
 }
 
 const getLightTheme = () => {
-  return 'bg-background text-text-dark border-default border-border-primary rounded-large drop-shadow-default hover:bg-panel-light';
+  return 'bg-background text-text-dark border-default border-border-primary rounded-large drop-shadow-default hover:bg-panel-light hover:drop-shadow-none';
 };
 
 export default function ButtonSecondary({

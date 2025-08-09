@@ -30,7 +30,7 @@ const getButtonClass = (variant: ButtonVariant) => {
     case ButtonVariant.Highlight:
       return 'bg-background text-text-dark hover:bg-panel-light';
     case ButtonVariant.None:
-      return 'border-none bg-transparent text-text-dark hover:bg-panel-light';
+      return 'border-none bg-transparent text-text-dark hover:bg-panel-light drop-shadow-none hover:drop-shadow-default';
     case ButtonVariant.Disabled:
       return 'bg-disabled text-on-disabled cursor-not-allowed';
     default:
@@ -82,7 +82,7 @@ export default function ButtonPrimary({
         {
           <span className="flex items-center">
             {withIcon && icon && <AppIcon icon={icon} tw="mr-3 inline-block" />}
-            <span className="text-left">{buttonText}</span>
+            <span className="text-left text-default">{buttonText}</span>
           </span>
         }
         {withDropdown && (
