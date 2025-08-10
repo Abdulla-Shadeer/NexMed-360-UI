@@ -11,6 +11,7 @@ enum ButtonVariant {
 }
 
 interface ButtonPrimaryProps {
+  type?: 'button' | 'submit' | 'reset' | undefined;
   isActive: boolean;
   withIcon?: boolean;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -29,7 +30,7 @@ const getButtonClass = (variant: ButtonVariant) => {
     case ButtonVariant.Highlight:
       return 'bg-background text-text-dark hover:bg-panel-light';
     case ButtonVariant.None:
-      return 'border-none bg-transparent text-text-dark hover:bg-panel-light';
+      return 'border-none bg-transparent text-text-dark hover:bg-panel-light drop-shadow-none hover:drop-shadow-default';
     case ButtonVariant.Disabled:
       return 'bg-disabled text-on-disabled cursor-not-allowed';
     default:
@@ -38,6 +39,7 @@ const getButtonClass = (variant: ButtonVariant) => {
 };
 
 export default function ButtonPrimary({
+  type = 'button',
   isActive = false,
   withIcon = false,
   icon,
@@ -72,7 +74,7 @@ export default function ButtonPrimary({
   return (
     <div className={`relative flex flex-col ${tw_width}`}>
       <button
-        type="button"
+        type={type}
         className={`w-full flex items-center justify-between px-4 py-3 border-default border-border-primary rounded-large drop-shadow-default cursor-pointer ${btnVarient}`}
         disabled={disabled}
         onClick={handleClick}
@@ -80,7 +82,7 @@ export default function ButtonPrimary({
         {
           <span className="flex items-center">
             {withIcon && icon && <AppIcon icon={icon} tw="mr-3 inline-block" />}
-            <span className="text-left">{buttonText}</span>
+            <span className="text-left text-default">{buttonText}</span>
           </span>
         }
         {withDropdown && (

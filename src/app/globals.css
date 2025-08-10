@@ -52,18 +52,22 @@
   --font-serif: "Roboto Serif", serif;
 
   /* typography */
-  --text-small: 0.875rem;
+  /* --text-small: 0.875rem; */
+  --text-small: 0.8rem;
   --text-small--line-height: calc(1.25 / 0.875);
 
-  --text-default: 1rem;
+  /* --text-default: 1rem; */
+  --text-default: 0.9rem;
   --text-default--line-height: calc(1.5 / 1);
 
-  --text-title-small: 1rem;
+  /* --text-title-small: 1rem; */
+  --text-title-small: 0.9rem;
   --text-title-small--line-height: calc(1.5 / 1);
   --text-title-small--font-weight: 600;
 
-  --text-title: 1.16rem;
-  --text-title--line-height: calc(1.75 / 1.16);
+  /* --text-title: 1.2rem; */
+  --text-title: 1rem;
+  --text-title--line-height: calc(1.75 / 1.2);
   --text-title--font-weight: 600;
 
   --text-display: 2.25rem;

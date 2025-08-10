@@ -20,7 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <div className="flex flex-row min-h-screen w-full">
-          <div className="flex flex-col justify-between min-h-screen bg-panel-light w-[373px] border-r border-border-primary p-6">
+          <div className="flex flex-col justify-between min-h-screen max-h-screen overflow-y-scroll bg-panel-light w-[373px] border-r border-border-primary p-6 drop-shadow-default">
             <div className="width-full mb-6">
               <Image
                 src={AppLogo}
@@ -56,7 +56,7 @@ export default function RootLayout({
               </p>
             </div>
           </div>
-          <div className="flex flex-col w-full p-6">
+          <div className="flex flex-col w-full min-h-screen max-h-screen overflow-y-scroll p-6">
             {<Breadcrumb navPaths={navPaths} callback={setActiveBtn} />}
             {children}
           </div>
