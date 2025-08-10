@@ -6,3 +6,5 @@ export { default as TextAreaInput } from '@/components/form/textAreaInput';
 export { default as DateInput } from '@/components/form/dateInput';
 export { default as NumberInput } from '@/components/form/numberInput';
 export { default as RangeInput } from '@/components/form/rangeInput';
+export { default as CheckBoxInput } from '@/components/form/checkboxInput';
+export { default as RadioInput } from '@/components/form/radioInput';
