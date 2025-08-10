@@ -87,6 +87,13 @@
   --border-width-default: 1px;
   --radius-default: 0.5rem;
   --radius-large: 1rem;
+
+  /* breakpoints */
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-xxl: 96rem;
 }
 
 @media (prefers-color-scheme: light) {
