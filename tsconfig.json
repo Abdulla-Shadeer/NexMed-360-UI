@@ -22,6 +22,11 @@
     "paths": {
       "@/app*": ["app/*"],
       "@/components/*":["_components/*"],
+      "@/hooks/*":["_hooks/*"],
+      "@/context":["_context/index.ts*"],
+      "@/utils":["_utils/index.ts"],
+      "@/public/*":["../public/*"],
+      "@/appIcons/*":["../public/app_icons/*"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
