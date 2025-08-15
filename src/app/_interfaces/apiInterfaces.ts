@@ -1,7 +1,6 @@
 export interface ApiCallParams {
   path: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  queries?: Record<string, string>[];
   payload?: object;
   accessToken?: string;
 }

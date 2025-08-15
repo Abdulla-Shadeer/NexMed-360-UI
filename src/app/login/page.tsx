@@ -6,27 +6,49 @@ import Image from 'next/image';
 import { useForm } from '@tanstack/react-form';
 import ButtonSecondary from '@/components/buttons/buttonSecondary';
 import { IconLogin } from '@/components/icons/icons';
+import { useAuth } from '_context';
+import { LoginUserDto } from '@/app_interfaces';
+import { useEffect, useState } from 'react';
+import PopupWindow from '@/components/popup/popup';
+import ApiErrorResult from '@/components/misc/apiErrorResult';
 
-interface LoginUser {
-  email: string;
-  password: string;
-}
-const defaultUser: LoginUser = {
+const defaultUser: LoginUserDto = {
   email: '',
   password: '',
 };
 
 export default function Login() {
+  const { loginUser, isLoggedIn, error } = useAuth();
+  const [showPopup, setShowPopup] = useState(error !== undefined);
+
+  useEffect(() => {
+    if (error) {
+      setShowPopup(true);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      console.log('Login Page: User already logged in!');
+      window.location.replace('/');
+    }
+  }, [isLoggedIn]);
+
   const { Field, Subscribe, reset, handleSubmit } = useForm({
     defaultValues: defaultUser,
     onSubmit: async ({ value }) => {
-      console.log(value);
+      loginUser(value);
       reset();
     },
   });
 
   return (
     <main className="relative w-full min-h-screen flex items-center justify-center">
+      {showPopup && error && (
+        <PopupWindow onClose={() => setShowPopup(false)}>
+          <ApiErrorResult apiErrorResult={error} />
+        </PopupWindow>
+      )}
       <Image
         src={BgImage}
         alt="bg"

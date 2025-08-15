@@ -23,7 +23,7 @@
 }
 
 @theme {
-  --*: initial; /* Reset all variables to initial */
+  /*--*: initial; /* Reset all variables to initial */
 
   --spacing: 4px;
   --border-radius-sm: 8px;
