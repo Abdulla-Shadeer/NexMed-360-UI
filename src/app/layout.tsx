@@ -32,7 +32,7 @@ export default function RootLayout({
 function AppLayout({ children }: { children: ReactNode }) {
   const path = usePathname();
   const [activeBtn, setActiveBtn] = useState<string>(path);
-  const { isLoggedIn, isLoading, logout } = useAuth();
+  const { isLoggedIn, isLoading, logout, user } = useAuth();
 
   return (
     <>
@@ -49,14 +49,20 @@ function AppLayout({ children }: { children: ReactNode }) {
                 className="w-[200px] mb-6"
                 priority={false}
               />
-              {navPaths.map((navPath) => (
-                <NavButton
-                  key={navPath.name}
-                  navPath={navPath}
-                  activeBtn={activeBtn}
-                  callback={setActiveBtn}
-                />
-              ))}
+              {navPaths.map(
+                (navPath) =>
+                  user?.roles.some((role) =>
+                    navPath.roles.includes(role, 0),
+                  ) && (
+                    <NavButton
+                      key={navPath.name}
+                      navPath={navPath}
+                      activeBtn={activeBtn}
+                      callback={setActiveBtn}
+                      userRoles={user.roles}
+                    />
+                  ),
+              )}
             </div>
             <div className="w-full flex flex-col items-center gap-6">
               <Link href="/login">

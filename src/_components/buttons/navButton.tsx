@@ -6,12 +6,14 @@ interface NavButtonProps {
   navPath: NavPath;
   activeBtn: string;
   callback: (btnId: string) => void;
+  userRoles: string[];
 }
 
 export default function NavButton({
   navPath,
   activeBtn,
   callback,
+  userRoles,
 }: NavButtonProps) {
   return navPath.children && navPath.children.length > 0 ? (
     <PrimaryButton
@@ -20,20 +22,24 @@ export default function NavButton({
       icon={navPath.icon}
       buttonText={navPath.name}
       withDropdown={true}
-      dropdownButtons={navPath.children.map((childPath) => (
-        <Link
-          key={`${navPath.name}-${childPath.name}`}
-          href={childPath.path || '#'}
-        >
-          <PrimaryButton
-            isActive={activeBtn === childPath.path}
-            withIcon={true}
-            icon={childPath.icon}
-            buttonText={childPath.name}
-            onClick={() => callback(childPath.path || '')}
-          />
-        </Link>
-      ))}
+      dropdownButtons={navPath.children.map((childPath) =>
+        userRoles.some((role) => childPath.roles.includes(role, 0)) ? (
+          <Link
+            key={`${navPath.name}-${childPath.name}`}
+            href={childPath.path || '#'}
+          >
+            <PrimaryButton
+              isActive={activeBtn === childPath.path}
+              withIcon={true}
+              icon={childPath.icon}
+              buttonText={childPath.name}
+              onClick={() => callback(childPath.path || '')}
+            />
+          </Link>
+        ) : (
+          <></>
+        ),
+      )}
       onClick={
         () => {} // Dropdowns never going to be active
       }

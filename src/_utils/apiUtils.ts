@@ -3,4 +3,12 @@ const apiPaths = {
   getUser: '/Users/GetUser',
 };
 
-export { apiPaths };
+const userRoles = {
+  superUser: 'SuperUser',
+  hospitalAdmin: 'HospitalAdmin',
+  receptionist: 'Receptionist',
+  doctor: 'Doctor',
+  patient: 'Patient',
+};
+
+export { apiPaths, userRoles };
