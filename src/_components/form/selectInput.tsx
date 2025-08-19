@@ -1,5 +1,5 @@
 'use client';
-import { SelectInputProps } from '@/app_interfaces';
+import { SelectInputProps } from '@/types';
 import InputWrapper from './inputWrapper';
 
 export default function SelectInput({

@@ -1,4 +1,4 @@
-import { NavPath } from '@/app_interfaces';
+import { NavPath } from '@/types';
 import Link from 'next/link';
 import { PrimaryButton } from '@/components/buttons';
 

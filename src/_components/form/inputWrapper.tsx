@@ -1,4 +1,4 @@
-import { InputProps } from '@/app_interfaces';
+import { InputProps } from '@/types';
 import AppIcon from '../icons/appIcon';
 import { IconXCircle } from '../icons/icons';
 

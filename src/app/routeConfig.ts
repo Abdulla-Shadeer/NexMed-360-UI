@@ -1,4 +1,4 @@
-import { NavPath } from '@/app_interfaces';
+import { NavPath } from '@/types';
 import { userRoles } from '@/utils';
 import {
   IconBuildingOffice,

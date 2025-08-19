@@ -1,5 +1,5 @@
 'use client';
-import { TextInputProps } from '@/app_interfaces';
+import { TextInputProps } from '@/types';
 import InputWrapper from './inputWrapper';
 
 export default function TextInput({

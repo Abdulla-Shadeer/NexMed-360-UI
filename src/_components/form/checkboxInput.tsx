@@ -1,5 +1,5 @@
 'use client';
-import { InputProps } from '@/app_interfaces';
+import { InputProps } from '@/types';
 import InputWrapper from './inputWrapper';
 import { useEffect, useState } from 'react';
 

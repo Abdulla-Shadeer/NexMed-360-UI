@@ -1,4 +1,4 @@
-import { InputProps } from '@/app_interfaces';
+import { InputProps } from '@/types';
 import InputWrapper from './inputWrapper';
 
 interface RadioInputProps extends InputProps {

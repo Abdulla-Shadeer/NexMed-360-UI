@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-interface NavPath {
+export interface NavPath {
   name: string;
   path?: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -8,7 +8,7 @@ interface NavPath {
   children?: NavPath[];
 }
 
-interface InputProps {
+export interface InputProps {
   name: string;
   description?: string;
   required?: boolean;
@@ -17,29 +17,29 @@ interface InputProps {
   tw_width?: string;
 }
 
-interface TextInputProps extends InputProps {
+export interface TextInputProps extends InputProps {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
 }
 
-interface TextAreaInputProps extends TextInputProps {
+export interface TextAreaInputProps extends TextInputProps {
   rows?: number;
 }
 
-interface SelectInputProps extends InputProps {
+export interface SelectInputProps extends InputProps {
   options: string[];
   selected?: string;
   onSelect: (value: string) => void;
 }
 
-interface DateInputProps extends InputProps {
+export interface DateInputProps extends InputProps {
   pickedDate?: string;
   withTime?: boolean;
   onPick: (value: string) => void;
 }
 
-interface RangeInputProps extends InputProps {
+export interface RangeInputProps extends InputProps {
   min: number;
   max: number;
   step?: number;
@@ -47,21 +47,9 @@ interface RangeInputProps extends InputProps {
   onChange: (value: string) => void;
 }
 
-export type {
-  NavPath,
-  InputProps,
-  TextInputProps,
-  SelectInputProps,
-  TextAreaInputProps,
-  DateInputProps,
-  RangeInputProps,
-};
-
-export type {
-  ApiError,
-  ApiResult,
-  ApiCallParams,
-  ViewUserDto,
-  LoginResponseDto,
-  LoginUserDto,
-} from './apiInterfaces';
+export interface ApiCallParams {
+  path: string;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  payload?: object;
+  accessToken?: string;
+}

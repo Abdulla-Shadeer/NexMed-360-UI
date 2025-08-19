@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { IconChevronRight, IconHome } from '@/components/icons/icons';
-import { NavPath } from '@/app_interfaces';
+import { NavPath } from '@/types';
 import AppIcon from '@/components/icons/appIcon';
 
 interface BreadcrumbProps {

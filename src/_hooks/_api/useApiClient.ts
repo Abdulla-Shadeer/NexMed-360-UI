@@ -1,13 +1,13 @@
-import { ApiCallParams, ApiResult, LoginUserDto } from '@/app_interfaces';
+import { ApiCallParams, ApiResultDto, LoginUserDto } from '@/types';
 import { apiPaths } from '@/utils';
 import { useState } from 'react';
 
 /*
 A custom hook that define available endpoints and methods from the API. this hook can be used as a HTTP API client library.
 */
-export default function useApiClient() {
+export function useApiClient() {
   const [isLoading, setIsLoading] = useState(false);
-  const [apiResult, setApiResult] = useState<ApiResult | null>(null);
+  const [apiResult, setApiResult] = useState<ApiResultDto | null>(null);
   const [error, setError] = useState<unknown>(null);
 
   // need to be passed via a config file or env variable

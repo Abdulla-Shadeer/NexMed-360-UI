@@ -1,4 +1,4 @@
-import { DateInputProps } from '@/app_interfaces';
+import { DateInputProps } from '@/types';
 import InputWrapper from './inputWrapper';
 
 export default function DateInput({

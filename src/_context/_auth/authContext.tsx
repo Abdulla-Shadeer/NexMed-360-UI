@@ -1,11 +1,11 @@
 'use client';
 import {
-  ApiError,
+  ApiErrorDto,
   LoginResponseDto,
   LoginUserDto,
   ViewUserDto,
-} from '@/app_interfaces';
-import useApiClient from '@/hooks/_api/useApiClient';
+} from '@/types';
+import { useApiClient } from '@/hooks';
 import {
   createContext,
   ReactNode,
@@ -21,7 +21,7 @@ interface AuthContext {
   accessToken: string | null;
   loginUser: (loginUser: LoginUserDto) => void;
   logout: () => void;
-  error?: ApiError;
+  error?: ApiErrorDto;
 }
 
 const defaultAuthContext: AuthContext = {

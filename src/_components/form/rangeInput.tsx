@@ -1,4 +1,4 @@
-import { RangeInputProps } from '@/app_interfaces';
+import { RangeInputProps } from '@/types';
 import InputWrapper from './inputWrapper';
 import { useEffect, useState } from 'react';
 

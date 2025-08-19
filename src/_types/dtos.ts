@@ -1,25 +1,18 @@
-export interface ApiCallParams {
-  path: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  payload?: object;
-  accessToken?: string;
-}
-
 export interface LoginUserDto {
   email: string;
   password: string;
 }
 
-export interface ApiError {
+export interface ApiErrorDto {
   code: string;
   title?: string;
   description?: string;
   httpStatus: number;
 }
 
-export interface ApiResult {
+export interface ApiResultDto {
   isSuccess: boolean;
-  error?: ApiError;
+  error?: ApiErrorDto;
   data?: ViewUserDto | LoginResponseDto; // need to be replaced by actual response types
 }
 

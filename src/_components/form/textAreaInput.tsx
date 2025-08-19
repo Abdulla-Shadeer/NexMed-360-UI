@@ -1,4 +1,4 @@
-import { TextAreaInputProps } from '@/app_interfaces';
+import { TextAreaInputProps } from '@/types';
 import InputWrapper from './inputWrapper';
 
 export default function TextArea({

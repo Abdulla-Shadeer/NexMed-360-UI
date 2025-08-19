@@ -7,7 +7,7 @@ import { useForm } from '@tanstack/react-form';
 import ButtonSecondary from '@/components/buttons/buttonSecondary';
 import { IconLogin } from '@/components/icons/icons';
 import { useAuth } from '_context';
-import { LoginUserDto } from '@/app_interfaces';
+import { LoginUserDto } from '@/types';
 import { useEffect, useState } from 'react';
 import PopupWindow from '@/components/popup/popup';
 import ApiErrorResult from '@/components/misc/apiErrorResult';
