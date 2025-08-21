@@ -7,6 +7,8 @@ export type {
   DateInputProps,
   RangeInputProps,
   ApiCallParams,
+  AppError,
+  KeyValuePair,
 } from './common';
 
 export type {
@@ -15,4 +17,11 @@ export type {
   ViewUserDto,
   LoginResponseDto,
   LoginUserDto,
+  DatewiseStatsDto,
+  CapacityDto,
+  OverviewDto,
+  DoctorOverviewDto,
+  PatientOverviewDto,
+  SystemOverviewDto,
+  HospitalOverviewDto,
 } from './dtos';

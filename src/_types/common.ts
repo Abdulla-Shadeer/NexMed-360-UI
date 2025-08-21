@@ -53,3 +53,14 @@ export interface ApiCallParams {
   payload?: object;
   accessToken?: string;
 }
+
+export interface AppError {
+  title?: string;
+  description?: string;
+  cause?: string;
+}
+
+export interface KeyValuePair<K, V> {
+  key: K;
+  value: V;
+}

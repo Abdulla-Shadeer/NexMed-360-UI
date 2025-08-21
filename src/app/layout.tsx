@@ -12,18 +12,22 @@ import Login from './login/page';
 import { AuthProvider, useAuth } from '_context';
 import { usePathname } from 'next/navigation';
 import AppLoader from '@/components/misc/loader';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const queryClient = new QueryClient();
   return (
     <html lang="en">
       <body className="antialiased">
-        <AuthProvider>
-          <AppLayout> {children} </AppLayout>
-        </AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <AppLayout> {children} </AppLayout>
+          </AuthProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

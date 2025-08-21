@@ -1,6 +1,10 @@
+// need to be passed via a config file or env variable
+const endPointUrl = 'https://localhost:7143/api/v1';
+
 const apiPaths = {
   login: '/Users/Login',
   getUser: '/Users/GetUser',
+  getOverview: '/Users/GetOverview',
 };
 
 const userRoles = {
@@ -11,4 +15,4 @@ const userRoles = {
   patient: 'Patient',
 };
 
-export { apiPaths, userRoles };
+export { endPointUrl, apiPaths, userRoles };

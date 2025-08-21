@@ -1,5 +1,5 @@
 import { NavPath } from '@/types';
-import { userRoles } from '@/utils';
+import { userRoles } from '@/constants';
 import {
   IconBuildingOffice,
   IconClock,
