@@ -31,7 +31,6 @@ export default function useQueryFunction() {
           }
         });
       }
-      console.log(`useQueryFunction => Request URL: ${url}`);
 
       const body = payload ? JSON.stringify(payload) : null;
       const request = new Request(url, {
@@ -46,6 +45,7 @@ export default function useQueryFunction() {
       try {
         console.info('useQueryFunction => Invoking fetch request..');
         const fetchRes = await fetch(request);
+        console.info('useQueryFunction => Fetch request completed.');
         if (fetchRes.ok) {
           setIsLoading(false);
           return (await fetchRes.json()) as ApiResultDto<T>;

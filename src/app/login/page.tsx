@@ -8,9 +8,11 @@ import ButtonSecondary from '@/components/buttons/buttonSecondary';
 import { IconLogin } from '@/components/icons/icons';
 import { useAuth } from '_context';
 import { LoginUserDto } from '@/types';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import PopupWindow from '@/components/popup/popup';
-import ApiErrorResult from '@/components/misc/apiErrorResult';
+import AppError from '@/components/misc/appError';
+import AppLoader from '@/components/misc/loader';
+import { useRouter } from 'next/navigation';
 
 const defaultUser: LoginUserDto = {
   email: '',
@@ -18,21 +20,16 @@ const defaultUser: LoginUserDto = {
 };
 
 export default function Login() {
-  const { loginUser, isLoggedIn, error } = useAuth();
-  const [showPopup, setShowPopup] = useState(error !== undefined);
-
-  useEffect(() => {
-    if (error) {
-      setShowPopup(true);
-    }
-  }, [error]);
+  const { loginUser, isLoggedIn, error, isLoading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (isLoggedIn) {
       console.log('Login Page: User already logged in!');
-      window.location.replace('/');
+      router.replace('/');
     }
-  }, [isLoggedIn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { Field, Subscribe, reset, handleSubmit } = useForm({
     defaultValues: defaultUser,
@@ -44,11 +41,12 @@ export default function Login() {
 
   return (
     <main className="relative w-full min-h-screen flex items-center justify-center">
-      {showPopup && error && (
-        <PopupWindow onClose={() => setShowPopup(false)}>
-          <ApiErrorResult apiErrorResult={error} />
+      {error && (
+        <PopupWindow>
+          <AppError appError={error} />
         </PopupWindow>
       )}
+      {isLoading && <AppLoader />}
       <Image
         src={BgImage}
         alt="bg"

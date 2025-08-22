@@ -1,11 +1,6 @@
 'use client';
-import {
-  ApiErrorDto,
-  LoginResponseDto,
-  LoginUserDto,
-  ViewUserDto,
-} from '@/types';
-import { useApiClient } from '@/hooks';
+import { AppError, LoginResponseDto, LoginUserDto, ViewUserDto } from '@/types';
+import { useQueryFunction } from '@/hooks';
 import {
   createContext,
   ReactNode,
@@ -13,103 +8,116 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { apiPaths } from '@/constants';
+import status from 'statuses';
 
 interface AuthContext {
   isLoggedIn: boolean;
   isLoading: boolean;
-  user: ViewUserDto | null;
-  accessToken: string | null;
+  user: ViewUserDto | undefined;
+  accessToken: string | undefined;
   loginUser: (loginUser: LoginUserDto) => void;
   logout: () => void;
-  error?: ApiErrorDto;
+  error: AppError | undefined;
 }
 
 const defaultAuthContext: AuthContext = {
   isLoggedIn: false,
   isLoading: false,
-  user: {
-    id: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    roles: [],
-  },
-  accessToken: '',
+  user: undefined,
+  accessToken: undefined,
   loginUser: () => {},
   logout: () => {},
-  error: {
-    code: '',
-    title: '',
-    description: '',
-    httpStatus: 0,
-  },
+  error: undefined,
 };
 
 const AuthContext = createContext(defaultAuthContext);
 
 function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [user, setUser] = useState<ViewUserDto>(defaultAuthContext.user!);
-  const { isLoading, apiResult, error, login, getUserData } = useApiClient();
-  const [isGetUserInvoked, setIsGetUserInvoked] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
+  const [user, setUser] = useState<ViewUserDto | undefined>(undefined);
+  const { createQueryFunction, isLoading } = useQueryFunction();
+  const [error, setError] = useState<AppError | undefined>(undefined);
+  const [hasAutoLoginAttempted, sethasAutoLoginAttempted] = useState(false);
 
   const accessTokenKey = 'accessToken';
 
-  function loginUser(loginUser: LoginUserDto) {
-    login(loginUser);
+  async function loginUser(loginUser: LoginUserDto) {
+    const queryFn = createQueryFunction<LoginResponseDto>({
+      path: apiPaths.login,
+      method: 'POST',
+      payload: loginUser,
+    });
+    try {
+      console.log('Auth context => executing login request..');
+      const res = await queryFn();
+      console.log('Auth context => result received.');
+      setUser(res.data?.user);
+      setIsLoggedIn(true);
+      setAccessToken(res.data?.accessToken);
+      localStorage.setItem(accessTokenKey, res.data?.accessToken ?? '');
+    } catch (err) {
+      setError({
+        description: (err as Error).message,
+        title: 'Login failed!',
+      });
+    }
   }
 
   function logout() {
-    setAccessToken(null);
-    setUser(defaultAuthContext.user!);
+    setAccessToken(undefined);
+    setUser(undefined);
     localStorage.removeItem(accessTokenKey);
     setIsLoggedIn(false);
     console.log('Auth Context: User logged out');
   }
 
   useEffect(() => {
-    if (!isLoading && (apiResult || error)) {
-      if (error) {
-        console.log(`Auth Context: Error found: ${error}`);
-      } else if (apiResult?.isSuccess) {
-        console.log('Auth Context: Api result received with success state:');
-        if (Object.hasOwn(apiResult.data!, 'accessToken')) {
-          console.log('Auth Context: Received loginUser response');
-          const loginResponse = apiResult.data as unknown as LoginResponseDto;
-          setAccessToken(loginResponse.accessToken);
-          localStorage.setItem(accessTokenKey, loginResponse.accessToken);
-          setUser(loginResponse.user);
-          setIsLoggedIn(true);
-          setIsGetUserInvoked(true);
-        } else {
-          console.log('Auth Context: Received getUser response');
-          const getUserResponse = apiResult.data as unknown as ViewUserDto;
-          setUser(getUserResponse);
-          setIsLoggedIn(true);
-        }
-      } else {
+    console.log('Auth context => Renders...');
+    if (!hasAutoLoginAttempted) {
+      console.log('Auth context => Auto login has attempted..');
+      sethasAutoLoginAttempted(true);
+      const token = localStorage.getItem(accessTokenKey);
+      if (token && !isLoggedIn) {
         console.log(
-          `Auth context: Api result failed: ${JSON.stringify(apiResult?.error)}`,
+          'Auth context => Token found and user not logged in, calling getUser..',
         );
+        getUserData(token);
+      } else {
+        console.log('No token found or already logged in!');
       }
     }
 
-    if (!isLoggedIn && !isGetUserInvoked) {
-      console.log('Auth Context: User not logged in!');
-      const token = localStorage.getItem(accessTokenKey);
-      if (token) {
-        setAccessToken(token);
-        console.log('Auth Context: Token found, calling getUser via apiClient');
-        getUserData(token);
-        setIsGetUserInvoked((prev) => !prev);
+    async function getUserData(accessToken: string) {
+      const queryFn = createQueryFunction<ViewUserDto>({
+        path: apiPaths.getUser,
+        method: 'GET',
+        accessToken: accessToken,
+      });
+
+      try {
+        console.log('Auth context => executing get user request..');
+        const res = await queryFn();
+        console.log('Auth context => result received.');
+        setUser(res.data);
+        setIsLoggedIn(true);
+        setAccessToken(accessToken);
+      } catch (err) {
+        const _err = err as Error;
+        console.log(`Auth context => Error get user: ${_err.message}`);
+        setError({
+          description: _err.message,
+          title: 'Get user failed!',
+        });
+        if (_err.message === status(401)) {
+          // prevent further login attempts with wrong token
+          localStorage.removeItem(accessTokenKey);
+        }
       }
-    } else {
-      console.log('Auth Context: User logged in!');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiResult, error, isLoading]);
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -120,7 +128,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
         accessToken,
         loginUser,
         logout,
-        error: apiResult?.error,
+        error,
       }}
     >
       {children}

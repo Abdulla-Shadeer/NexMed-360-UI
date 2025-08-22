@@ -8,10 +8,9 @@ import AppIcon from '@/components/icons/appIcon';
 
 interface BreadcrumbProps {
   navPaths: NavPath[];
-  callback: (clickedPath: string) => void;
 }
 
-export default function Breadcrumb({ navPaths, callback }: BreadcrumbProps) {
+export default function Breadcrumb({ navPaths }: BreadcrumbProps) {
   const pathname = usePathname();
 
   const findPathDefinition = (path: string): NavPath | undefined => {
@@ -78,7 +77,6 @@ export default function Breadcrumb({ navPaths, callback }: BreadcrumbProps) {
               <Link
                 href={segment.path}
                 className="ml-2 text-blue-secondary hover:text-blue-primary"
-                onClick={() => callback(segment.path)}
               >
                 {segment.name === 'Home' ? (
                   <AppIcon icon={IconHome} width={20} />

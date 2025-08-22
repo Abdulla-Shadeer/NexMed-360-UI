@@ -1,6 +1,6 @@
 'use client';
 import './globals.css';
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import Link from 'next/link';
 import { NavButton, SecondaryButton } from '@/components/buttons';
 import { Breadcrumb, Divider } from '@/components/misc';
@@ -10,7 +10,6 @@ import navPaths from '@/approuteConfig';
 import { IconLogout } from '@/components/icons/icons';
 import Login from './login/page';
 import { AuthProvider, useAuth } from '_context';
-import { usePathname } from 'next/navigation';
 import AppLoader from '@/components/misc/loader';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -34,8 +33,6 @@ export default function RootLayout({
 }
 
 function AppLayout({ children }: { children: ReactNode }) {
-  const path = usePathname();
-  const [activeBtn, setActiveBtn] = useState<string>(path);
   const { isLoggedIn, isLoading, logout, user } = useAuth();
 
   return (
@@ -61,8 +58,6 @@ function AppLayout({ children }: { children: ReactNode }) {
                     <NavButton
                       key={navPath.name}
                       navPath={navPath}
-                      activeBtn={activeBtn}
-                      callback={setActiveBtn}
                       userRoles={user.roles}
                     />
                   ),
@@ -86,7 +81,7 @@ function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex flex-col w-full min-h-screen max-h-screen overflow-y-scroll p-6">
-            {<Breadcrumb navPaths={navPaths} callback={setActiveBtn} />}
+            {<Breadcrumb navPaths={navPaths} />}
             {children}
           </div>
         </div>

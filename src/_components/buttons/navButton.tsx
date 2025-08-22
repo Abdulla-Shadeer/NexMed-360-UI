@@ -1,20 +1,16 @@
 import { NavPath } from '@/types';
 import Link from 'next/link';
 import { PrimaryButton } from '@/components/buttons';
+import { usePathname } from 'next/navigation';
 
 interface NavButtonProps {
   navPath: NavPath;
-  activeBtn: string;
-  callback: (btnId: string) => void;
   userRoles: string[];
 }
 
-export default function NavButton({
-  navPath,
-  activeBtn,
-  callback,
-  userRoles,
-}: NavButtonProps) {
+export default function NavButton({ navPath, userRoles }: NavButtonProps) {
+  const path = usePathname();
+
   return navPath.children && navPath.children.length > 0 ? (
     <PrimaryButton
       isActive={false}
@@ -29,29 +25,27 @@ export default function NavButton({
             href={childPath.path || '#'}
           >
             <PrimaryButton
-              isActive={activeBtn === childPath.path}
+              isActive={path === childPath.path}
               withIcon={true}
               icon={childPath.icon}
               buttonText={childPath.name}
-              onClick={() => callback(childPath.path || '')}
+              onClick={() => {}}
             />
           </Link>
         ) : (
           <></>
         ),
       )}
-      onClick={
-        () => {} // Dropdowns never going to be active
-      }
+      onClick={() => {}}
     />
   ) : (
     <Link href={navPath.path || '#'}>
       <PrimaryButton
-        isActive={activeBtn === navPath.path}
+        isActive={path === navPath.path}
         withIcon={true}
         icon={navPath.icon}
         buttonText={navPath.name}
-        onClick={() => callback(navPath.path || '')}
+        onClick={() => {}}
       />
     </Link>
   );
