@@ -7,12 +7,10 @@ import {
   IconLayers,
   IconUsers,
 } from '@/components/icons/icons';
-import AppError from '@/components/misc/appError';
 import AppLoader from '@/components/misc/loader';
 import DateWiseStats from '@/components/overview/dateWiseStats';
 import RecentAppointments from '@/components/overview/recentAppointments/recentAppointments';
 import SingleStatView from '@/components/overview/singleStatView';
-import PopupWindow from '@/components/popup/popup';
 import {
   DoctorOverviewDto,
   HospitalOverviewDto,
@@ -25,6 +23,7 @@ import useAppQuery from '_hooks/_api/useAppQuery';
 import { apiPaths } from '@/constants';
 import { useAuth } from '_context';
 import { LineChart } from '@/components/misc';
+import AppNotification from '@/components/misc/appNotification';
 
 export default function Home() {
   const { accessToken } = useAuth();
@@ -37,11 +36,7 @@ export default function Home() {
   return (
     <div className="w-full flex flex-col">
       {isLoading && <AppLoader />}
-      {error && (
-        <PopupWindow>
-          <AppError appError={error} />
-        </PopupWindow>
-      )}
+      {error && <AppNotification notification={error} />}
       {!isLoading &&
         data &&
         data.map((overview) => {

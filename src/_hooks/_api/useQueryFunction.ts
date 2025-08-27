@@ -44,20 +44,32 @@ export default function useQueryFunction() {
 
       try {
         console.info('useQueryFunction => Invoking fetch request..');
-        const fetchRes = await fetch(request);
+        const fetchRes = await fetch(request).then(async (res) =>
+          res.ok ? ((await res.json()) as ApiResultDto<T>) : res,
+        );
         console.info('useQueryFunction => Fetch request completed.');
-        if (fetchRes.ok) {
-          setIsLoading(false);
-          return (await fetchRes.json()) as ApiResultDto<T>;
+        console.log(JSON.stringify(fetchRes));
+        if (!(fetchRes instanceof Response)) {
+          if (fetchRes.isSuccess) {
+            setIsLoading(false);
+            return fetchRes;
+          } else {
+            setIsLoading(false);
+            throw new Error(fetchRes.error?.title, {
+              cause: fetchRes.error?.description,
+            });
+          }
         } else {
           setIsLoading(false);
-          throw new Error(`${status(fetchRes.status)}`);
+          throw new Error('Something went wrong', {
+            cause: status(fetchRes.status),
+          });
         }
       } catch (err) {
         setIsLoading(false);
         if (err instanceof Error) {
           console.info(
-            `useQueryFunction => Something went wrong: ${err.message}`,
+            `useQueryFunction => Message: ${err.message}, Cause: ${err.cause ?? ''}`,
           );
           throw err;
         }

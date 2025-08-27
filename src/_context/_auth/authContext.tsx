@@ -1,5 +1,10 @@
 'use client';
-import { AppError, LoginResponseDto, LoginUserDto, ViewUserDto } from '@/types';
+import {
+  AppNotification,
+  LoginResponseDto,
+  LoginUserDto,
+  ViewUserDto,
+} from '@/types';
 import { useQueryFunction } from '@/hooks';
 import {
   createContext,
@@ -18,7 +23,7 @@ interface AuthContext {
   accessToken: string | undefined;
   loginUser: (loginUser: LoginUserDto) => void;
   logout: () => void;
-  error: AppError | undefined;
+  error: AppNotification | undefined;
 }
 
 const defaultAuthContext: AuthContext = {
@@ -38,7 +43,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
   const [user, setUser] = useState<ViewUserDto | undefined>(undefined);
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const [error, setError] = useState<AppError | undefined>(undefined);
+  const [error, setError] = useState<AppNotification | undefined>(undefined);
   const [hasAutoLoginAttempted, sethasAutoLoginAttempted] = useState(false);
 
   const accessTokenKey = 'accessToken';
@@ -59,8 +64,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(accessTokenKey, res.data?.accessToken ?? '');
     } catch (err) {
       setError({
-        description: (err as Error).message,
+        type: 'error',
         title: 'Login failed!',
+        description: (err as Error).message,
       });
     }
   }
@@ -107,8 +113,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
         const _err = err as Error;
         console.log(`Auth context => Error get user: ${_err.message}`);
         setError({
-          description: _err.message,
+          type: 'error',
           title: 'Get user failed!',
+          description: _err.message,
         });
         if (_err.message === status(401)) {
           // prevent further login attempts with wrong token

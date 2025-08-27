@@ -54,7 +54,8 @@ export interface ApiCallParams {
   accessToken?: string;
 }
 
-export interface AppError {
+export interface AppNotification {
+  type: 'error' | 'notification' | 'success';
   title?: string;
   description?: string;
   cause?: string;

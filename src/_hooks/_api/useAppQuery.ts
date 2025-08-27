@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import useQueryFunction, { ApiRequestOption } from './useQueryFunction';
-import { AppError } from '_types/common';
+import { AppNotification } from '_types/common';
 
 export default function useAppQuery<T>(requestOptions: ApiRequestOption) {
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const [error, setError] = useState<AppError | undefined>(undefined);
+  const [error, setError] = useState<AppNotification | undefined>(undefined);
   const [data, setData] = useState<T | undefined>(undefined);
 
   const queryResult = useQuery({
@@ -23,6 +23,7 @@ export default function useAppQuery<T>(requestOptions: ApiRequestOption) {
         `useAppQuery: something went wrong!,\nError: ${queryResult.error.message}`,
       );
       setError({
+        type: 'error',
         title: 'Something went wrong!',
         description: queryResult.error.message,
       });

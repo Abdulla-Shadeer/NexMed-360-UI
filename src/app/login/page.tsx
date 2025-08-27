@@ -9,10 +9,9 @@ import { IconLogin } from '@/components/icons/icons';
 import { useAuth } from '_context';
 import { LoginUserDto } from '@/types';
 import { useEffect } from 'react';
-import PopupWindow from '@/components/popup/popup';
-import AppError from '@/components/misc/appError';
 import AppLoader from '@/components/misc/loader';
 import { useRouter } from 'next/navigation';
+import AppNotification from '@/components/misc/appNotification';
 
 const defaultUser: LoginUserDto = {
   email: '',
@@ -41,11 +40,7 @@ export default function Login() {
 
   return (
     <main className="relative w-full min-h-screen flex items-center justify-center">
-      {error && (
-        <PopupWindow>
-          <AppError appError={error} />
-        </PopupWindow>
-      )}
+      {error && <AppNotification notification={error} />}
       {isLoading && <AppLoader />}
       <Image
         src={BgImage}
