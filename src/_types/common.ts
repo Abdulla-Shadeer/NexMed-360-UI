@@ -15,6 +15,7 @@ export interface InputProps {
   error: string;
   children?: ReactNode;
   tw_width?: string;
+  disabled?: boolean;
 }
 
 export interface TextInputProps extends InputProps {

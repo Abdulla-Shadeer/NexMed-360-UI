@@ -5,6 +5,14 @@ const apiPaths = {
   login: '/Users/Login',
   getUser: '/Users/GetUser',
   getOverview: '/Users/GetOverview',
+  createAppointment: '/Appointments/Create',
+  editAppointment: '/Appointments/Edit',
+  viewAppointment: '/Appointments/View',
+  viewAppointmentById: (id: string): string => `/Appointments/View/${id}`,
+  cancelAppointment: '/Appointments/Cancel',
+  confirmAppointment: (id: string): string => `/Appointments/Confirm/${id}`,
+  completeAppointment: (id: string): string => `/Appointments/Complete/${id}`,
+  entitySearch: '/Search/Entity',
 };
 
 const userRoles = {

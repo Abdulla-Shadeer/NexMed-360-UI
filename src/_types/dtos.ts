@@ -25,12 +25,19 @@ export interface ViewUserDto {
   email: string;
   phoneNumber: string;
   roles: string[];
+  patientProfile?: ViewPatientDto;
+  doctorProfile?: ViewDoctorDto;
+  receptionistProfile?: ViewReceptionistDto;
+  hospitalAdminProfile?: ViewHospitalAdminDto;
 }
 
 export interface LoginResponseDto {
   user: ViewUserDto;
   accessToken: string;
 }
+
+// Overview
+// ********
 
 export interface OverviewDto {
   name: string;
@@ -79,6 +86,8 @@ export interface DatewiseStatsDto {
   thisMonth: number;
 }
 
+// Appointment
+// ***********
 export interface ViewAppointmentDto {
   id: string;
   patientName: string;
@@ -93,6 +102,80 @@ export interface ViewAppointmentDto {
   createdByUserName: string;
   appointmentDateTime: string;
   remarks?: string;
-  location: string;
   status: string;
+}
+
+export interface CreateAppointmentDto {
+  patientId: string;
+  doctorId: string;
+  hospitalId: string;
+  appointmentDateTime: string;
+  remarks?: string;
+}
+
+export interface ViewAppointmentsFilterDto {
+  patientId?: string;
+  doctorId?: string;
+  hospitalId?: string;
+  fromDate?: string;
+  toDate?: string;
+  appointmentStatus?: string;
+}
+
+export interface ModifyAppointmentDto {
+  id: string;
+  patientId?: string;
+  doctorId?: string;
+  appointmentDateTime?: string;
+  remarks?: string;
+}
+
+export interface CancellationRequestDto {
+  appointmentId: string;
+  reason: string;
+}
+
+// Search
+// ******
+export interface SearchDto {
+  entity: 'patient' | 'doctor' | 'hospital';
+  inputType: 'name' | 'fullName' | 'email';
+  input: string;
+}
+
+export interface ViewHospitalDto {
+  id: string;
+  name: string;
+  street?: string;
+  city?: string;
+  district?: string;
+  phone: string;
+  grade?: string;
+}
+
+export interface ViewDoctorDto {
+  id: string;
+  speciality: string;
+  hospitalId: string;
+  hospitalName: string;
+}
+
+export interface ViewPatientDto {
+  id: string;
+  birthDate: string;
+  gender: string;
+}
+
+export interface ViewHospitalAdminDto {
+  id: string;
+  hospitalId: string;
+  hospitalName: string;
+}
+
+export interface ViewReceptionistDto {
+  id: string;
+  location?: string;
+  department?: string;
+  hospitalId: string;
+  hospitalName: string;
 }

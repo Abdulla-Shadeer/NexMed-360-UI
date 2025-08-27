@@ -24,4 +24,13 @@ export type {
   PatientOverviewDto,
   SystemOverviewDto,
   HospitalOverviewDto,
+  CreateAppointmentDto,
+  ViewAppointmentsFilterDto,
+  ViewAppointmentDto,
+  CancellationRequestDto,
+  ModifyAppointmentDto,
+  SearchDto,
+  ViewDoctorDto,
+  ViewHospitalDto,
+  ViewPatientDto,
 } from './dtos';

@@ -44,19 +44,18 @@ export default function useQueryFunction() {
 
       try {
         console.info('useQueryFunction => Invoking fetch request..');
-        const fetchRes = await fetch(request).then(async (res) =>
-          res.ok ? ((await res.json()) as ApiResultDto<T>) : res,
-        );
+        const fetchRes = await fetch(request);
         console.info('useQueryFunction => Fetch request completed.');
-        console.log(JSON.stringify(fetchRes));
-        if (!(fetchRes instanceof Response)) {
-          if (fetchRes.isSuccess) {
+
+        if (!(fetchRes.type === 'error') && !(fetchRes.status === 0)) {
+          const apiRes = (await fetchRes.json()) as ApiResultDto<T>;
+          if (apiRes.isSuccess) {
             setIsLoading(false);
-            return fetchRes;
+            return apiRes;
           } else {
             setIsLoading(false);
-            throw new Error(fetchRes.error?.title, {
-              cause: fetchRes.error?.description,
+            throw new Error(apiRes.error?.title, {
+              cause: apiRes.error?.description,
             });
           }
         } else {

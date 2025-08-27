@@ -23,7 +23,7 @@ export default function ButtonSecondary({
   icon,
   buttonText,
   disabled = false,
-  tw = 'w-fit',
+  tw = 'w-fit h-fit',
   onClick,
 }: ButtonSecondaryProps) {
   const handleClick = () => {

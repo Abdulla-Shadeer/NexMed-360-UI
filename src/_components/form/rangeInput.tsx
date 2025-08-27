@@ -13,6 +13,7 @@ export default function RangeInput({
   value,
   onChange,
   tw_width,
+  disabled = false,
 }: RangeInputProps) {
   const [currentValue, setCurrentValue] = useState(value ?? 0);
 
@@ -48,7 +49,8 @@ export default function RangeInput({
             setCurrentValue(Number.parseInt(e.target.value));
             onChange(e.target.value);
           }}
-          className="w-full"
+          className="w-full disabled:hover:cursor-not-allowed disabled:text-black-secondary"
+          disabled={disabled}
         />
         <div className="flex flex-row items-center justify-between">
           <p>{min}</p>

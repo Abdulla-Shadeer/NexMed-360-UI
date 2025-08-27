@@ -17,7 +17,11 @@ export default function Form({
       action={action}
       className={`h-fit space-y-12 border-default border-border-primary rounded-default p-6 drop-shadow-default bg-background ${tw}`}
     >
-      {title && <h2 className="w-full text-title mb-2">{title}</h2>}
+      {title && (
+        <h2 className="w-full text-title pb-8 border-b-default border-border-primary">
+          {title}
+        </h2>
+      )}
       {children}
     </form>
   );

@@ -16,6 +16,7 @@ export default function RadioInput({
   selectedItem,
   onChange,
   tw_width,
+  disabled = false,
 }: RadioInputProps) {
   return (
     <InputWrapper
@@ -30,7 +31,7 @@ export default function RadioInput({
           return (
             <label
               key={`${item}-${idx}`}
-              className="flex flex-row items-center gap-2 hover:bg-panel-light"
+              className="flex flex-row items-center gap-2 hover:bg-panel-light capitalize disabled:hover:cursor-not-allowed disabled:text-black-secondary"
             >
               <input
                 type="radio"
@@ -39,6 +40,7 @@ export default function RadioInput({
                 checked={selectedItem === item}
                 onChange={(e) => onChange(e.target.value)}
                 className="w-4 h-4"
+                disabled={disabled}
               />
               {item}
             </label>

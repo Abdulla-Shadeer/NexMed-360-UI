@@ -10,6 +10,7 @@ export default function DateInput({
   withTime,
   onPick,
   tw_width,
+  disabled = false,
 }: DateInputProps) {
   return (
     <InputWrapper
@@ -24,6 +25,7 @@ export default function DateInput({
         defaultValue={pickedDate}
         onChange={(e) => onPick(e.target.value)}
         className="border-default border-border-primary rounded-default px-3 py-2 text-default focus:outline-none focus:ring-1 focus:ring-blue-primary focus:bg-panel-light active:bg-panel-light"
+        disabled={disabled}
       />
     </InputWrapper>
   );

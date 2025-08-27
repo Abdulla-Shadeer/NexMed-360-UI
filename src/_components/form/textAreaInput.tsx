@@ -11,6 +11,7 @@ export default function TextArea({
   onChange,
   tw_width,
   rows = 3,
+  disabled = false,
 }: TextAreaInputProps) {
   return (
     <InputWrapper
@@ -25,8 +26,9 @@ export default function TextArea({
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
-        className="border-default border-border-primary rounded-default px-3 py-2 text-default focus:outline-none focus:ring-1 focus:ring-blue-primary"
+        className="border-default border-border-primary rounded-default px-3 py-2 text-default focus:outline-none focus:ring-1 focus:ring-blue-primary disabled:hover:cursor-not-allowed disabled:text-black-secondary"
         value={value}
+        disabled={disabled}
       ></textarea>
     </InputWrapper>
   );

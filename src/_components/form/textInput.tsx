@@ -11,6 +11,7 @@ export default function TextInput({
   value = '',
   onChange,
   tw_width = '',
+  disabled = false,
 }: TextInputProps) {
   return (
     <InputWrapper
@@ -22,11 +23,12 @@ export default function TextInput({
     >
       <input
         type="text"
-        className="border-default text-default border-border-primary rounded-default px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-primary"
+        className="border-default text-default border-border-primary rounded-default px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-primary disabled:hover:cursor-not-allowed disabled:text-black-secondary"
         placeholder={placeholder}
         aria-label="Text input"
         onChange={(e) => onChange(e.target.value)}
         value={value}
+        disabled={disabled}
       />
     </InputWrapper>
   );

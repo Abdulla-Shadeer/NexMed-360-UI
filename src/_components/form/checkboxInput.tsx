@@ -19,6 +19,7 @@ export default function CheckBoxInput({
   checkedItems,
   onChange,
   tw_width,
+  disabled = false,
 }: CheckBoxInputProps) {
   const [selections, setSelection] = useState<string[]>(checkedItems ?? []);
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function CheckBoxInput({
                   );
                 }}
                 className="w-4 h-4"
+                disabled={disabled}
               />
               {item}
             </label>

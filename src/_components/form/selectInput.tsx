@@ -11,6 +11,7 @@ export default function SelectInput({
   selected = '',
   onSelect,
   tw_width,
+  disabled = false,
 }: SelectInputProps) {
   return (
     <InputWrapper
@@ -24,13 +25,14 @@ export default function SelectInput({
         name={name}
         onChange={(e) => onSelect(e.target.value)}
         defaultValue={selected}
-        className="border-default border-border-primary rounded-default px-3 py-2 text-default focus:outline-none focus:ring-1 focus:ring-blue-primary focus:bg-panel-light"
+        className="border-default border-border-primary rounded-default px-3 py-2 text-default focus:outline-none focus:ring-1 focus:ring-blue-primary focus:bg-panel-light disabled:hover:cursor-not-allowed disabled:text-black-secondary"
+        disabled={disabled}
       >
         <option value="" disabled>
           Select an option
         </option>
         {options.map((opt, idx) => (
-          <option key={opt + idx} value={opt}>
+          <option key={opt + idx} value={opt} className="capitalize">
             {opt}
           </option>
         ))}
