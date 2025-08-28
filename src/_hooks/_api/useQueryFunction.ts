@@ -1,5 +1,4 @@
 import { apiPaths, endPointUrl } from '@/constants';
-import { KeyValuePair } from '@/types';
 import { ApiResultDto } from '_types/dtos';
 import { useState } from 'react';
 import status from 'statuses';
@@ -9,7 +8,7 @@ export interface ApiRequestOption {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   accessToken?: string;
   payload?: object;
-  queryParams?: KeyValuePair<string, string | number>[];
+  queryParams?: unknown;
 }
 
 export default function useQueryFunction() {
@@ -23,11 +22,12 @@ export default function useQueryFunction() {
       let url = `${endPointUrl + path}`;
 
       if (queryParams) {
-        queryParams.map((param, idx) => {
+        const keyValues = Object.entries(queryParams);
+        keyValues.map((param, idx) => {
           if (idx === 0) {
-            url += `?${param.key}=${param.value}`;
+            url += `?${param[0]}=${param[1]}`;
           } else {
-            url += `&${param.key}=${param.value}`;
+            url += `&${param[0]}=${param[1]}`;
           }
         });
       }

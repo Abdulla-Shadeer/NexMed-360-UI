@@ -1,10 +1,10 @@
 import { Row } from '@tanstack/react-table';
 import { useAuth } from '_context';
-import { ViewAppointmentDto } from '_types/dtos';
+import { AppointmentStatus, ViewAppointmentDto } from '_types/dtos';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
-import AppIcon from '../../icons/appIcon';
-import { IconMoreVertical } from '../../icons/icons';
+import AppIcon from '../icons/appIcon';
+import { IconMoreVertical } from '../icons/icons';
 
 export default function AppointmentRowActions({
   row,
@@ -55,8 +55,8 @@ export default function AppointmentRowActions({
             View
           </Link>
           {!(
-            row.original.status === 'Completed' ||
-            row.original.status === 'Cancelled'
+            row.original.status.toLowerCase() === AppointmentStatus.Completed ||
+            row.original.status.toLowerCase() === AppointmentStatus.Cancelled
           ) && (
             <>
               {user?.id === row.original.createdByUserId && (

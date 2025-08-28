@@ -3,16 +3,19 @@ import {
   useReactTable,
   getCoreRowModel,
 } from '@tanstack/react-table';
-import { ViewAppointmentDto } from '_types/dtos';
+import { AppointmentStatus, ViewAppointmentDto } from '_types/dtos';
 import { useMemo } from 'react';
 import CustomTable from '@/components/table';
 import AppointmentRowActions from './appointmentRowAction';
 import { usePathname } from 'next/navigation';
+import { toDefaultDateTimeFormat } from '_utils/dateUtils';
 
-export default function RecentAppointments({
+export default function ViewAppointmentsTable({
   appointments,
+  title,
 }: {
   appointments: ViewAppointmentDto[];
+  title: string;
 }) {
   const pathName = usePathname();
 
@@ -32,11 +35,19 @@ export default function RecentAppointments({
         header: 'Hospital',
       }),
       columnHelper.accessor('appointmentDateTime', {
-        cell: (info) => info.getValue(),
+        cell: (info) => (
+          <p>{toDefaultDateTimeFormat(new Date(info.getValue()))}</p>
+        ),
         header: 'Scheduled On',
       }),
       columnHelper.accessor('status', {
-        cell: (info) => info.getValue(),
+        cell: (info) => (
+          <p
+            className={`py-1 px-2 rounded-default ${info.getValue() === ('Completed' as AppointmentStatus) ? 'bg-green-primary text-text-light' : info.getValue() === ('Pending' as AppointmentStatus) ? 'bg-amber-500 text-text-light' : ''}`}
+          >
+            {info.getValue()}
+          </p>
+        ),
         header: 'Status',
       }),
       columnHelper.display({
@@ -55,5 +66,5 @@ export default function RecentAppointments({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  return <CustomTable tableData={table} title="Recent Appointments" />;
+  return <CustomTable tableData={table} title={title} />;
 }

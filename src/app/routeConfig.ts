@@ -78,9 +78,9 @@ const navPaths: NavPath[] = [
         roles: [patient, doctor],
       },
       {
-        name: 'View All',
+        name: 'Hospital Appointments',
         icon: IconList,
-        path: '/appointments/view-all',
+        path: '/appointments/hospital-appointments',
         roles: [receptionist],
       },
       {

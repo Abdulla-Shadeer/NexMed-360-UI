@@ -9,7 +9,6 @@ import {
 } from '@/components/icons/icons';
 import AppLoader from '@/components/misc/loader';
 import DateWiseStats from '@/components/overview/dateWiseStats';
-import RecentAppointments from '@/components/overview/recentAppointments/recentAppointments';
 import SingleStatView from '@/components/overview/singleStatView';
 import {
   DoctorOverviewDto,
@@ -24,6 +23,7 @@ import { apiPaths } from '@/constants';
 import { useAuth } from '_context';
 import { LineChart } from '@/components/misc';
 import AppNotification from '@/components/misc/appNotification';
+import { AppointmentsTable } from '@/components/appointments';
 
 export default function Home() {
   const { accessToken } = useAuth();
@@ -107,7 +107,10 @@ function PatientOverview({ overview }: { overview: PatientOverviewDto }) {
         icon={IconClock}
       />
       {overview.recentAppointments && (
-        <RecentAppointments appointments={overview.recentAppointments} />
+        <AppointmentsTable
+          appointments={overview.recentAppointments}
+          title="Recent Appointments"
+        />
       )}
     </OverviewFrame>
   );
@@ -131,7 +134,10 @@ function DoctorOverview({ overview }: { overview: DoctorOverviewDto }) {
         icon={IconClock}
       />
       {overview.recentAppointments && (
-        <RecentAppointments appointments={overview.recentAppointments} />
+        <AppointmentsTable
+          appointments={overview.recentAppointments}
+          title="Recent Appointments"
+        />
       )}
     </OverviewFrame>
   );
@@ -195,7 +201,10 @@ function HospitalOverview({ overview }: { overview: HospitalOverviewDto }) {
         />
       )}
       {overview.recentAppointments && (
-        <RecentAppointments appointments={overview.recentAppointments} />
+        <AppointmentsTable
+          appointments={overview.recentAppointments}
+          title="Recent Appointments"
+        />
       )}
       {overview.patientTrendsOverMonths && (
         <LineChart

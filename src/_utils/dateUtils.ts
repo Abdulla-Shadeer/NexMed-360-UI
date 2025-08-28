@@ -9,4 +9,21 @@ function toDefaultDateFormat(date?: Date): string {
   return `${year}-${month.toString().length < 2 ? '0' + month : month}-${day.toString().length < 2 ? '0' + day : day}`;
 }
 
-export { toDefaultDateFormat };
+function toDefaultDateTimeFormat(date?: Date): string {
+  if (!date) {
+    return '';
+  }
+  const formatter = Intl.DateTimeFormat('en', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+    hour12: true,
+  });
+  // yyyy-MM-dd HH-mn XX
+  return formatter.format(date);
+}
+
+export { toDefaultDateFormat, toDefaultDateTimeFormat };

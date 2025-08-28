@@ -88,6 +88,14 @@ export interface DatewiseStatsDto {
 
 // Appointment
 // ***********
+
+export enum AppointmentStatus {
+  Pending = 'pending',
+  Confirmed = 'confirmed',
+  CancelRequested = 'cancelRequested',
+  Cancelled = 'cancelled',
+  Completed = 'completed',
+}
 export interface ViewAppointmentDto {
   id: string;
   patientName: string;
@@ -102,7 +110,7 @@ export interface ViewAppointmentDto {
   createdByUserName: string;
   appointmentDateTime: string;
   remarks?: string;
-  status: string;
+  status: AppointmentStatus;
 }
 
 export interface CreateAppointmentDto {
@@ -119,7 +127,7 @@ export interface ViewAppointmentsFilterDto {
   hospitalId?: string;
   fromDate?: string;
   toDate?: string;
-  appointmentStatus?: string;
+  status?: AppointmentStatus;
 }
 
 export interface ModifyAppointmentDto {
