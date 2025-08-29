@@ -9,7 +9,7 @@ function toDefaultDateFormat(date?: Date): string {
   return `${year}-${month.toString().length < 2 ? '0' + month : month}-${day.toString().length < 2 ? '0' + day : day}`;
 }
 
-function toDefaultDateTimeFormat(date?: Date): string {
+function toDisplayDateTimeFormat(date?: Date): string {
   if (!date) {
     return '';
   }
@@ -26,4 +26,23 @@ function toDefaultDateTimeFormat(date?: Date): string {
   return formatter.format(date);
 }
 
-export { toDefaultDateFormat, toDefaultDateTimeFormat };
+function toDefaultDateTimeFormat(date: string): string {
+  const dateObj = new Date(date);
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth() + 1; // https://stackoverflow.com/questions/18624326/getmonth-in-javascript-gives-previous-month
+  const day = dateObj.getDate();
+  const hours = dateObj.getHours();
+  const minutes = dateObj.getMinutes();
+  // yyyy-MM-ddTHH:mm
+  const monthStr = month.toString().length < 2 ? '0' + month : month;
+  const dayStr = day.toString().length < 2 ? '0' + day : day;
+  const hoursStr = hours.toString().length < 2 ? '0' + hours : hours;
+  const minutesStr = minutes.toString().length < 2 ? '0' + minutes : minutes;
+  return `${year}-${monthStr}-${dayStr}T${hoursStr}:${minutesStr}`;
+}
+
+export {
+  toDefaultDateFormat,
+  toDisplayDateTimeFormat,
+  toDefaultDateTimeFormat,
+};

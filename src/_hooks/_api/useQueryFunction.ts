@@ -47,7 +47,7 @@ export default function useQueryFunction() {
         const fetchRes = await fetch(request);
         console.info('useQueryFunction => Fetch request completed.');
 
-        if (!(fetchRes.type === 'error') && !(fetchRes.status === 0)) {
+        if (!(fetchRes.type === 'error') || !(fetchRes.status === 0)) {
           const apiRes = (await fetchRes.json()) as ApiResultDto<T>;
           if (apiRes.isSuccess) {
             setIsLoading(false);

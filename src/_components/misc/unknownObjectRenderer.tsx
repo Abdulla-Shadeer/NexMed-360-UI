@@ -1,3 +1,4 @@
+import { startCase } from 'lodash';
 import { JSX } from 'react';
 
 export function unknownObjectRenderer(object: object): JSX.Element {
@@ -11,9 +12,9 @@ export function unknownObjectRenderer(object: object): JSX.Element {
   }
 
   return (
-    <div className="bg-background w-full p-4 mt-4 border-2 border-border-primary border-b-0 text-black-secondary scroll-auto">
+    <div className="bg-background w-full p-4 mt-4 border-2 border-border-primary border-b-0 text-black-secondary dark:text-foreground scroll-auto">
       {Object.entries(object).map((property) => {
-        const Key = <p className="capitalize">{property[0]} :</p>;
+        const Key = <p>{startCase(property[0])} :</p>;
 
         const Value = hasKnownType(property[1]) ? (
           <p className="font-mono">{`${property[1] as string}`}</p>

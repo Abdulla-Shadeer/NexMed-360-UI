@@ -1,21 +1,90 @@
 import { Row } from '@tanstack/react-table';
 import { useAuth } from '_context';
-import { AppointmentStatus, ViewAppointmentDto } from '_types/dtos';
+import {
+  AppointmentStatus,
+  CancellationRequestDto,
+  ViewAppointmentDto,
+} from '_types/dtos';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import AppIcon from '../icons/appIcon';
 import { IconMoreVertical } from '../icons/icons';
+import { useQueryFunction } from '@/hooks';
+import { apiPaths } from '@/constants';
+import { AppNotification } from '_types/common';
+import AppLoader from '../misc/loader';
 
 export default function AppointmentRowActions({
   row,
   returnPath,
+  onError,
 }: {
   row: Row<ViewAppointmentDto>;
   returnPath: string;
+  onError: (error: AppNotification | undefined) => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
+  const { createQueryFunction, isLoading } = useQueryFunction();
+
+  async function dispatchConfirmRequest(id: string) {
+    const request = createQueryFunction<ViewAppointmentDto>({
+      path: apiPaths.confirmAppointment(id),
+      method: 'GET',
+      accessToken,
+    });
+
+    try {
+      onError(undefined);
+      await request();
+      onError({
+        type: 'success',
+        title: 'Appointment Confirmed!',
+        description: 'It may take up to 5 minutes to reflect the changes.',
+      });
+    } catch (error) {
+      const err = error as Error;
+      onError({
+        type: 'error',
+        title: 'Failed to confirm Appointment!',
+        description: err.message,
+        cause: (err.cause as string) ?? '',
+      });
+    }
+  }
+
+  async function dispatchCancelRequest(id: string, reason: string) {
+    const cancelReq: CancellationRequestDto = {
+      appointmentId: id,
+      reason,
+    };
+    const request = createQueryFunction<ViewAppointmentDto>({
+      path: apiPaths.cancelAppointment,
+      method: 'POST',
+      accessToken,
+      payload: cancelReq,
+    });
+
+    try {
+      onError(undefined);
+      const res = await request();
+      onError({
+        type: 'success',
+        title: 'Success!',
+        description: 'It may take up to 5 minutes to reflect the changes.',
+        cause: res.data?.status,
+      });
+    } catch (error) {
+      const err = error as Error;
+      onError({
+        type: 'error',
+        title: 'Failed to cancel Appointment!',
+        description: err.message,
+        cause: (err.cause as string) ?? '',
+      });
+    }
+  }
 
   useEffect(() => {
     function handleMousedownEvent(event: MouseEvent) {
@@ -35,6 +104,7 @@ export default function AppointmentRowActions({
 
   return (
     <>
+      {isLoading && <AppLoader />}
       <a
         onClick={(e) => {
           e.preventDefault();
@@ -72,7 +142,7 @@ export default function AppointmentRowActions({
                 className="hover:cursor-pointer hover:text-blue-secondary"
                 onClick={(e) => {
                   e.preventDefault();
-                  // call confirm request here
+                  dispatchConfirmRequest(row.original.id);
                 }}
               >
                 Confirm
@@ -82,7 +152,10 @@ export default function AppointmentRowActions({
                 className="hover:cursor-pointer hover:text-blue-secondary"
                 onClick={(e) => {
                   e.preventDefault();
-                  // call cancel request here
+                  const reason = window.prompt('Why do you want to cancle?');
+                  if (reason) {
+                    dispatchCancelRequest(row.original.id, reason);
+                  }
                 }}
               >
                 Cancel

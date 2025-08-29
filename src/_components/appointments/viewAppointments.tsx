@@ -7,6 +7,7 @@ import { useState, useMemo } from 'react';
 import AppLoader from '../misc/loader';
 import { AppNotification } from '../misc';
 import { AppointmentsTable } from '.';
+import { AppNotification as AppNotificationType } from '_types/common';
 
 export default function ViewAppointments({
   type,
@@ -33,12 +34,22 @@ export default function ViewAppointments({
 
   const { isLoading, data, error } =
     useAppQuery<ViewAppointmentDto[]>(requestOptions);
+  const [tableError, setTableError] = useState<AppNotificationType | undefined>(
+    undefined,
+  );
 
   return (
-    <>
+    <div>
       {isLoading && <AppLoader />}
       {error && !data && <AppNotification notification={error} />}
-      {data && <AppointmentsTable appointments={data} title={title} />}
-    </>
+      {tableError && <AppNotification notification={tableError} />}
+      {data && (
+        <AppointmentsTable
+          appointments={data}
+          title={title}
+          onError={(err) => setTableError(err)}
+        />
+      )}
+    </div>
   );
 }

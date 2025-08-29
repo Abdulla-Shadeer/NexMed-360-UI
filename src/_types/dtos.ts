@@ -98,11 +98,14 @@ export enum AppointmentStatus {
 }
 export interface ViewAppointmentDto {
   id: string;
+  patientId: string;
   patientName: string;
   patientEmail: string;
   patientPhone: string;
+  doctorId: string;
   doctorName: string;
   doctorSpeciality: string;
+  hospitalId: string;
   hospitalName: string;
   hospitalAddress: string;
   hospitalPhone: string;
