@@ -23,7 +23,7 @@ export default function TextInput({
     >
       <input
         type="text"
-        className="border-default text-default border-border-primary rounded-default px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-primary disabled:hover:cursor-not-allowed disabled:text-black-secondary"
+        className="border-default text-default border-border-primary rounded-default px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-primary disabled:hover:cursor-not-allowed disabled:text-black-secondary bg-background"
         placeholder={placeholder}
         aria-label="Text input"
         onChange={(e) => onChange(e.target.value)}

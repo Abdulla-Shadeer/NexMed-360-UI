@@ -22,9 +22,9 @@ const defaultDto: EntitySearchDto = {
   input: '',
 };
 
-export default function EntitySearch() {
+export default function EntitySearch({ open = true }: { open?: boolean }) {
   const [searchDto, setSearchDto] = useState<EntitySearchDto>(defaultDto);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(open);
   const { accessToken } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [error, setError] = useState<AppNotificationType | undefined>(

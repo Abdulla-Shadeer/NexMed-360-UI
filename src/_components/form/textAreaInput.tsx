@@ -26,7 +26,7 @@ export default function TextArea({
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
-        className="border-default border-border-primary rounded-default px-3 py-2 text-default focus:outline-none focus:ring-1 focus:ring-blue-primary disabled:hover:cursor-not-allowed disabled:text-black-secondary"
+        className="border-default border-border-primary rounded-default px-3 py-2 text-default focus:outline-none focus:ring-1 focus:ring-blue-primary disabled:hover:cursor-not-allowed disabled:text-black-secondary bg-background"
         value={value}
         disabled={disabled}
       ></textarea>
