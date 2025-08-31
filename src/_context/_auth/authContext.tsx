@@ -24,6 +24,7 @@ interface AuthContext {
   loginUser: (loginUser: LoginUserDto) => void;
   logout: () => void;
   error: AppNotification | undefined;
+  refetchUser: () => void;
 }
 
 const defaultAuthContext: AuthContext = {
@@ -34,6 +35,7 @@ const defaultAuthContext: AuthContext = {
   loginUser: () => {},
   logout: () => {},
   error: undefined,
+  refetchUser: () => {},
 };
 
 const AuthContext = createContext(defaultAuthContext);
@@ -126,6 +128,29 @@ function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  async function refetchUser() {
+    const fetch = createQueryFunction<ViewUserDto>({
+      path: apiPaths.getUser,
+      method: 'GET',
+      accessToken,
+    });
+
+    try {
+      console.log('Auth context => Refetching user data...');
+      const res = await fetch();
+      setUser(res.data);
+    } catch (err) {
+      const _err = err as Error;
+      console.log(`Auth context => Error get user: ${_err.message}`);
+      setError({
+        type: 'error',
+        title: 'Get user failed!',
+        description: _err.message,
+        cause: _err.cause ? (_err.cause as string) : '',
+      });
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -136,6 +161,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
         loginUser,
         logout,
         error,
+        refetchUser,
       }}
     >
       {children}

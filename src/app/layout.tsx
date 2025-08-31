@@ -2,16 +2,18 @@
 import './globals.css';
 import { ReactNode } from 'react';
 import Link from 'next/link';
-import { NavButton, SecondaryButton } from '@/components/buttons';
+import { NavButton } from '@/components/buttons';
 import { Breadcrumb, Divider } from '@/components/misc';
 import Image from 'next/image';
 import AppLogo from '../../public/AppLogo.png';
 import navPaths from '@/approuteConfig';
-import { IconLogout } from '@/components/icons/icons';
+import { IconUserCircle } from '@/components/icons/icons';
 import Login from './login/page';
 import { AuthProvider, useAuth } from '_context';
 import AppLoader from '@/components/misc/loader';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AppIcon from '@/components/icons/appIcon';
+import { usePathname } from 'next/navigation';
 
 export default function RootLayout({
   children,
@@ -33,7 +35,8 @@ export default function RootLayout({
 }
 
 function AppLayout({ children }: { children: ReactNode }) {
-  const { isLoggedIn, isLoading, logout, user } = useAuth();
+  const { isLoggedIn, isLoading, user } = useAuth();
+  const pathName = usePathname();
 
   return (
     <>
@@ -64,16 +67,14 @@ function AppLayout({ children }: { children: ReactNode }) {
               )}
             </div>
             <div className="w-full flex flex-col items-center gap-6">
-              <Link href="/login">
-                <SecondaryButton
-                  initialState="light"
-                  buttonText="Logout"
-                  withIcon={true}
-                  icon={IconLogout}
-                  onClick={() => logout()}
-                  tw="w-full"
-                />
+              <Link
+                href="/account"
+                className={`w-full inline-flex items-center gap-2 px-4 py-2 bg-background border-default border-border-primary rounded-large shadow hover:drop-shadow-default ${pathName.includes('/account') ? 'bg-blue-primary text-text-light' : ''}`}
+              >
+                <AppIcon icon={IconUserCircle} tw="w-[32px] h-[32px]" />
+                Good Day, {`${user?.firstName} ${user?.lastName} !`}
               </Link>
+
               <Divider tw_width="w-full" />
               <p className="text-small text-center">
                 &copy; 2025 Shadeer Abdullah

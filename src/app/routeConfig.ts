@@ -123,6 +123,12 @@ const navPaths: NavPath[] = [
     path: '/settings',
     roles: [superUser],
   },
+  {
+    name: 'Account',
+    icon: IconUserPlus,
+    path: '/account',
+    roles: [], // to prevent creating nav button, but to allow breadcrumb to work
+  },
 ];
 
 export default navPaths;

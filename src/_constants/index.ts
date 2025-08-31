@@ -4,6 +4,7 @@ const endPointUrl = 'https://localhost:7143/api/v1';
 const apiPaths = {
   login: '/Users/Login',
   getUser: '/Users/GetUser',
+  updateUser: '/Users/UpdateUser',
   getOverview: '/Users/GetOverview',
   createAppointment: '/Appointments/Create',
   editAppointment: '/Appointments/Edit',
