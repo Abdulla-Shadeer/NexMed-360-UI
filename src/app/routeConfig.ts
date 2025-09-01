@@ -32,13 +32,13 @@ const navPaths: NavPath[] = [
         name: 'Your Hospital',
         path: '/hospital/your-hospital',
         icon: IconHeart,
-        roles: [hospitalAdmin],
+        roles: [hospitalAdmin, receptionist],
       },
       {
         name: 'View All',
         path: '/hospital/view-all',
         icon: IconList,
-        roles: [superUser],
+        roles: [superUser, patient],
       },
       {
         name: 'Add Hospital',

@@ -49,12 +49,17 @@ function HospitalTable({ hospitals }: { hospitals: ViewHospitalDto[] }) {
             View
           </Link>
 
-          <Link
-            href={`/hospital/edit/${row.original.id}`}
-            className="text-default text-blue-secondary hover:text-blue-primary"
-          >
-            Edit
-          </Link>
+          {user?.roles.some(
+            (role) =>
+              role === userRoles.superUser || role === userRoles.hospitalAdmin,
+          ) && (
+            <Link
+              href={`/hospital/edit/${row.original.id}`}
+              className="text-default text-blue-secondary hover:text-blue-primary"
+            >
+              Edit
+            </Link>
+          )}
 
           {user?.roles.some((role) => role === userRoles.superUser) && (
             <Link
