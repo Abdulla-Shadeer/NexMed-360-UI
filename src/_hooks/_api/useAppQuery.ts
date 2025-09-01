@@ -26,6 +26,9 @@ export default function useAppQuery<T>(requestOptions: ApiRequestOption) {
         type: 'error',
         title: 'Something went wrong!',
         description: queryResult.error.message,
+        cause: queryResult.error.cause
+          ? (queryResult.error.cause as string)
+          : '',
       });
     } else {
       if (queryResult.data && queryResult.data.data) {

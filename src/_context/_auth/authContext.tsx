@@ -57,6 +57,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
       payload: loginUser,
     });
     try {
+      setError(undefined);
       console.log('Auth context => executing login request..');
       const res = await queryFn();
       console.log('Auth context => result received.');
@@ -69,6 +70,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
         type: 'error',
         title: 'Login failed!',
         description: (err as Error).message,
+        cause: (err as Error).cause ? ((err as Error).cause as string) : '',
       });
     }
   }

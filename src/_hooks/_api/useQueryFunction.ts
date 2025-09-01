@@ -48,6 +48,31 @@ export default function useQueryFunction() {
         console.info('useQueryFunction => Fetch request completed.');
 
         if (!(fetchRes.type === 'error') || !(fetchRes.status === 0)) {
+          if (fetchRes.status === 403) {
+            setIsLoading(false);
+            throw new Error('Access Forbidden', {
+              cause: 'You do not have permission to access this resource',
+            });
+          }
+          if (
+            fetchRes.status === 401 &&
+            fetchRes.headers.get('content-length') === '0'
+          ) {
+            setIsLoading(false);
+            throw new Error('Unauthorized', {
+              cause: 'You are not authorized to access this resource',
+            });
+          }
+          if (
+            fetchRes.status > 299 &&
+            fetchRes.headers.get('content-length') === '0'
+          ) {
+            setIsLoading(false);
+            throw new Error('Something went wrong', {
+              cause: status(fetchRes.status),
+            });
+          }
+
           const apiRes = (await fetchRes.json()) as ApiResultDto<T>;
           if (apiRes.isSuccess) {
             setIsLoading(false);
