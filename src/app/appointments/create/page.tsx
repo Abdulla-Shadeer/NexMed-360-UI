@@ -110,11 +110,7 @@ export default function CreateAppointment() {
         />
       )}
 
-      <Form
-        action={handleSubmit}
-        title="Create Appointment"
-        tw="flex flex-row flex-wrap gap-x-12 mt-6"
-      >
+      <Form action={handleSubmit} title="Create Appointment">
         <Field
           name="patientId"
           validators={{

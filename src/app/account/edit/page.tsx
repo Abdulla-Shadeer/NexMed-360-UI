@@ -47,15 +47,6 @@ export default function EditAppointment() {
     try {
       setNotification(undefined);
       await request();
-      // const newDefaultData: UpdateUserDto = {
-      //   id: updateResponse.data?.id ?? '',
-      //   firstName: updateResponse.data?.firstName,
-      //   lastName: updateResponse.data?.lastName,
-      //   email: updateResponse.data?.email,
-      //   phoneNumber: updateResponse.data?.phoneNumber,
-      // };
-      // setDefaultData(newDefaultData);
-      // reset(newDefaultData);
       setNotification({ type: 'success', title: 'Successfully Updated!' });
       refetchUser();
     } catch (error) {
@@ -108,11 +99,7 @@ export default function EditAppointment() {
       </Link>
 
       {defaultData && (
-        <Form
-          title="Update User"
-          action={handleSubmit}
-          tw="flex flex-row flex-wrap gap-x-10"
-        >
+        <Form title="Update User" action={handleSubmit}>
           <Field name="id">
             {(field) => (
               <TextInput

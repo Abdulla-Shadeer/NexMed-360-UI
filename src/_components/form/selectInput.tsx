@@ -1,5 +1,5 @@
 'use client';
-import { SelectInputProps } from '@/types';
+import { KeyValuePair, SelectInputProps } from '@/types';
 import InputWrapper from './inputWrapper';
 
 export default function SelectInput({
@@ -31,11 +31,27 @@ export default function SelectInput({
         <option value="" disabled>
           Select an option
         </option>
-        {options.map((opt, idx) => (
-          <option key={opt + idx} value={opt} className="capitalize">
-            {opt}
-          </option>
-        ))}
+        {options.some((opt) => typeof opt === 'string')
+          ? options.map((option) => {
+              const value = option as string;
+              return (
+                <option key={value} value={value} className="capitalize">
+                  {value}
+                </option>
+              );
+            })
+          : options.map((option) => {
+              const keyValue = option as KeyValuePair<string, string>;
+              return (
+                <option
+                  key={keyValue.key}
+                  value={keyValue.key}
+                  className="capitalize"
+                >
+                  {keyValue.value}
+                </option>
+              );
+            })}
       </select>
     </InputWrapper>
   );

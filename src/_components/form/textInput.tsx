@@ -12,6 +12,7 @@ export default function TextInput({
   onChange,
   tw_width = '',
   disabled = false,
+  type = 'text',
 }: TextInputProps) {
   return (
     <InputWrapper
@@ -22,7 +23,7 @@ export default function TextInput({
       tw_width={tw_width}
     >
       <input
-        type="text"
+        type={type}
         className="border-default text-default border-border-primary rounded-default px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-primary disabled:hover:cursor-not-allowed disabled:text-black-secondary bg-background"
         placeholder={placeholder}
         aria-label="Text input"

@@ -141,11 +141,7 @@ export default function EditAppointment({
       </Link>
 
       {defaultData && (
-        <Form
-          title="Update Appointment"
-          action={handleSubmit}
-          tw="flex flex-row flex-wrap gap-x-10"
-        >
+        <Form title="Update Appointment" action={handleSubmit}>
           <Field name="id">
             {(field) => (
               <TextInput

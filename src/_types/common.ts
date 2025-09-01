@@ -19,6 +19,7 @@ export interface InputProps {
 }
 
 export interface TextInputProps extends InputProps {
+  type?: 'text' | 'email' | 'password' | 'tel' | 'search';
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
@@ -29,7 +30,7 @@ export interface TextAreaInputProps extends TextInputProps {
 }
 
 export interface SelectInputProps extends InputProps {
-  options: string[];
+  options: KeyValuePair<string, string>[] | string[];
   selected?: string;
   onSelect: (value: string) => void;
 }

@@ -59,7 +59,7 @@ export default function Login() {
           <p className="text-small">© 2025- Shadeer Abdullah</p>
         </div>
         <div className="lg:w-[50%] md:w-full sm:w-full bg-transparent flex items-center justify-center py-14">
-          <Form action={handleSubmit} tw="w-fit flex flex-col items-center">
+          <Form action={handleSubmit} direction="col">
             <Field
               name="email"
               validators={{
@@ -70,6 +70,7 @@ export default function Login() {
               {(field) => {
                 return (
                   <TextInput
+                    type="email"
                     name={field.name}
                     required={true}
                     onChange={(value) => field.handleChange(value)}
@@ -90,6 +91,7 @@ export default function Login() {
               {(field) => {
                 return (
                   <TextInput
+                    type="password"
                     name={field.name}
                     required={true}
                     onChange={(value) => field.handleChange(value)}
