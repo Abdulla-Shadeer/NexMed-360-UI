@@ -15,6 +15,11 @@ const apiPaths = {
   confirmAppointment: (id: string): string => `/Appointments/Confirm/${id}`,
   completeAppointment: (id: string): string => `/Appointments/Complete/${id}`,
   entitySearch: '/Search/Entity',
+  getAllHospitals: '/Hospital/GetAll',
+  getHospitalById: (id: string): string => `/Hospital/FindById/${id}`,
+  addHospital: '/Hospital/Add',
+  updateHospital: '/Hospital/Update',
+  assignHospitalAdmin: '/Hospital/AssignAdmin',
 };
 
 const userRoles = {

@@ -30,7 +30,7 @@ const navPaths: NavPath[] = [
     children: [
       {
         name: 'Your Hospital',
-        path: '/hospital/view',
+        path: '/hospital/your-hospital',
         icon: IconHeart,
         roles: [hospitalAdmin],
       },
@@ -41,28 +41,28 @@ const navPaths: NavPath[] = [
         roles: [superUser],
       },
       {
+        name: 'Add Hospital',
+        path: '/hospital/add',
+        icon: IconPlusCircle,
+        roles: [superUser],
+      },
+      {
         name: 'Assign Admin',
         path: '/hospital/assign-admin',
         icon: IconShieldCheck,
         roles: [superUser],
       },
       {
-        name: 'Create Hospital',
-        path: '/hospital/create',
-        icon: IconPlusCircle,
-        roles: [superUser],
-      },
-      {
         name: 'View Members',
         path: '/hospital/view-members',
         icon: IconUsers,
-        roles: [superUser],
+        roles: [hospitalAdmin],
       },
       {
         name: 'Add Members',
         path: '/hospital/add-members',
         icon: IconUserPlus,
-        roles: [superUser],
+        roles: [hospitalAdmin],
       },
     ],
     roles: [superUser, hospitalAdmin],

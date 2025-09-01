@@ -190,3 +190,34 @@ export interface ViewReceptionistDto {
   hospitalId: string;
   hospitalName: string;
 }
+
+export interface CreateHospitalDto {
+  name: string;
+  street?: string;
+  city?: string;
+  district?: string;
+  phone: string;
+  grade?: string;
+}
+export interface UpdateHospitalDto {
+  id: string;
+  name?: string;
+  street?: string;
+  city?: string;
+  district?: string;
+  phone?: string;
+  grade?: string;
+}
+
+export interface RegisterUserDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  password: string;
+}
+
+export interface CreateHospitalAdminDto {
+  personalInformation: RegisterUserDto;
+  hospitalId: string;
+}

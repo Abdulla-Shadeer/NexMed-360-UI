@@ -69,7 +69,7 @@ function AppLayout({ children }: { children: ReactNode }) {
             <div className="w-full flex flex-col items-center gap-6">
               <Link
                 href="/account"
-                className={`w-full inline-flex items-center gap-2 px-4 py-2 bg-background border-default border-border-primary rounded-large shadow hover:drop-shadow-default ${pathName.includes('/account') ? 'bg-blue-primary text-text-light' : ''}`}
+                className={`w-full text-default inline-flex items-center gap-2 px-4 py-2 bg-background border-default border-border-primary rounded-large shadow hover:drop-shadow-default ${pathName.includes('/account') ? 'bg-blue-primary text-text-light' : ''}`}
               >
                 <AppIcon icon={IconUserCircle} tw="w-[32px] h-[32px]" />
                 Good Day, {`${user?.firstName} ${user?.lastName} !`}

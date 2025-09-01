@@ -34,4 +34,8 @@ export type {
   ViewHospitalDto,
   ViewPatientDto,
   AppointmentStatus,
+  CreateHospitalDto,
+  UpdateHospitalDto,
+  RegisterUserDto,
+  CreateHospitalAdminDto,
 } from './dtos';
