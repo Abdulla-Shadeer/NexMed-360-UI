@@ -4,11 +4,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
 
 @layer base {
-  * { scrollbar-width: thin; scrollbar-color: var(--blue-secondary) var(--panel-light); }
+  * { scrollbar-width: thin; scrollbar-color: var(--border-primary) var(--panel-light); }
   *::-webkit-scrollbar { width: 8px; height: 8px; }
   *::-webkit-scrollbar-track { background: var(--panel-light); }
   *::-webkit-scrollbar-thumb {
-    background-color: var(--blue-secondary);
+    background-color: var(--panel-light);
     border-radius: 9999px;
     border: 2px solid var(--border-primary);
   }
