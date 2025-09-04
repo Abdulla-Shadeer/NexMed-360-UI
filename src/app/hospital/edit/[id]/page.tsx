@@ -11,8 +11,7 @@ import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
 import { AppNotification as AppNotificationType } from '_types/common';
 import { UpdateHospitalDto, ViewHospitalDto } from '_types/dtos';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
 export default function EditHospital({
@@ -21,7 +20,7 @@ export default function EditHospital({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const searchParams = useSearchParams();
+  const router = useRouter();
   const { accessToken } = useAuth();
   const { data, error, isLoading } = useAppQuery<ViewHospitalDto>({
     path: apiPaths.getHospitalById(id),
@@ -108,13 +107,13 @@ export default function EditHospital({
       {(isLoading || isUpdating) && <AppLoader />}
       {notification && <AppNotification notification={notification} />}
       {error && <AppNotification notification={error} />}
-      <Link
-        href={`${searchParams.get('returnPath') ?? '/hospital/view-all'}`}
-        className="text-blue-secondary hover:text-blue-primary py-1 px-2 bg-panel-light rounded-default w-fit flex flex-row items-center gap-2 border-default border-border-primary mb-6"
+      <button
+        onClick={router.back}
+        className="text-blue-secondary hover:text-blue-primary py-1 px-2 bg-panel-light rounded-default w-fit flex flex-row items-center gap-2 border-default border-border-primary mb-6 cursor-pointer"
       >
         <AppIcon icon={IconArrowLeft} />
         Go back
-      </Link>
+      </button>
 
       {data && (
         <Form title="Update hospital" action={handleSubmit}>

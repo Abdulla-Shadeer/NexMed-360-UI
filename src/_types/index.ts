@@ -38,4 +38,6 @@ export type {
   UpdateHospitalDto,
   RegisterUserDto,
   CreateHospitalAdminDto,
+  CreateDoctorDto,
+  CreateReceptionistDto,
 } from './dtos';

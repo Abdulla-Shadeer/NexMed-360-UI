@@ -20,6 +20,10 @@ const apiPaths = {
   addHospital: '/Hospital/Add',
   updateHospital: '/Hospital/Update',
   assignHospitalAdmin: '/Hospital/AssignAdmin',
+  getHospitalMembers: (hospitalId: string) =>
+    `/Hospital/GetMembers/${hospitalId}`,
+  addDoctor: '/Hospital/AddDoctor',
+  addReceptionist: '/Hospital/AddReceptionist',
 };
 
 const userRoles = {

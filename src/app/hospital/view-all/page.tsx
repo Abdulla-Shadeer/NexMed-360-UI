@@ -16,18 +16,22 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import AppIcon from '@/components/icons/appIcon';
 import { IconMoreVertical } from '@/components/icons/icons';
+import RefreshData from '@/components/misc/refresh';
+import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 
 export default function ViewAllHospitals() {
   const { accessToken } = useAuth();
-  const { data, error, isLoading } = useAppQuery<ViewHospitalDto[]>({
+  const queryKey: ApiRequestOption = {
     path: apiPaths.getAllHospitals,
     method: 'GET',
     accessToken,
-  });
+  };
+  const { data, error, isLoading } = useAppQuery<ViewHospitalDto[]>(queryKey);
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col gap-6">
       {isLoading && <AppLoader />}
       {error && <AppNotification notification={error} />}
+      {data && <RefreshData queryKey={queryKey} />}
       {data && <HospitalTable hospitals={data} />}
     </div>
   );

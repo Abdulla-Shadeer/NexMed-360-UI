@@ -162,6 +162,7 @@ export interface ViewHospitalDto {
   district?: string;
   phone: string;
   grade?: string;
+  admins?: ViewUserDto[];
 }
 
 export interface ViewDoctorDto {
@@ -220,4 +221,17 @@ export interface RegisterUserDto {
 export interface CreateHospitalAdminDto {
   personalInformation: RegisterUserDto;
   hospitalId: string;
+}
+
+export interface CreateDoctorDto {
+  personalInformation: RegisterUserDto;
+  hospitalId: string;
+  speciality: string;
+}
+
+export interface CreateReceptionistDto {
+  personalInformation: RegisterUserDto;
+  hospitalId: string;
+  department: string;
+  location: string;
 }
