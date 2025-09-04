@@ -7,7 +7,6 @@ import { AppointmentStatus, ViewAppointmentDto } from '_types/dtos';
 import { useMemo } from 'react';
 import CustomTable from '@/components/table';
 import AppointmentRowActions from './appointmentRowAction';
-import { usePathname } from 'next/navigation';
 import { toDisplayDateTimeFormat } from '_utils/dateUtils';
 import { AppNotification } from '_types/common';
 
@@ -20,8 +19,6 @@ export default function ViewAppointmentsTable({
   title: string;
   onError: (error: AppNotification | undefined) => void;
 }) {
-  const pathName = usePathname();
-
   const columnHelper = createColumnHelper<ViewAppointmentDto>();
   const columns = useMemo(
     () => [
@@ -55,17 +52,13 @@ export default function ViewAppointmentsTable({
       }),
       columnHelper.display({
         cell: (props) => (
-          <AppointmentRowActions
-            row={props.row}
-            returnPath={pathName}
-            onError={onError}
-          />
+          <AppointmentRowActions row={props.row} onError={onError} />
         ),
         header: 'Actions',
       }),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [columnHelper, pathName],
+    [columnHelper],
   );
 
   const table = useReactTable({

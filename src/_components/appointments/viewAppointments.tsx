@@ -28,7 +28,6 @@ export default function ViewAppointments({
   const [filter, setFilter] = useState<ViewAppointmentsFilterDto>({});
 
   const requestOptions = useMemo(() => {
-    console.log(`filter changed: ${JSON.stringify(filter)}`);
     const opt: ApiRequestOption = {
       path:
         type === 'own'
@@ -64,11 +63,7 @@ export default function ViewAppointments({
 
   function AppointmentFilter() {
     return (
-      <Form
-        title="Filter Appointments"
-        action={handleSubmit}
-        tw="flex flex-row flex-wrap gap-x-10 bg-panel-light mb-6"
-      >
+      <Form title="Filter Appointments" action={handleSubmit}>
         {(type === 'hospital' || user?.roles.includes(userRoles.doctor)) && (
           <Field name="patientId">
             {(field) => (

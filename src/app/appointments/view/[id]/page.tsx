@@ -1,4 +1,5 @@
 'use client';
+import QuickActionButton from '@/components/buttons/quickActionButton';
 import AppIcon from '@/components/icons/appIcon';
 import { IconArrowLeft, IconEdit } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
@@ -9,7 +10,7 @@ import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
 import { AppointmentStatus, ViewAppointmentDto } from '_types/dtos';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { use } from 'react';
 export default function ViewAppointment({
   params,
@@ -17,7 +18,6 @@ export default function ViewAppointment({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const returnPath = useSearchParams().get('returnPath');
   const currentPath = usePathname();
   const { accessToken, user } = useAuth();
   const { data, error, isLoading } = useAppQuery<ViewAppointmentDto>({
@@ -25,19 +25,18 @@ export default function ViewAppointment({
     method: 'GET',
     accessToken,
   });
+  const router = useRouter();
 
   return (
     <div>
       {isLoading && <AppLoader />}
       {error && <AppNotification notification={error} />}
       <div className="w-full flex flex-row items-center justify-between mb-4">
-        <Link
-          href={returnPath ?? '/'}
-          className="text-blue-secondary hover:text-blue-primary py-1 px-2 bg-panel-light rounded-default w-fit flex flex-row items-center gap-2 border-default border-border-primary"
-        >
-          <AppIcon icon={IconArrowLeft} />
-          Go back
-        </Link>
+        <QuickActionButton
+          text="Go back"
+          icon={IconArrowLeft}
+          onClick={router.back}
+        />
         {data &&
           data.createdByUserId === user?.id &&
           !(

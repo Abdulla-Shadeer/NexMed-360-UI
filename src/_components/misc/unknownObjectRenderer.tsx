@@ -1,4 +1,4 @@
-import { startCase } from 'lodash';
+import { isEmpty, startCase } from 'lodash';
 import { JSX } from 'react';
 
 export function unknownObjectRenderer(
@@ -25,13 +25,16 @@ export function unknownObjectRenderer(
 
         const Value = hasKnownType(property[1]) ? (
           <p className="font-mono">{`${property[1] as string}`}</p>
-        ) : property[1] === null || property[1] === undefined ? (
+        ) : property[1] === null ||
+          property[1] === undefined ||
+          isEmpty(property[0]) ? (
           <></>
         ) : (
           unknownObjectRenderer(property[1])
         );
         return (
-          property[1] && (
+          property[1] &&
+          !isEmpty(property[1]) && (
             <div
               className="w-full flex flex-row flex-wrap items-center justify-between py-1 border-b-2 border-dashed border-border-primary hover:cursor-auto hover:bg-panel-light"
               key={property[0]}

@@ -16,11 +16,9 @@ import AppLoader from '../misc/loader';
 
 export default function AppointmentRowActions({
   row,
-  returnPath,
   onError,
 }: {
   row: Row<ViewAppointmentDto>;
-  returnPath: string;
   onError: (error: AppNotification | undefined) => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
@@ -119,7 +117,7 @@ export default function AppointmentRowActions({
           className="absolute w-fit h-fit p-4 flex flex-col gap-1 bg-panel-light border-default border-border-primary rounded-default drop-shadow-default"
         >
           <Link
-            href={`/appointments/view/${row.original.id}?returnPath=${returnPath}`}
+            href={`/appointments/view/${row.original.id}`}
             className="hover:text-blue-secondary"
           >
             View
@@ -131,7 +129,7 @@ export default function AppointmentRowActions({
             <>
               {user?.id === row.original.createdByUserId && (
                 <Link
-                  href={`/appointments/edit/${row.original.id}?returnPath=${returnPath}`}
+                  href={`/appointments/edit/${row.original.id}`}
                   className="hover:text-blue-secondary"
                 >
                   Edit

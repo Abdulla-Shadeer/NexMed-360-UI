@@ -1,7 +1,7 @@
 'use client';
 import { SecondaryButton } from '@/components/buttons';
+import QuickActionButton from '@/components/buttons/quickActionButton';
 import { DateInput, Form, TextInput } from '@/components/form';
-import AppIcon from '@/components/icons/appIcon';
 import { IconArrowLeft, IconSend, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
@@ -12,8 +12,7 @@ import { useAuth } from '_context';
 import { AppNotification as AppNotificationType } from '_types/common';
 import { ModifyAppointmentDto, ViewAppointmentDto } from '_types/dtos';
 import { toDefaultDateTimeFormat } from '_utils/dateUtils';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
 export default function EditAppointment({
@@ -22,7 +21,6 @@ export default function EditAppointment({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const returnPath = useSearchParams().get('returnPath');
   const { accessToken } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [notification, setNotification] = useState<
@@ -31,6 +29,7 @@ export default function EditAppointment({
   const [defaultData, setDefaultData] = useState<
     ModifyAppointmentDto | undefined
   >(undefined);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchAppointmentData() {
@@ -132,13 +131,12 @@ export default function EditAppointment({
     <div>
       {isLoading && <AppLoader />}
       {notification && <AppNotification notification={notification} />}
-      <Link
-        href={returnPath ?? '/'}
-        className="text-blue-secondary hover:text-blue-primary py-1 px-2 bg-panel-light rounded-default w-fit flex flex-row items-center gap-2 border-default border-border-primary mb-6"
-      >
-        <AppIcon icon={IconArrowLeft} />
-        Go back
-      </Link>
+
+      <QuickActionButton
+        text="Go back"
+        icon={IconArrowLeft}
+        onClick={router.back}
+      />
 
       {defaultData && (
         <Form title="Update Appointment" action={handleSubmit}>
