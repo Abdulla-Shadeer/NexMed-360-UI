@@ -5,6 +5,7 @@ import {
   IconClock,
   IconDocumentList,
   IconDocumentText,
+  IconFace,
   IconHeart,
   IconHome,
   IconList,
@@ -91,6 +92,25 @@ const navPaths: NavPath[] = [
       },
     ],
     roles: [patient, receptionist, doctor],
+  },
+  {
+    name: 'Patient',
+    icon: IconFace,
+    children: [
+      {
+        name: 'Add New',
+        icon: IconUserPlus,
+        path: '/patient/add',
+        roles: [receptionist],
+      },
+      {
+        name: 'View patient',
+        icon: IconList,
+        path: '/patient/view',
+        roles: [doctor, receptionist],
+      },
+    ],
+    roles: [receptionist, doctor],
   },
   {
     name: 'EHR',

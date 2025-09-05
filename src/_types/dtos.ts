@@ -235,3 +235,9 @@ export interface CreateReceptionistDto {
   department: string;
   location: string;
 }
+
+export interface CreatePatientDto {
+  personalInformation: RegisterUserDto;
+  birthDate: string;
+  gender: 'Male' | 'Female';
+}

@@ -49,6 +49,7 @@ import IconShieldCheck from '@/appIcons/sheild-check.svg';
 import IconSearch from '@/appIcons/search.svg';
 import IconBell from '@/appIcons/bell.svg';
 import IconRefresh from '@/appIcons/refresh.svg';
+import IconFace from '@/appIcons/face.svg';
 export {
   IconArrowLeft,
   IconArrowRight,
@@ -101,4 +102,5 @@ export {
   IconBell,
   IconSearch,
   IconRefresh,
+  IconFace,
 };
