@@ -15,6 +15,8 @@ import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
 import { useEffect, useMemo, useState } from 'react';
 import { EntitySearch } from '@/components/misc';
+import { toDisplayDateTimeFormat } from '_utils/dateUtils';
+import { IconClock, IconTrash } from '@/components/icons/icons';
 
 export default function CreateAppointment() {
   const { accessToken, user } = useAuth();
@@ -32,9 +34,7 @@ export default function CreateAppointment() {
       doctorId: '',
       hospitalId:
         appointmentType === 'patient'
-          ? (user?.doctorProfile?.hospitalId ??
-            user?.receptionistProfile?.hospitalId ??
-            '')
+          ? (user?.receptionistProfile?.hospitalId ?? '')
           : '',
       appointmentDateTime: '',
       remarks: '',
@@ -56,7 +56,7 @@ export default function CreateAppointment() {
         setNotification({
           type: 'success',
           title: 'Appointment created successfully!',
-          description: `Please be prepared on ${res.data?.appointmentDateTime}`,
+          description: `Please be prepared on ${toDisplayDateTimeFormat(new Date(res.data?.appointmentDateTime ?? ''))}`,
           cause: `Your appointment ID: ${res.data?.id}`,
         });
       } else {
@@ -149,7 +149,8 @@ export default function CreateAppointment() {
         <Field
           name="hospitalId"
           validators={{
-            onChange: ({ value }) => (!value ? 'Hospital ID is required!' : ''),
+            onChange: ({ value }) =>
+              !value ? 'Hospital ID is required!' : undefined,
           }}
         >
           {(field) => (
@@ -183,20 +184,37 @@ export default function CreateAppointment() {
           )}
         </Field>
 
-        <Subscribe>
-          <ButtonSecondary
-            type="submit"
-            buttonText="Create"
-            initialState="active"
-            onClick={() => {}}
-          />
-          <ButtonSecondary
-            type="button"
-            buttonText="Clear"
-            initialState="light"
-            onClick={() => reset()}
-          />
-        </Subscribe>
+        <Field name="remarks">
+          {(field) => (
+            <TextInput
+              name={field.name}
+              value={field.state.value ?? ''}
+              onChange={(v) => field.handleChange(v)}
+              error=""
+            />
+          )}
+        </Field>
+
+        <div className="w-full inline-flex gap-6">
+          <Subscribe>
+            <ButtonSecondary
+              type="submit"
+              buttonText="Create"
+              initialState="active"
+              onClick={() => {}}
+              withIcon
+              icon={IconClock}
+            />
+            <ButtonSecondary
+              type="button"
+              buttonText="Clear"
+              initialState="light"
+              onClick={() => reset()}
+              withIcon
+              icon={IconTrash}
+            />
+          </Subscribe>
+        </div>
       </Form>
     </div>
   );

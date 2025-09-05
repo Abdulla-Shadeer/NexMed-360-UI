@@ -1,7 +1,7 @@
 'use client';
 import { SecondaryButton } from '@/components/buttons';
 import { Form, TextInput } from '@/components/form';
-import { IconArrowRight, IconSend, IconTrash } from '@/components/icons/icons';
+import { IconArrowRight, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { apiPaths } from '@/constants';
@@ -11,12 +11,12 @@ import { useAuth } from '_context';
 import {
   CreateHospitalAdminDto,
   CreateHospitalDto,
-  RegisterUserDto,
   ViewHospitalDto,
   ViewUserDto,
   AppNotification as AppNotificationType,
 } from '@/types';
 import { useState } from 'react';
+import AddUserForm from '@/components/hospital/addUserForm';
 
 const stepButtonStyle =
   'text-default text-left py-1 px-2 border-border-primary border-default cursor-pointer';
@@ -26,9 +26,7 @@ export default function AddHospital() {
   const [defaultHospitalData, setDefaultHospitalData] = useState<
     CreateHospitalDto | undefined
   >(undefined);
-  const [defaultAdminData, setDefaultAdminData] = useState<
-    RegisterUserDto | undefined
-  >(undefined);
+
   const { accessToken } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [notification, setNotification] = useState<
@@ -68,16 +66,12 @@ export default function AddHospital() {
     }
   }
 
-  async function dispatchAssignAdmin(data: RegisterUserDto) {
-    const addAdminDto: CreateHospitalAdminDto = {
-      hospitalId: createdHospitalId ?? '',
-      personalInformation: data,
-    };
+  async function dispatchAssignAdmin(data: CreateHospitalAdminDto) {
     const request = createQueryFunction<ViewUserDto>({
       path: apiPaths.assignHospitalAdmin,
       method: 'POST',
       accessToken,
-      payload: addAdminDto,
+      payload: data,
     });
 
     try {
@@ -85,7 +79,6 @@ export default function AddHospital() {
       const response = await request();
       setCreatedHospitalId(undefined);
       setDefaultHospitalData(undefined);
-      setDefaultAdminData(undefined);
       setNotification({
         type: 'success',
         title: 'Admin User Assigned!',
@@ -133,11 +126,10 @@ export default function AddHospital() {
       )}
 
       {step === 'two' && (
-        <HospitalAdminInfo
-          defaultData={defaultAdminData}
-          submitCallback={(data) => {
-            setDefaultAdminData(data);
-            dispatchAssignAdmin(data);
+        <AddUserForm
+          userType="hospitalAdmin"
+          onFormSubmit={(data) => {
+            dispatchAssignAdmin(data as CreateHospitalAdminDto);
           }}
           hospitalId={createdHospitalId}
         />
@@ -257,136 +249,6 @@ function HospitalInfo({
             buttonText="Next"
             withIcon
             icon={IconArrowRight}
-            onClick={() => {}}
-            initialState="active"
-          />
-          <SecondaryButton
-            type="button"
-            buttonText="Clear"
-            withIcon
-            icon={IconTrash}
-            onClick={() => reset(defaultData)}
-            initialState="light"
-          />
-        </div>
-      </Subscribe>
-    </Form>
-  );
-}
-
-function HospitalAdminInfo({
-  submitCallback,
-  defaultData,
-  hospitalId,
-}: {
-  submitCallback: (data: RegisterUserDto) => void;
-  defaultData: RegisterUserDto | undefined;
-  hospitalId?: string;
-}) {
-  const { Field, Subscribe, reset, handleSubmit } = useForm({
-    defaultValues: defaultData,
-    onSubmit: ({ value }) => submitCallback(value),
-  });
-
-  return (
-    <Form title="Hospital Admin Info" action={handleSubmit}>
-      <TextInput
-        name="Hospital ID"
-        value={hospitalId ?? ''}
-        onChange={() => {}}
-        required
-        error=""
-        disabled
-      />
-      <Field
-        name="firstName"
-        validators={{
-          onChange: ({ value }) =>
-            !value ? 'First Name required!' : undefined,
-        }}
-      >
-        {(field) => (
-          <TextInput
-            name={field.name}
-            value={field.state.value ?? ''}
-            onChange={field.handleChange}
-            required
-            error={field.state.meta.errorMap.onChange ?? ''}
-          />
-        )}
-      </Field>
-
-      <Field
-        name="lastName"
-        validators={{
-          onChange: ({ value }) => (!value ? 'Last Name required!' : undefined),
-        }}
-      >
-        {(field) => (
-          <TextInput
-            name={field.name}
-            value={field.state.value ?? ''}
-            onChange={field.handleChange}
-            required
-            error={field.state.meta.errorMap.onChange ?? ''}
-          />
-        )}
-      </Field>
-
-      <Field
-        name="email"
-        validators={{
-          onChange: ({ value }) => (!value ? 'Email required!' : undefined),
-        }}
-      >
-        {(field) => (
-          <TextInput
-            type="email"
-            name={field.name}
-            value={field.state.value ?? ''}
-            onChange={field.handleChange}
-            required
-            error={field.state.meta.errorMap.onChange ?? ''}
-          />
-        )}
-      </Field>
-
-      <Field name="phoneNumber">
-        {(field) => (
-          <TextInput
-            type="tel"
-            name={field.name}
-            value={field.state.value ?? ''}
-            onChange={field.handleChange}
-            error=""
-          />
-        )}
-      </Field>
-
-      <Field
-        name="password"
-        validators={{
-          onChange: ({ value }) => (!value ? 'Password required!' : undefined),
-        }}
-      >
-        {(field) => (
-          <TextInput
-            name={field.name}
-            value={field.state.value ?? ''}
-            onChange={field.handleChange}
-            required
-            error={field.state.meta.errorMap.onChange ?? ''}
-          />
-        )}
-      </Field>
-
-      <Subscribe>
-        <div className="w-full inline-flex gap-4">
-          <SecondaryButton
-            type="submit"
-            buttonText="Submit"
-            withIcon
-            icon={IconSend}
             onClick={() => {}}
             initialState="active"
           />

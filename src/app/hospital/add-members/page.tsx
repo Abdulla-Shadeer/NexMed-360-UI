@@ -1,7 +1,6 @@
 'use client';
 import { RadioInput } from '@/components/form';
-import AddDoctorForm from '@/components/hospital/addDoctor';
-import AddReceptionistForm from '@/components/hospital/addReceptionist';
+import AddUserForm from '@/components/hospital/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { apiPaths } from '@/constants';
@@ -16,7 +15,7 @@ import { useAuth } from '_context';
 import { useState } from 'react';
 
 export default function AddMembersPage() {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   const [memberType, setMemberType] = useState<'doctor' | 'receptionist'>(
     'doctor',
   );
@@ -69,10 +68,20 @@ export default function AddMembersPage() {
         error=""
       />
       {memberType === 'doctor' && (
-        <AddDoctorForm onFormSubmit={(data) => dispatchRequest(data)} />
+        <AddUserForm
+          userType="doctor"
+          onFormSubmit={(data) => dispatchRequest(data as CreateDoctorDto)}
+          hospitalId={user?.hospitalAdminProfile?.hospitalId}
+        />
       )}
       {memberType === 'receptionist' && (
-        <AddReceptionistForm onFormSubmit={(data) => dispatchRequest(data)} />
+        <AddUserForm
+          userType="receptionist"
+          onFormSubmit={(data) =>
+            dispatchRequest(data as CreateReceptionistDto)
+          }
+          hospitalId={user?.hospitalAdminProfile?.hospitalId}
+        />
       )}
     </div>
   );
