@@ -41,4 +41,10 @@ export type {
   CreateDoctorDto,
   CreateReceptionistDto,
   CreatePatientDto,
+  ViewClinicRecordDto,
+  ViewPrescriptionDto,
+  ViewHospitalAdminDto,
+  ViewReceptionistDto,
+  AddClinicRecordDto,
+  AddPrescriptionDto,
 } from './dtos';

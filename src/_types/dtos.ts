@@ -241,3 +241,46 @@ export interface CreatePatientDto {
   birthDate: string;
   gender: 'Male' | 'Female';
 }
+
+export interface ViewPrescriptionDto {
+  id: string;
+  clinicRecordId: string;
+  issuedOn: string;
+  issuedByDoctor: string;
+  issuedAtHospital: string;
+  medicineName: string;
+  dosage: string;
+  timesPerDay: number;
+  durationDays: number;
+  notes?: string;
+  isActive: boolean;
+}
+
+export interface ViewClinicRecordDto {
+  id: string;
+  patientId: string;
+  patientName: string;
+  doctorId: string;
+  doctorName: string;
+  visitDate: string;
+  diagnosis: string;
+  doctorNotes?: string;
+  followUpDate?: string;
+  prescriptions?: ViewPrescriptionDto[];
+}
+
+export interface AddClinicRecordDto {
+  patientId: string;
+  diagnosis: string;
+  doctorNotes?: string;
+  followUpDate?: string;
+  prescriptions?: AddPrescriptionDto[];
+}
+
+export interface AddPrescriptionDto {
+  medicineName: string;
+  dosage: string;
+  timesPerDay: number;
+  durationDays: number;
+  notes?: string;
+}

@@ -26,6 +26,10 @@ const apiPaths = {
   addReceptionist: '/Hospital/AddReceptionist',
   addPatient: '/Patient/Create',
   getPatient: (id: string) => `/Patient/Get/${id}`,
+  getClinicRecord: (id: string) => `/Patient/GetClinicRecord/${id}`,
+  getClinicRecords: (patientId: string) =>
+    `/Patient/GetClinicRecords/${patientId}`,
+  addClinicRecord: '/Patient/AddClinicRecord',
 };
 
 const userRoles = {
