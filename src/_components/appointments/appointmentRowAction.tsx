@@ -117,7 +117,7 @@ export default function AppointmentRowActions({
           className="absolute w-fit h-fit p-4 flex flex-col gap-1 bg-panel-light border-default border-border-primary rounded-default drop-shadow-default"
         >
           <Link
-            href={`/appointments/view/${row.original.id}`}
+            href={`/appointments/view/${row.original.bookingReference}`}
             className="hover:text-blue-secondary"
           >
             View
@@ -129,7 +129,7 @@ export default function AppointmentRowActions({
             <>
               {user?.id === row.original.createdByUserId && (
                 <Link
-                  href={`/appointments/edit/${row.original.id}`}
+                  href={`/appointments/edit/${row.original.bookingReference}`}
                   className="hover:text-blue-secondary"
                 >
                   Edit
@@ -140,7 +140,7 @@ export default function AppointmentRowActions({
                 className="hover:cursor-pointer hover:text-blue-secondary"
                 onClick={(e) => {
                   e.preventDefault();
-                  dispatchConfirmRequest(row.original.id);
+                  dispatchConfirmRequest(row.original.bookingReference);
                 }}
               >
                 Confirm
@@ -152,7 +152,10 @@ export default function AppointmentRowActions({
                   e.preventDefault();
                   const reason = window.prompt('Why do you want to cancle?');
                   if (reason) {
-                    dispatchCancelRequest(row.original.id, reason);
+                    dispatchCancelRequest(
+                      row.original.bookingReference,
+                      reason,
+                    );
                   }
                 }}
               >

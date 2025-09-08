@@ -42,7 +42,7 @@ export default function EditAppointment({
       try {
         const response = await request();
         const newDefaultData = {
-          id: response.data?.id ?? '',
+          id: response.data?.bookingReference ?? '',
           patientId: response.data?.patientId,
           doctorId: response.data?.doctorId,
           appointmentDateTime: toDefaultDateTimeFormat(
@@ -78,7 +78,7 @@ export default function EditAppointment({
       setNotification(undefined);
       const updateResponse = await request();
       const newDefaultData = {
-        id: updateResponse.data?.id ?? '',
+        id: updateResponse.data?.bookingReference ?? '',
         patientId: updateResponse.data?.patientId,
         doctorId: updateResponse.data?.doctorId,
         appointmentDateTime: toDefaultDateTimeFormat(

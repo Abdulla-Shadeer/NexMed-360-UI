@@ -94,7 +94,7 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
       patientId,
       doctorId: appointment.doctorId,
       hospitalId: appointment.hospitalId,
-      appointmentId: appointment.id,
+      appointmentId: appointment.bookingReference,
       patientInfo: {
         ehrs: ehrs.data,
         prescriptions: ehrs.data?.flatMap((ehr) => ehr.prescriptions ?? []),

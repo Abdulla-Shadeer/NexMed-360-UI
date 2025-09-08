@@ -96,8 +96,9 @@ export enum AppointmentStatus {
   Cancelled = 'cancelled',
   Completed = 'completed',
 }
+
 export interface ViewAppointmentDto {
-  id: string;
+  bookingReference: string;
   patientId: string;
   patientName: string;
   patientEmail: string;
@@ -112,6 +113,7 @@ export interface ViewAppointmentDto {
   createdByUserId: string;
   createdByUserName: string;
   appointmentDateTime: string;
+  appointmentNumber: number;
   remarks?: string;
   status: AppointmentStatus;
 }

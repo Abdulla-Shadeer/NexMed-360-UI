@@ -57,7 +57,7 @@ export default function CreateAppointment() {
           type: 'success',
           title: 'Appointment created successfully!',
           description: `Please be prepared on ${toDisplayDateTimeFormat(new Date(res.data?.appointmentDateTime ?? ''))}`,
-          cause: `Your appointment ID: ${res.data?.id}`,
+          cause: `Your appointment ID: ${res.data?.bookingReference}`,
         });
       } else {
         setNotification({
