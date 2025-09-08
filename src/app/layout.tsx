@@ -1,9 +1,9 @@
 'use client';
 import './globals.css';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { NavButton } from '@/components/buttons';
-import { Breadcrumb, Divider } from '@/components/misc';
+import { AppNotification, Breadcrumb, Divider } from '@/components/misc';
 import Image from 'next/image';
 import AppLogo from '../../public/AppLogo.png';
 import navPaths from '@/approuteConfig';
@@ -14,6 +14,9 @@ import AppLoader from '@/components/misc/loader';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppIcon from '@/components/icons/appIcon';
 import { usePathname } from 'next/navigation';
+import { SessionProvider } from '_context/_session/sessionContext';
+import { AppNotification as AppNotificationType } from '_types/common';
+import SessionStatusBar from '@/components/session/sessionStatusBar';
 
 export default function RootLayout({
   children,
@@ -26,7 +29,9 @@ export default function RootLayout({
       <body className="antialiased">
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <AppLayout> {children} </AppLayout>
+            <SessionProvider>
+              <AppLayout> {children} </AppLayout>
+            </SessionProvider>
           </AuthProvider>
         </QueryClientProvider>
       </body>
@@ -37,10 +42,14 @@ export default function RootLayout({
 function AppLayout({ children }: { children: ReactNode }) {
   const { isLoggedIn, isLoading, user } = useAuth();
   const pathName = usePathname();
+  const [notification, setNotification] = useState<
+    AppNotificationType | undefined
+  >(undefined);
 
   return (
     <>
       {isLoading && <AppLoader />}
+      {notification && <AppNotification notification={notification} />}
       {!isLoggedIn ? (
         <Login />
       ) : (
@@ -83,6 +92,9 @@ function AppLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex flex-col w-full min-h-screen max-h-screen overflow-y-scroll p-6">
             {<Breadcrumb navPaths={navPaths} />}
+            {user?.doctorProfile && (
+              <SessionStatusBar onError={(error) => setNotification(error)} />
+            )}
             {children}
           </div>
         </div>

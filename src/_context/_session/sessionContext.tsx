@@ -30,9 +30,6 @@ interface SessionMeta {
 interface SessionContext {
   isActive: boolean;
   meta: SessionMeta;
-  showAppointmentsPicker: boolean;
-  appointments?: ViewAppointmentDto[];
-  onAppointmentPick: (appointmentId: string) => void;
   startSession: (patientId: string) => void;
   endSession: () => void;
   isLoading: boolean;
@@ -57,8 +54,6 @@ const defaultSessionContext: SessionContext = {
       },
     },
   },
-  showAppointmentsPicker: false,
-  onAppointmentPick: () => {},
   startSession: () => {},
   endSession: () => {},
   isLoading: false,
@@ -71,10 +66,6 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
   const [sessionMeta, setSessionMeta] = useState<SessionMeta>(
     defaultSessionContext.meta,
   );
-  const [showAppointmentsPicker, setShowAppointmentsPicker] = useState(false);
-  const [appointments, setAppointments] = useState<
-    ViewAppointmentDto[] | undefined
-  >(undefined);
   const { accessToken, user } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [error, setError] = useState<AppNotification | undefined>(undefined);
@@ -146,16 +137,13 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
 
       if (appointments.data?.length === 1) {
         await fetchAndStart(patientId, appointments.data[0]);
-      } else if (appointments.data && appointments.data.length <= 0) {
+      } else {
         setError({
           type: 'error',
           title: 'Unable to start Session!',
           description: `Patient with id ${patientId} doesn't have an Appointment booked.`,
           cause: 'No appointments found!',
         });
-      } else {
-        setAppointments(appointments.data);
-        setShowAppointmentsPicker(true);
       }
     } catch (error) {
       const err = error as Error;
@@ -173,17 +161,6 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
     // check if the end session called after a successfull session start (isActive === true) and dispatch complete appointment req
     setIsActive(false);
     setSessionMeta(defaultSessionContext.meta);
-    setAppointments(undefined);
-    setShowAppointmentsPicker(false);
-  }
-
-  async function onAppointmentPick(appointmentId: string) {
-    const activeAppointment = appointments?.find(
-      (appt) => appt.id === appointmentId,
-    );
-    await fetchAndStart(activeAppointment!.patientId, activeAppointment!);
-    setShowAppointmentsPicker(false);
-    setAppointments(undefined);
   }
 
   return (
@@ -191,11 +168,8 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
       value={{
         isActive,
         meta: sessionMeta,
-        showAppointmentsPicker,
-        appointments,
         startSession,
         endSession,
-        onAppointmentPick,
         isLoading,
         error,
       }}

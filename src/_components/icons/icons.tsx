@@ -50,6 +50,8 @@ import IconSearch from '@/appIcons/search.svg';
 import IconBell from '@/appIcons/bell.svg';
 import IconRefresh from '@/appIcons/refresh.svg';
 import IconFace from '@/appIcons/face.svg';
+import IconPlayCircle from '@/appIcons/play-circle.svg';
+import IconStopCircle from '@/appIcons/stop-circle.svg';
 export {
   IconArrowLeft,
   IconArrowRight,
@@ -103,4 +105,6 @@ export {
   IconSearch,
   IconRefresh,
   IconFace,
+  IconPlayCircle,
+  IconStopCircle,
 };
