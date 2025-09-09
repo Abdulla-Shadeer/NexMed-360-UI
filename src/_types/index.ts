@@ -47,4 +47,9 @@ export type {
   ViewReceptionistDto,
   AddClinicRecordDto,
   AddPrescriptionDto,
+  SearchDoctorDto,
+  ViewDoctorSessionDto,
+  SessionOccurrence,
+  ViewSessionSlotDto,
+  GetSessionSlotsDto,
 } from './dtos';

@@ -15,6 +15,7 @@ const apiPaths = {
   confirmAppointment: (id: string): string => `/Appointments/Confirm/${id}`,
   completeAppointment: (id: string): string => `/Appointments/Complete/${id}`,
   entitySearch: '/Search/Entity',
+  doctorSearch: '/Search/Doctor',
   getAllHospitals: '/Hospital/GetAll',
   getHospitalById: (id: string): string => `/Hospital/FindById/${id}`,
   addHospital: '/Hospital/Add',
@@ -30,6 +31,10 @@ const apiPaths = {
   getClinicRecords: (patientId: string) =>
     `/Patient/GetClinicRecords/${patientId}`,
   addClinicRecord: '/Patient/AddClinicRecord',
+  getDoctorSessions: (doctorId: string) =>
+    `/Appointments/GetDoctorSessions/${doctorId}`,
+  getSessionSlots: '/Appointments/GetSessionSlots',
+  createDoctorSession: '/Appointments/CreateDoctorSession',
 };
 
 const userRoles = {

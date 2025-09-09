@@ -120,9 +120,7 @@ export interface ViewAppointmentDto {
 
 export interface CreateAppointmentDto {
   patientId: string;
-  doctorId: string;
-  hospitalId: string;
-  appointmentDateTime: string;
+  sessionSlotId: string;
   remarks?: string;
 }
 
@@ -169,6 +167,11 @@ export interface ViewHospitalDto {
 
 export interface ViewDoctorDto {
   id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
   speciality: string;
   hospitalId: string;
   hospitalName: string;
@@ -285,4 +288,52 @@ export interface AddPrescriptionDto {
   timesPerDay: number;
   durationDays: number;
   notes?: string;
+}
+
+export interface SearchDoctorDto {
+  name?: string;
+  email?: string;
+  speciality?: string;
+}
+
+export interface ViewDoctorSessionDto {
+  id: string;
+  doctorId: string;
+  startTime: string;
+  endTime: string;
+  hospitalId: string;
+  hospitalName: string;
+  hospitalAddress: string;
+  slotDurationMinutes: string;
+  totalSlots: string;
+  occurrences: SessionOccurrence[];
+}
+
+export enum SessionOccurrence {
+  Weekdays = 'Weekdays',
+  Weekend = 'Weekend',
+  AllDays = 'AllDays',
+  Monday = 'Monday',
+  Tuesday = 'Tuesday',
+  Wednesday = 'Wednesday',
+  Thursday = 'Thursday',
+  Friday = 'Friday',
+  Saturday = 'Saturday',
+  Sunday = 'Sunday',
+}
+
+export interface ViewSessionSlotDto {
+  id: string;
+  sessionId: string;
+  startTime: string;
+  endTime: string;
+  date: string;
+  isAvailable: boolean;
+  bookingAllowed: boolean;
+  slotNumber: number;
+}
+
+export interface GetSessionSlotsDto {
+  sessionId: string;
+  date: string;
 }

@@ -1,221 +1,535 @@
 'use client';
 
-import ButtonSecondary from '@/components/buttons/buttonSecondary';
-import { DateInput, Form, RadioInput, TextInput } from '@/components/form';
-import AppLoader from '@/components/misc/loader';
-import AppNotification from '@/components/misc/appNotification';
-import { apiPaths, userRoles } from '@/constants';
-import { useQueryFunction } from '@/hooks';
+import { SecondaryButton } from '@/components/buttons';
+import QuickActionButton from '@/components/buttons/quickActionButton';
+import { DateInput, Form, TextInput } from '@/components/form';
+import AppIcon from '@/components/icons/appIcon';
 import {
-  AppNotification as AppNotificationType,
-  CreateAppointmentDto,
-  ViewAppointmentDto,
-} from '@/types';
+  IconArrowRight,
+  IconCalendarDays,
+  IconCheckCircle,
+  IconClock,
+  IconPlusCircle,
+  IconSearch,
+  IconTrash,
+} from '@/components/icons/icons';
+import { AppNotification } from '@/components/misc';
+import AppLoader from '@/components/misc/loader';
+import { apiPaths } from '@/constants';
+import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
-import { useEffect, useMemo, useState } from 'react';
-import { EntitySearch } from '@/components/misc';
-import { toDisplayDateTimeFormat } from '_utils/dateUtils';
-import { IconClock, IconTrash } from '@/components/icons/icons';
+import { AppNotification as AppNotificationType } from '_types/common';
+import {
+  GetSessionSlotsDto,
+  SearchDoctorDto,
+  ViewDoctorDto,
+  ViewDoctorSessionDto,
+  ViewSessionSlotDto,
+} from '_types/dtos';
+import { to12HourFormat } from '_utils/dateUtils';
+import { useEffect, useState } from 'react';
 
-export default function CreateAppointment() {
-  const { accessToken, user } = useAuth();
-  const { createQueryFunction, isLoading } = useQueryFunction();
+enum CreationSteps {
+  chooseDoctor = 'Choose Doctor',
+  chooseSession = 'Choose Session',
+  chooseSlot = 'Choose Slot',
+}
+
+interface CreationMeta {
+  doctor?: ViewDoctorDto;
+  session?: ViewDoctorSessionDto;
+  date?: string;
+  slot?: ViewSessionSlotDto;
+}
+
+const stepButtonStyle =
+  'text-default text-left py-1 px-2 border-border-primary border-default cursor-pointer';
+
+export default function CreateAppointmentPage() {
+  const [step, setStep] = useState<CreationSteps>(CreationSteps.chooseDoctor);
+  const [creationMeta, setCreationMeta] = useState<CreationMeta>({});
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
-  const [appointmentType, setappointmentType] = useState<'mySelf' | 'patient'>(
-    !user?.roles.includes(userRoles.patient) ? 'patient' : 'mySelf',
-  );
-  const defaultValues = useMemo(() => {
-    const defaultValues: CreateAppointmentDto = {
-      patientId:
-        appointmentType === 'mySelf' ? (user?.patientProfile?.id ?? '') : '',
-      doctorId: '',
-      hospitalId:
-        appointmentType === 'patient'
-          ? (user?.receptionistProfile?.hospitalId ?? '')
-          : '',
-      appointmentDateTime: '',
-      remarks: '',
-    };
-    return defaultValues;
-  }, [user, appointmentType]);
+  return (
+    <>
+      {notification && <AppNotification notification={notification} />}
+      <div className="w-full flex flex-row lg:flex-nowrapb md:flex-wrap sm:flex-wrap">
+        <AppointmentDetails
+          creationMeta={creationMeta}
+          onConfirm={() => {}}
+          onReset={() => {
+            setCreationMeta({});
+            setStep(CreationSteps.chooseDoctor);
+          }}
+        />
+        <div className="lg:w-3/4 md:w-full sm:w-full p-6 border-default border-border-primary rounded-default bg-background drop-shadow-default flex flex-col gap-6">
+          <div className="flex flex-row items-center gap-1">
+            <div
+              className={`${stepButtonStyle} ${step === CreationSteps.chooseDoctor ? 'bg-panel-light text-blue-secondary' : 'bg-disabled text-on-disabled'}`}
+            >
+              01. Select a Doctor
+            </div>
+            <div
+              className={`${stepButtonStyle} ${step === CreationSteps.chooseSession ? 'bg-panel-light text-blue-secondary' : 'bg-disabled text-on-disabled'}`}
+            >
+              02. Pick a Session & Date
+            </div>
+            <div
+              className={`${stepButtonStyle} ${step === CreationSteps.chooseSlot ? 'bg-panel-light text-blue-secondary' : 'bg-disabled text-on-disabled'}`}
+            >
+              03. Pick a Slot and Confirm
+            </div>
+          </div>
 
-  async function createAppointment(value: CreateAppointmentDto) {
-    const postRequest = createQueryFunction<ViewAppointmentDto>({
+          {step === CreationSteps.chooseDoctor ? (
+            <div className="w-full space-y-6">
+              <DoctorSearch
+                onDoctorSelect={(doctor) =>
+                  setCreationMeta((prev) => ({
+                    ...prev,
+                    doctor,
+                  }))
+                }
+                onError={(error) => setNotification(error)}
+              />
+              <SecondaryButton
+                buttonText="Next"
+                initialState="active"
+                onClick={() => setStep(CreationSteps.chooseSession)}
+                disabled={creationMeta.doctor === undefined}
+                withIcon
+                icon={IconArrowRight}
+              />
+            </div>
+          ) : step === CreationSteps.chooseSession ? (
+            <div className="w-full space-y-6">
+              <SessionSelector
+                doctorId={creationMeta.doctor?.id ?? ''}
+                onSessionSelect={(session) =>
+                  setCreationMeta((prev) => ({
+                    ...prev,
+                    session,
+                  }))
+                }
+                onError={(error) => setNotification(error)}
+              />
+              <DateInput
+                name="Appointment Date"
+                description="Choose a date according to the selected session occurrence"
+                error=""
+                onPick={(date) =>
+                  setCreationMeta((prev) => ({
+                    ...prev,
+                    date,
+                  }))
+                }
+              />
+              <SecondaryButton
+                buttonText="Next"
+                initialState="active"
+                onClick={() => setStep(CreationSteps.chooseSlot)}
+                disabled={!(creationMeta.date && creationMeta.session)}
+                withIcon
+                icon={IconArrowRight}
+              />
+            </div>
+          ) : (
+            <SlotSelector
+              sessionId={creationMeta.session?.id ?? ''}
+              date={creationMeta.date ?? ''}
+              onSlotSelect={(slot) =>
+                setCreationMeta((prev) => ({
+                  ...prev,
+                  slot,
+                }))
+              }
+              onError={(error) => {
+                setNotification(error);
+                setStep(CreationSteps.chooseSession);
+              }}
+            />
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function AppointmentDetails({
+  creationMeta,
+  onConfirm,
+  onReset,
+}: {
+  creationMeta: CreationMeta;
+  onConfirm: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <div className="lg:w-1/4 md:w-fit sm:w-fit h-fit p-6 bg-panel-light border-default border-border-primary rounded-default flex flex-col gap-4 text-default text-black-secondary justify-between">
+      <p className="text-title-small pb-1 border-b-default border-border-primary text-blue-secondary">
+        Appointment Details
+      </p>
+      <p>
+        Doctor:
+        {creationMeta.doctor ? (
+          <span className="font-semibold">{` Dr. ${creationMeta.doctor?.firstName} ${creationMeta.doctor?.lastName}`}</span>
+        ) : (
+          <span>~</span>
+        )}
+      </p>
+      <p>
+        Hospital:
+        {creationMeta.doctor ? (
+          <span className="font-semibold">{` ${creationMeta.doctor.hospitalName}`}</span>
+        ) : (
+          <span>~</span>
+        )}
+      </p>
+      <p>
+        Session:
+        {creationMeta.session ? (
+          <span className="font-semibold">
+            {` ${to12HourFormat(creationMeta.session.startTime)} - ${to12HourFormat(creationMeta.session.endTime)}`}
+          </span>
+        ) : (
+          <span>~</span>
+        )}
+      </p>
+      <p>
+        Date:
+        {creationMeta.date ? (
+          <span className="font-semibold">{` ${creationMeta.date}`}</span>
+        ) : (
+          <span>~</span>
+        )}
+      </p>
+      <p>
+        Time:
+        {creationMeta.slot ? (
+          <span className="font-semibold">{` ${to12HourFormat(creationMeta.slot.startTime)} - ${to12HourFormat(creationMeta.slot.endTime)}`}</span>
+        ) : (
+          <span>~</span>
+        )}
+      </p>
+      <div className="inline-flex flex-wrap gap-2 mt-12">
+        <SecondaryButton
+          buttonText="Confirm"
+          onClick={onConfirm}
+          withIcon
+          icon={IconCalendarDays}
+          initialState="active"
+          tw="w-full"
+          disabled={
+            !(
+              creationMeta.doctor &&
+              creationMeta.session &&
+              creationMeta.date &&
+              creationMeta.slot
+            )
+          }
+        />
+        <SecondaryButton
+          buttonText="Reset"
+          onClick={onReset}
+          withIcon
+          icon={IconCalendarDays}
+          initialState="light"
+          tw="w-full"
+        />
+      </div>
+    </div>
+  );
+}
+
+function DoctorSearch({
+  onDoctorSelect,
+  onError,
+}: {
+  onDoctorSelect: (docto?: ViewDoctorDto) => void;
+  onError: (error: AppNotificationType) => void;
+}) {
+  const [searchDto] = useState<SearchDoctorDto>({});
+  const { createQueryFunction, isLoading } = useQueryFunction();
+  const [searchResult, setSearchResult] = useState<ViewDoctorDto[] | undefined>(
+    undefined,
+  );
+  const [inputError, setInputError] = useState<string | undefined>(undefined);
+  const { accessToken } = useAuth();
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
+
+  async function dispatchSearch(data: SearchDoctorDto) {
+    const searchRequest = createQueryFunction<ViewDoctorDto[]>({
+      path: apiPaths.doctorSearch,
       method: 'POST',
-      accessToken: accessToken,
-      path: apiPaths.createAppointment,
-      payload: value,
+      accessToken,
+      payload: data,
     });
 
     try {
-      const res = await postRequest();
-      if (res.isSuccess) {
-        setNotification({
-          type: 'success',
-          title: 'Appointment created successfully!',
-          description: `Please be prepared on ${toDisplayDateTimeFormat(new Date(res.data?.appointmentDateTime ?? ''))}`,
-          cause: `Your appointment ID: ${res.data?.bookingReference}`,
-        });
-      } else {
-        setNotification({
-          type: 'error',
-          title: 'Appointment failed!',
-          description: res.error?.title,
-          cause: res.error?.description,
-        });
-      }
+      setSearchResult((await searchRequest()).data);
     } catch (error) {
-      setNotification({
+      const err = error as Error;
+      onError({
         type: 'error',
-        title: 'Appointment failed!',
-        description: (error as Error).message,
-        cause: (error as Error).cause as string,
+        title: 'Search Failed!',
+        description: err.message,
+        cause: err.cause ? (err.cause as string) : undefined,
       });
     }
   }
 
-  const { Field, Subscribe, reset, handleSubmit } = useForm({
-    defaultValues: defaultValues,
-    async onSubmit({ value }) {
-      setNotification(undefined);
-      await createAppointment(value);
+  const { Field, Subscribe, handleSubmit, reset } = useForm({
+    defaultValues: searchDto,
+    onSubmit: ({ value }) => {
+      if (value === searchDto) {
+        setInputError('*Please specify a minimum of one search criteria');
+        return;
+      }
+      setInputError(undefined);
+      dispatchSearch(value);
     },
   });
 
-  useEffect(() => {
-    if (notification?.type === 'success') {
-      reset();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notification]);
-
   return (
-    <div>
+    <div className="w-full flex flex-col gap-6">
       {isLoading && <AppLoader />}
-      {notification && <AppNotification notification={notification} />}
-      <EntitySearch />
-
-      {user?.roles.length && user.roles.length > 1 && (
-        <RadioInput
-          name="Who is this appointment for?"
-          selectItems={['mySelf', 'patient']}
-          selectedItem={appointmentType}
-          onChange={(value) =>
-            setappointmentType(value as 'mySelf' | 'patient')
-          }
-          error=""
-        />
-      )}
-
-      <Form action={handleSubmit} title="Create Appointment">
-        <Field
-          name="patientId"
-          validators={{
-            onChange: ({ value }) => (!value ? 'Patient ID is required!' : ''),
-          }}
-        >
-          {(field) => (
-            <TextInput
-              name={field.name}
-              required
-              value={field.state.value}
-              onChange={(v) => field.handleChange(v)}
-              error={field.state.meta.errorMap.onChange ?? ''}
-              disabled={appointmentType === 'mySelf'}
-            />
-          )}
-        </Field>
-
-        <Field
-          name="doctorId"
-          validators={{
-            onChange: ({ value }) => (!value ? 'Doctor ID is required!' : ''),
-          }}
-        >
-          {(field) => (
-            <TextInput
-              name={field.name}
-              required
-              value={field.state.value}
-              onChange={(v) => field.handleChange(v)}
-              error={field.state.meta.errorMap.onChange ?? ''}
-            />
-          )}
-        </Field>
-
-        <Field
-          name="hospitalId"
-          validators={{
-            onChange: ({ value }) =>
-              !value ? 'Hospital ID is required!' : undefined,
-          }}
-        >
-          {(field) => (
-            <TextInput
-              name={field.name}
-              required
-              value={field.state.value}
-              onChange={(v) => field.handleChange(v)}
-              error={field.state.meta.errorMap.onChange ?? ''}
-              disabled={appointmentType === 'patient'}
-            />
-          )}
-        </Field>
-
-        <Field
-          name="appointmentDateTime"
-          validators={{
-            onChange: ({ value }) =>
-              !value ? 'Appointment Date and Time is required!' : '',
-          }}
-        >
-          {(field) => (
-            <DateInput
-              name={field.name}
-              required
-              withTime
-              pickedDate={field.state.value}
-              onPick={(d) => field.handleChange(d)}
-              error={field.state.meta.errorMap.onChange ?? ''}
-            />
-          )}
-        </Field>
-
-        <Field name="remarks">
+      {inputError && <p className="w-full text-red-primary">{inputError}</p>}
+      <Form action={handleSubmit} title="Search Doctor">
+        <Field name="name">
           {(field) => (
             <TextInput
               name={field.name}
               value={field.state.value ?? ''}
-              onChange={(v) => field.handleChange(v)}
+              onChange={field.handleChange}
               error=""
+              tw_width="w-fit"
             />
           )}
         </Field>
-
-        <div className="w-full inline-flex gap-6">
-          <Subscribe>
-            <ButtonSecondary
-              type="submit"
-              buttonText="Create"
-              initialState="active"
-              onClick={() => {}}
-              withIcon
-              icon={IconClock}
+        <Field name="email">
+          {(field) => (
+            <TextInput
+              type="email"
+              name={field.name}
+              value={field.state.value ?? ''}
+              onChange={field.handleChange}
+              error=""
+              tw_width="w-fit"
             />
-            <ButtonSecondary
-              type="button"
-              buttonText="Clear"
-              initialState="light"
-              onClick={() => reset()}
-              withIcon
-              icon={IconTrash}
+          )}
+        </Field>
+        <Field name="speciality">
+          {(field) => (
+            <TextInput
+              name={field.name}
+              value={field.state.value ?? ''}
+              onChange={field.handleChange}
+              error=""
+              tw_width="w-fit"
             />
-          </Subscribe>
-        </div>
+          )}
+        </Field>
+        <Subscribe>
+          <SecondaryButton
+            buttonText="Search"
+            type="submit"
+            onClick={() => {}}
+            withIcon
+            icon={IconSearch}
+            initialState="active"
+          />
+          <SecondaryButton
+            buttonText="Clear"
+            type="button"
+            onClick={() => {
+              reset(searchDto);
+              setInputError(undefined);
+              setSearchResult(undefined);
+              onDoctorSelect(undefined);
+            }}
+            withIcon
+            icon={IconTrash}
+            initialState="light"
+          />
+        </Subscribe>
       </Form>
+      {searchResult && (
+        <div className="w-full flex flex-row flex-wrap gap-6 items-stretch max-h-[430px] overflow-auto">
+          {searchResult.map((doctor) => (
+            <div
+              key={doctor.id}
+              className={`w-fit bg-background ${selectedDoctorId === doctor.id ? 'border-green-primary border-2' : 'border-border-primary border-default'} rounded-default flex flex-col gap-2 p-6 justify-between`}
+            >
+              <p className="text-title-small">
+                Dr. {doctor.firstName + ' ' + doctor.lastName}
+              </p>
+              <p className="text-small"> {doctor.speciality} </p>
+              <p className="text-black-secondary">{doctor.hospitalName}</p>
+              <QuickActionButton
+                text={
+                  selectedDoctorId === doctor.id ? 'Selected' : 'Select Doctor'
+                }
+                onClick={() => {
+                  onDoctorSelect(doctor);
+                  setSelectedDoctorId(doctor.id);
+                }}
+                icon={
+                  selectedDoctorId === doctor.id
+                    ? IconCheckCircle
+                    : IconPlusCircle
+                }
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SessionSelector({
+  doctorId,
+  onSessionSelect,
+  onError,
+}: {
+  doctorId: string;
+  onSessionSelect: (session: ViewDoctorSessionDto) => void;
+  onError: (error: AppNotificationType) => void;
+}) {
+  const { accessToken } = useAuth();
+  const { data, error, isLoading } = useAppQuery<ViewDoctorSessionDto[]>({
+    path: apiPaths.getDoctorSessions(doctorId),
+    method: 'GET',
+    accessToken,
+  });
+  const [selectedSessionId, setSelectedSessionId] = useState('');
+
+  useEffect(() => {
+    if (error) {
+      onError(error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  return (
+    <div className="w-full flex flex-row flex-wrap gap-6 max-h-[430px] overflow-auto">
+      {isLoading && <AppLoader />}
+      {data && data.length === 0 && (
+        <p>No Sessions Found For the Selected Doctor!</p>
+      )}
+      {data &&
+        data.map((session) => (
+          <div
+            key={session.id}
+            className={`w-fit bg-background ${selectedSessionId === session.id ? 'border-green-primary border-2' : 'border-border-primary border-default'} rounded-default flex flex-col gap-2 p-6 justify-between`}
+          >
+            <p className="text-title-small">{session.hospitalName}</p>
+            <p className="text-black-primary inline-flex gap-2">
+              <AppIcon icon={IconClock} />
+              {`${to12HourFormat(session.startTime)} - ${to12HourFormat(session.endTime)}`}
+            </p>
+            <p className="font-mono">
+              <span className="font-sans text-black-secondary">Occurs On:</span>{' '}
+              {session.occurrences.join(', ')}
+            </p>
+            <p className="text-small">
+              Approximate duration : {session.slotDurationMinutes} mins
+            </p>
+            <QuickActionButton
+              text={
+                selectedSessionId === session.id ? 'Selected' : 'Select Session'
+              }
+              onClick={() => {
+                onSessionSelect(session);
+                setSelectedSessionId(session.id);
+              }}
+              icon={
+                selectedSessionId === session.id
+                  ? IconCheckCircle
+                  : IconPlusCircle
+              }
+            />
+          </div>
+        ))}
+    </div>
+  );
+}
+
+function SlotSelector({
+  sessionId,
+  date,
+  onSlotSelect,
+  onError,
+}: {
+  sessionId: string;
+  date: string;
+  onSlotSelect: (slot: ViewSessionSlotDto) => void;
+  onError: (error: AppNotificationType) => void;
+}) {
+  const { accessToken } = useAuth();
+  const { data, error, isLoading } = useAppQuery<ViewSessionSlotDto[]>({
+    path: apiPaths.getSessionSlots,
+    method: 'GET',
+    accessToken,
+    queryParams: {
+      sessionId,
+      date,
+    } as GetSessionSlotsDto,
+  });
+  const [selectedSlotId, setSelectedSlotId] = useState('');
+
+  useEffect(() => {
+    if (error) {
+      onError(error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  return (
+    <div className="w-full flex flex-row flex-wrap gap-6 max-h-[430px] overflow-auto">
+      {isLoading && <AppLoader />}
+      {data &&
+        data
+          .sort((slotA, slotB) => slotA.slotNumber - slotB.slotNumber)
+          .map((slot) => (
+            <div
+              key={slot.id}
+              className={`w-fit bg-background ${selectedSlotId === slot.id ? 'border-green-primary border-2' : 'border-border-primary border-default'} rounded-default flex flex-col gap-2 p-6 justify-between`}
+            >
+              <p className="text-title-small">Number: {slot.slotNumber}</p>
+              <p className="text-black-primary inline-flex gap-2">
+                <AppIcon icon={IconClock} />
+                {`${to12HourFormat(slot.startTime)} - ${to12HourFormat(slot.endTime)}`}
+              </p>
+              <p
+                className={`font-mono ${slot.isAvailable && slot.bookingAllowed ? 'text-green-600' : 'text-red-primary'}`}
+              >
+                {!slot.bookingAllowed
+                  ? 'Booking Not Allowed'
+                  : slot.isAvailable
+                    ? 'Available'
+                    : 'Booked'}
+              </p>
+              {slot.bookingAllowed && slot.isAvailable && (
+                <QuickActionButton
+                  text={
+                    selectedSlotId === slot.id ? 'Selected' : 'Select Session'
+                  }
+                  onClick={() => {
+                    onSlotSelect(slot);
+                    setSelectedSlotId(slot.id);
+                  }}
+                  icon={
+                    selectedSlotId === slot.id
+                      ? IconCheckCircle
+                      : IconPlusCircle
+                  }
+                />
+              )}
+            </div>
+          ))}
     </div>
   );
 }
