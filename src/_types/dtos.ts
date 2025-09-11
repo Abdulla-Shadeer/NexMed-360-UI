@@ -179,18 +179,33 @@ export interface ViewDoctorDto {
 
 export interface ViewPatientDto {
   id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
   birthDate: string;
   gender: string;
 }
 
 export interface ViewHospitalAdminDto {
   id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
   hospitalId: string;
   hospitalName: string;
 }
 
 export interface ViewReceptionistDto {
   id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
   location?: string;
   department?: string;
   hospitalId: string;
