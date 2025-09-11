@@ -2,7 +2,7 @@ import { apiPaths } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import {
   AppNotification,
-  AppointmentStatus,
+  AppointmentStatusDto,
   ViewAppointmentDto,
   ViewAppointmentsFilterDto,
   ViewClinicRecordDto,
@@ -19,7 +19,7 @@ interface PatientInfo {
   demographics: ViewUserDto;
 }
 
-interface SessionMeta {
+interface EncounterMeta {
   patientId: string;
   appointmentId: string;
   doctorId: string;
@@ -27,16 +27,16 @@ interface SessionMeta {
   patientInfo: PatientInfo;
 }
 
-interface SessionContext {
+interface EncounterContext {
   isActive: boolean;
-  meta: SessionMeta;
-  startSession: (patientId: string) => void;
-  endSession: () => void;
+  meta: EncounterMeta;
+  startEncounter: (patientId: string) => void;
+  endEncounter: () => void;
   isLoading: boolean;
   error?: AppNotification;
 }
 
-const defaultSessionContext: SessionContext = {
+const defaultEncounterContext: EncounterContext = {
   isActive: false,
   meta: {
     patientId: '',
@@ -54,17 +54,19 @@ const defaultSessionContext: SessionContext = {
       },
     },
   },
-  startSession: () => {},
-  endSession: () => {},
+  startEncounter: () => {},
+  endEncounter: () => {},
   isLoading: false,
 };
 
-const SessionContext = createContext<SessionContext>(defaultSessionContext);
+const EncounterContext = createContext<EncounterContext>(
+  defaultEncounterContext,
+);
 
-function SessionProvider({ children }: { children: React.ReactNode }) {
+function EncounterProvider({ children }: { children: React.ReactNode }) {
   const [isActive, setIsActive] = useState(false);
-  const [sessionMeta, setSessionMeta] = useState<SessionMeta>(
-    defaultSessionContext.meta,
+  const [EncounterMeta, setEncounterMeta] = useState<EncounterMeta>(
+    defaultEncounterContext.meta,
   );
   const { accessToken, user } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
@@ -100,17 +102,17 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
         prescriptions: ehrs.data?.flatMap((ehr) => ehr.prescriptions ?? []),
         demographics:
           demographics.data ??
-          defaultSessionContext.meta.patientInfo.demographics,
+          defaultEncounterContext.meta.patientInfo.demographics,
       },
     };
 
-    setSessionMeta(meta);
-    console.log('Session Context => Session Started!');
+    setEncounterMeta(meta);
+    console.log('Encounter Context => Encounter Started!');
     setIsActive(true);
   }
 
-  async function startSession(patientId: string) {
-    console.log('Session Context => Starting...');
+  async function startEncounter(patientId: string) {
+    console.log('Encounter Context => Starting...');
     setError(undefined);
 
     const loadAppointmentFilters = () => {
@@ -120,7 +122,7 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
         toDate: toDefaultDateFormat(today),
         patientId,
         doctorId: user?.doctorProfile?.id,
-        status: 'confirmed' as AppointmentStatus,
+        status: AppointmentStatusDto.Confirmed,
       };
       return appointmentFilter;
     };
@@ -140,7 +142,7 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
       } else {
         setError({
           type: 'error',
-          title: 'Unable to start Session!',
+          title: 'Unable to start Encounter!',
           description: `Patient with id ${patientId} doesn't have an Appointment booked.`,
           cause: 'No appointments found!',
         });
@@ -149,39 +151,39 @@ function SessionProvider({ children }: { children: React.ReactNode }) {
       const err = error as Error;
       setError({
         type: 'error',
-        title: 'Something went wrong while starting Session!',
+        title: 'Something went wrong while starting Encounter!',
         description: err.message,
         cause: err.cause ? (err.cause as string) : '',
       });
     }
   }
 
-  function endSession() {
-    console.log('Session Context => Session ended.');
-    // check if the end session called after a successfull session start (isActive === true) and dispatch complete appointment req
+  function endEncounter() {
+    console.log('Encounter Context => Encounter ended.');
+    // check if the end Encounter called after a successfull Encounter start (isActive === true) and dispatch complete appointment req
     setIsActive(false);
-    setSessionMeta(defaultSessionContext.meta);
+    setEncounterMeta(defaultEncounterContext.meta);
   }
 
   return (
-    <SessionContext.Provider
+    <EncounterContext.Provider
       value={{
         isActive,
-        meta: sessionMeta,
-        startSession,
-        endSession,
+        meta: EncounterMeta,
+        startEncounter,
+        endEncounter,
         isLoading,
         error,
       }}
     >
       {children}
-    </SessionContext.Provider>
+    </EncounterContext.Provider>
   );
 }
 
-function useSession() {
-  const context = useContext(SessionContext);
+function useEncounter() {
+  const context = useContext(EncounterContext);
   return context;
 }
 
-export { SessionProvider, useSession };
+export { EncounterProvider, useEncounter };

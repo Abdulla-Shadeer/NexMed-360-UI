@@ -33,7 +33,6 @@ export type {
   ViewDoctorDto,
   ViewHospitalDto,
   ViewPatientDto,
-  AppointmentStatus,
   CreateHospitalDto,
   UpdateHospitalDto,
   RegisterUserDto,
@@ -49,7 +48,8 @@ export type {
   AddPrescriptionDto,
   SearchDoctorDto,
   ViewDoctorSessionDto,
-  SessionOccurrence,
   ViewSessionSlotDto,
   GetSessionSlotsDto,
 } from './dtos';
+
+export { AppointmentStatusDto, SessionOccurrenceDto } from './dtos';

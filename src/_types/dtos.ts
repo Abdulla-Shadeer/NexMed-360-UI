@@ -89,12 +89,12 @@ export interface DatewiseStatsDto {
 // Appointment
 // ***********
 
-export enum AppointmentStatus {
-  Pending = 'pending',
-  Confirmed = 'confirmed',
-  CancelRequested = 'cancelRequested',
-  Cancelled = 'cancelled',
-  Completed = 'completed',
+export enum AppointmentStatusDto {
+  Pending = 'Pending',
+  Confirmed = 'Confirmed',
+  CancelRequested = 'CancelRequested',
+  Cancelled = 'Cancelled',
+  Completed = 'Completed',
 }
 
 export interface ViewAppointmentDto {
@@ -115,7 +115,7 @@ export interface ViewAppointmentDto {
   appointmentDateTime: string;
   appointmentNumber: number;
   remarks?: string;
-  status: AppointmentStatus;
+  status: AppointmentStatusDto;
 }
 
 export interface CreateAppointmentDto {
@@ -130,7 +130,7 @@ export interface ViewAppointmentsFilterDto {
   hospitalId?: string;
   fromDate?: string;
   toDate?: string;
-  status?: AppointmentStatus;
+  status?: AppointmentStatusDto;
 }
 
 export interface ModifyAppointmentDto {
@@ -321,10 +321,10 @@ export interface ViewDoctorSessionDto {
   hospitalAddress: string;
   slotDurationMinutes: string;
   totalSlots: string;
-  occurrences: SessionOccurrence[];
+  occurrences: SessionOccurrenceDto[];
 }
 
-export enum SessionOccurrence {
+export enum SessionOccurrenceDto {
   Weekdays = 'Weekdays',
   Weekend = 'Weekend',
   AllDays = 'AllDays',

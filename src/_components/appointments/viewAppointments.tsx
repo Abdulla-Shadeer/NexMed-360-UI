@@ -5,7 +5,7 @@ import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import {
   ViewAppointmentsFilterDto,
   ViewAppointmentDto,
-  AppointmentStatus,
+  AppointmentStatusDto,
 } from '_types/dtos';
 import { useState, useMemo, useEffect } from 'react';
 import AppLoader from '../misc/loader';
@@ -110,10 +110,12 @@ export default function ViewAppointments({
           {(field) => (
             <SelectInput
               name={field.name}
-              options={Object.entries(AppointmentStatus).flatMap((e) => e[1])}
+              options={Object.entries(AppointmentStatusDto).flatMap(
+                (e) => e[1],
+              )}
               selected={field.state.value}
               onSelect={(value) =>
-                field.handleChange(value as AppointmentStatus)
+                field.handleChange(value as AppointmentStatusDto)
               }
               error=""
               tw_width="w-fit"

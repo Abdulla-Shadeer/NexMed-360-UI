@@ -14,9 +14,9 @@ import AppLoader from '@/components/misc/loader';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppIcon from '@/components/icons/appIcon';
 import { usePathname } from 'next/navigation';
-import { SessionProvider } from '_context/_session/sessionContext';
+import { EncounterProvider } from '_context/_encounter/encounterContext';
 import { AppNotification as AppNotificationType } from '_types/common';
-import SessionStatusBar from '@/components/session/sessionStatusBar';
+import EncounterStatusBar from '@/components/session/encounterStatusBar';
 import Head from 'next/head';
 
 export default function RootLayout({
@@ -33,9 +33,9 @@ export default function RootLayout({
       <body className="antialiased">
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <SessionProvider>
+            <EncounterProvider>
               <AppLayout> {children} </AppLayout>
-            </SessionProvider>
+            </EncounterProvider>
           </AuthProvider>
         </QueryClientProvider>
       </body>
@@ -94,7 +94,7 @@ function AppLayout({ children }: { children: ReactNode }) {
           <div className="flex flex-col w-full min-h-screen max-h-screen overflow-y-scroll p-6">
             {<Breadcrumb navPaths={navPaths} />}
             {user?.doctorProfile && (
-              <SessionStatusBar onError={(error) => setNotification(error)} />
+              <EncounterStatusBar onError={(error) => setNotification(error)} />
             )}
             {children}
           </div>

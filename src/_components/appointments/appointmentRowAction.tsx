@@ -1,7 +1,7 @@
 import { Row } from '@tanstack/react-table';
 import { useAuth } from '_context';
 import {
-  AppointmentStatus,
+  AppointmentStatusDto,
   CancellationRequestDto,
   ViewAppointmentDto,
 } from '_types/dtos';
@@ -123,8 +123,8 @@ export default function AppointmentRowActions({
             View
           </Link>
           {!(
-            row.original.status.toLowerCase() === AppointmentStatus.Completed ||
-            row.original.status.toLowerCase() === AppointmentStatus.Cancelled
+            row.original.status === AppointmentStatusDto.Completed ||
+            row.original.status === AppointmentStatusDto.Cancelled
           ) && (
             <>
               {user?.id === row.original.createdByUserId && (

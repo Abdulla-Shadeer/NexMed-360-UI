@@ -8,7 +8,7 @@ import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
 import { apiPaths } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
-import { AppointmentStatus, ViewAppointmentDto } from '_types/dtos';
+import { AppointmentStatusDto, ViewAppointmentDto } from '_types/dtos';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { use } from 'react';
@@ -40,8 +40,8 @@ export default function ViewAppointment({
         {data &&
           data.createdByUserId === user?.id &&
           !(
-            data.status.toLowerCase() === AppointmentStatus.Cancelled ||
-            data.status.toLowerCase() === AppointmentStatus.Completed
+            data.status === AppointmentStatusDto.Cancelled ||
+            data.status === AppointmentStatusDto.Completed
           ) && (
             <Link
               href={`/appointments/edit/${id}?returnPath=${currentPath}`}
