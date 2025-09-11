@@ -17,6 +17,7 @@ import { usePathname } from 'next/navigation';
 import { SessionProvider } from '_context/_session/sessionContext';
 import { AppNotification as AppNotificationType } from '_types/common';
 import SessionStatusBar from '@/components/session/sessionStatusBar';
+import Head from 'next/head';
 
 export default function RootLayout({
   children,
@@ -26,6 +27,9 @@ export default function RootLayout({
   const queryClient = new QueryClient();
   return (
     <html lang="en">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </Head>
       <body className="antialiased">
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
@@ -53,15 +57,12 @@ function AppLayout({ children }: { children: ReactNode }) {
       {!isLoggedIn ? (
         <Login />
       ) : (
-        <div className="flex flex-row min-h-screen w-full">
-          <div className="flex flex-col justify-between min-h-screen max-h-screen overflow-y-scroll bg-panel-light w-[373px] border-r border-border-primary p-6 drop-shadow-default">
-            <div className="width-full mb-6">
-              <Image
-                src={AppLogo}
-                alt="Logo"
-                className="w-[200px] mb-6"
-                priority={false}
-              />
+        <div className="flex lg:flex-row md:flex-col sm:flex-col flex-wrap lg:flex-nowrap min-h-screen w-full">
+          <div className="flex flex-col justify-between lg:min-h-screen lg:max-h-screen md:h-fit sm:h-fit overflow-y-scroll bg-panel-light lg:w-[350px] md:w-full sm:w-full border-r border-border-primary p-6 drop-shadow-default">
+            <div className="width-full flex mb-6 md:flex-row sm:flex-row flex-wrap">
+              <div className="w-full mb-6">
+                <Image src={AppLogo} alt="Logo" priority={false} />
+              </div>
               {navPaths.map(
                 (navPath) =>
                   user?.roles.some((role) =>

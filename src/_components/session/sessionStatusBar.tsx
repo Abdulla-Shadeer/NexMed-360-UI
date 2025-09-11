@@ -27,7 +27,7 @@ export default function SessionStatusBar({
 
   return (
     <div
-      className={`w-full py-3 px-4 mb-6 border-default border-border-primary rounded-large ${isActive ? 'bg-green-200' : 'bg-red-100'} drop-shadow-default`}
+      className={`w-full py-3 px-4 mb-6 border-default border-border-primary rounded-large ${isActive ? 'bg-green-200' : 'bg-disabled'}`}
     >
       {isLoading && <AppLoader />}
       {isActive ? (

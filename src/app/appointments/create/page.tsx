@@ -55,7 +55,7 @@ export default function CreateAppointmentPage() {
   return (
     <>
       {notification && <AppNotification notification={notification} />}
-      <div className="w-full flex flex-row lg:flex-nowrapb md:flex-wrap sm:flex-wrap">
+      <div className="w-full flex flex-row gap-[2%] flex-wrap lg:flex-nowrapb space-y-6">
         <AppointmentDetails
           creationMeta={creationMeta}
           onConfirm={() => {}}
@@ -64,7 +64,7 @@ export default function CreateAppointmentPage() {
             setStep(CreationSteps.chooseDoctor);
           }}
         />
-        <div className="lg:w-3/4 md:w-full sm:w-full p-6 border-default border-border-primary rounded-default bg-background drop-shadow-default flex flex-col gap-6">
+        <div className="lg:w-[74%] md:w-full sm:w-full p-6 border-default border-border-primary rounded-default bg-background drop-shadow-default flex flex-col gap-6">
           <div className="flex flex-row items-center gap-1">
             <div
               className={`${stepButtonStyle} ${step === CreationSteps.chooseDoctor ? 'bg-panel-light text-blue-secondary' : 'bg-disabled text-on-disabled'}`}
@@ -167,7 +167,7 @@ function AppointmentDetails({
   onReset: () => void;
 }) {
   return (
-    <div className="lg:w-1/4 md:w-fit sm:w-fit h-fit p-6 bg-panel-light border-default border-border-primary rounded-default flex flex-col gap-4 text-default text-black-secondary justify-between">
+    <div className="lg:w-[24%] md:w-fit sm:w-fit h-fit p-6 bg-panel-light border-default border-border-primary rounded-default flex flex-col gap-4 text-default text-black-secondary justify-between">
       <p className="text-title-small pb-1 border-b-default border-border-primary text-blue-secondary">
         Appointment Details
       </p>
@@ -234,7 +234,7 @@ function AppointmentDetails({
           buttonText="Reset"
           onClick={onReset}
           withIcon
-          icon={IconCalendarDays}
+          icon={IconTrash}
           initialState="light"
           tw="w-full"
         />
