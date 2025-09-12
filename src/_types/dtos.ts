@@ -92,6 +92,8 @@ export interface DatewiseStatsDto {
 export enum AppointmentStatusDto {
   Pending = 'Pending',
   Confirmed = 'Confirmed',
+  Arrived = 'Arrived',
+  InProgress = 'InProgress',
   CancelRequested = 'CancelRequested',
   Cancelled = 'Cancelled',
   Completed = 'Completed',
@@ -113,7 +115,7 @@ export interface ViewAppointmentDto {
   createdByUserId: string;
   createdByUserName: string;
   appointmentDateTime: string;
-  appointmentNumber: number;
+  appointmentNumber: string;
   remarks?: string;
   status: AppointmentStatusDto;
 }

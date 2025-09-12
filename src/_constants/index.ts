@@ -14,6 +14,10 @@ const apiPaths = {
   cancelAppointment: '/Appointments/Cancel',
   confirmAppointment: (id: string): string => `/Appointments/Confirm/${id}`,
   completeAppointment: (id: string): string => `/Appointments/Complete/${id}`,
+  confirmPatientArrival: (id: string): string =>
+    `/Appointments/ConfirmArrival/${id}`,
+  confirmEncounterInProgress: (id: string): string =>
+    `/Appointments/ConfirmInProgress/${id}`,
   entitySearch: '/Search/Entity',
   doctorSearch: '/Search/Doctor',
   getAllHospitals: '/Hospital/GetAll',

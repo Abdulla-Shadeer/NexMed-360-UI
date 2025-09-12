@@ -9,21 +9,25 @@ import { AppNotification } from '@/types';
 import DialogWindow from '../popup/dialogWindow';
 
 export default function EncounterStatusBar({
-  onError,
+  onNotification,
 }: {
-  onError: (error: AppNotification | undefined) => void;
+  onNotification: (notification: AppNotification | undefined) => void;
 }) {
-  const { startEncounter, endEncounter, isActive, isLoading, error, meta } =
-    useEncounter();
+  const {
+    startEncounter,
+    endEncounter,
+    isActive,
+    isLoading,
+    notification,
+    meta,
+  } = useEncounter();
   const [showStartPrompt, setShowPrompt] = useState(false);
   const [patientId, setPatientId] = useState('');
 
   useEffect(() => {
-    if (error) {
-      onError(error);
-    }
+    onNotification(notification);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  }, [notification]);
 
   return (
     <div
@@ -32,10 +36,13 @@ export default function EncounterStatusBar({
       {isLoading && <AppLoader />}
       {isActive ? (
         <div className="w-full flex flex-row items-center justify-between">
-          <p>
-            Patient:{' '}
-            {`${meta.patientInfo.demographics.firstName} ${meta.patientInfo.demographics.lastName}`}
-          </p>
+          <div className="flex flex-col gap-1">
+            <p>
+              Patient:
+              {`${meta.patientData?.demographics?.firstName} ${meta.patientData?.demographics?.lastName}`}
+            </p>
+            <p>Appointment No: {meta.appointmentData?.appointmentNumber}</p>
+          </div>
           <QuickActionButton
             text="End Encounter"
             icon={IconStopCircle}
@@ -52,7 +59,7 @@ export default function EncounterStatusBar({
             icon={IconPlayCircle}
             onClick={() => {
               setShowPrompt(true);
-              onError(undefined);
+              onNotification(undefined);
             }}
           />
         </div>

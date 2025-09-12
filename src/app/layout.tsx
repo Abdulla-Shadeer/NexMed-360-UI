@@ -16,7 +16,7 @@ import AppIcon from '@/components/icons/appIcon';
 import { usePathname } from 'next/navigation';
 import { EncounterProvider } from '_context/_encounter/encounterContext';
 import { AppNotification as AppNotificationType } from '_types/common';
-import EncounterStatusBar from '@/components/session/encounterStatusBar';
+import EncounterStatusBar from '@/components/encounter/encounterStatusBar';
 import Head from 'next/head';
 
 export default function RootLayout({
@@ -94,7 +94,9 @@ function AppLayout({ children }: { children: ReactNode }) {
           <div className="flex flex-col w-full min-h-screen max-h-screen overflow-y-scroll p-6">
             {<Breadcrumb navPaths={navPaths} />}
             {user?.doctorProfile && (
-              <EncounterStatusBar onError={(error) => setNotification(error)} />
+              <EncounterStatusBar
+                onNotification={(notification) => setNotification(notification)}
+              />
             )}
             {children}
           </div>

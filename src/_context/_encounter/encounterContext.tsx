@@ -6,25 +6,22 @@ import {
   ViewAppointmentDto,
   ViewAppointmentsFilterDto,
   ViewClinicRecordDto,
+  ViewPatientDto,
   ViewPrescriptionDto,
-  ViewUserDto,
 } from '@/types';
 import { useAuth } from '_context/_auth/authContext';
 import { toDefaultDateFormat } from '_utils/dateUtils';
 import { createContext, useContext, useState } from 'react';
 
-interface PatientInfo {
+interface PatientData {
   ehrs?: ViewClinicRecordDto[];
   prescriptions?: ViewPrescriptionDto[];
-  demographics: ViewUserDto;
+  demographics?: ViewPatientDto;
 }
 
 interface EncounterMeta {
-  patientId: string;
-  appointmentId: string;
-  doctorId: string;
-  hospitalId: string;
-  patientInfo: PatientInfo;
+  appointmentData?: ViewAppointmentDto;
+  patientData?: PatientData;
 }
 
 interface EncounterContext {
@@ -33,27 +30,12 @@ interface EncounterContext {
   startEncounter: (patientId: string) => void;
   endEncounter: () => void;
   isLoading: boolean;
-  error?: AppNotification;
+  notification?: AppNotification;
 }
 
 const defaultEncounterContext: EncounterContext = {
   isActive: false,
-  meta: {
-    patientId: '',
-    appointmentId: '',
-    doctorId: '',
-    hospitalId: '',
-    patientInfo: {
-      demographics: {
-        id: '',
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        roles: [],
-      },
-    },
-  },
+  meta: {},
   startEncounter: () => {},
   endEncounter: () => {},
   isLoading: false,
@@ -65,18 +47,26 @@ const EncounterContext = createContext<EncounterContext>(
 
 function EncounterProvider({ children }: { children: React.ReactNode }) {
   const [isActive, setIsActive] = useState(false);
-  const [EncounterMeta, setEncounterMeta] = useState<EncounterMeta>(
+  const [encounterMeta, setEncounterMeta] = useState<EncounterMeta>(
     defaultEncounterContext.meta,
   );
   const { accessToken, user } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const [error, setError] = useState<AppNotification | undefined>(undefined);
+  const [notification, setNotification] = useState<AppNotification | undefined>(
+    undefined,
+  );
 
-  async function fetchAndStart(
+  function resetNotification() {
+    setTimeout(() => {
+      setNotification(undefined);
+    }, 5000);
+  }
+
+  async function loadPatientDataAndStart(
     patientId: string,
     appointment: ViewAppointmentDto,
   ) {
-    const getDemographics = createQueryFunction<ViewUserDto>({
+    const getDemographics = createQueryFunction<ViewPatientDto>({
       path: apiPaths.getPatient(patientId),
       method: 'GET',
       accessToken,
@@ -92,28 +82,35 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
       getEhrs(),
     ]);
 
-    const meta = {
-      patientId,
-      doctorId: appointment.doctorId,
-      hospitalId: appointment.hospitalId,
-      appointmentId: appointment.bookingReference,
-      patientInfo: {
-        ehrs: ehrs.data,
+    const meta: EncounterMeta = {
+      appointmentData: appointment,
+      patientData: {
+        ehrs: ehrs.data ?? [],
         prescriptions: ehrs.data?.flatMap((ehr) => ehr.prescriptions ?? []),
-        demographics:
-          demographics.data ??
-          defaultEncounterContext.meta.patientInfo.demographics,
+        demographics: demographics.data,
       },
     };
 
     setEncounterMeta(meta);
     console.log('Encounter Context => Encounter Started!');
     setIsActive(true);
+
+    const confirmInProgress = createQueryFunction<ViewAppointmentDto>({
+      path: apiPaths.confirmEncounterInProgress(appointment.bookingReference),
+      method: 'GET',
+      accessToken,
+    });
+    await confirmInProgress();
+    setNotification({
+      type: 'success',
+      title: 'Encounter Started Successfully!',
+    });
+    resetNotification();
   }
 
   async function startEncounter(patientId: string) {
     console.log('Encounter Context => Starting...');
-    setError(undefined);
+    setNotification(undefined);
 
     const loadAppointmentFilters = () => {
       const today = new Date();
@@ -122,13 +119,14 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
         toDate: toDefaultDateFormat(today),
         patientId,
         doctorId: user?.doctorProfile?.id,
-        status: AppointmentStatusDto.Confirmed,
+        hospitalId: user?.doctorProfile?.hospitalId, // Might be removed in future to allow multiple hospital IDs per doctor
+        status: AppointmentStatusDto.Arrived,
       };
       return appointmentFilter;
     };
 
     const getAppointments = createQueryFunction<ViewAppointmentDto[]>({
-      path: apiPaths.viewOwnAppointments,
+      path: apiPaths.viewOwnAppointments, // docto's own appointment with given patient id
       method: 'GET',
       accessToken,
       queryParams: loadAppointmentFilters(),
@@ -138,18 +136,18 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
       const appointments = await getAppointments();
 
       if (appointments.data?.length === 1) {
-        await fetchAndStart(patientId, appointments.data[0]);
+        await loadPatientDataAndStart(patientId, appointments.data[0]);
       } else {
-        setError({
+        setNotification({
           type: 'error',
           title: 'Unable to start Encounter!',
-          description: `Patient with id ${patientId} doesn't have an Appointment booked.`,
-          cause: 'No appointments found!',
+          description: `Patient doesn't have an appointment booked or arrival confirmed at the front desk.`,
+          cause: 'No appointments found with Arrived status!',
         });
       }
     } catch (error) {
       const err = error as Error;
-      setError({
+      setNotification({
         type: 'error',
         title: 'Something went wrong while starting Encounter!',
         description: err.message,
@@ -158,22 +156,38 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  function endEncounter() {
-    console.log('Encounter Context => Encounter ended.');
+  async function endEncounter() {
     // check if the end Encounter called after a successfull Encounter start (isActive === true) and dispatch complete appointment req
+    if (isActive) {
+      const completeAppointment = createQueryFunction<ViewAppointmentDto>({
+        path: apiPaths.completeAppointment(
+          encounterMeta.appointmentData?.bookingReference || '',
+        ),
+        method: 'GET',
+        accessToken,
+      });
+      await completeAppointment();
+      setNotification({
+        type: 'success',
+        title: 'Encounter Completed!',
+        description: `Patient: ${encounterMeta.appointmentData?.patientName}`,
+        cause: `Appointment Number: ${encounterMeta.appointmentData?.appointmentNumber}`,
+      });
+    }
     setIsActive(false);
     setEncounterMeta(defaultEncounterContext.meta);
+    console.log('Encounter Context => Encounter ended.');
   }
 
   return (
     <EncounterContext.Provider
       value={{
         isActive,
-        meta: EncounterMeta,
+        meta: encounterMeta,
         startEncounter,
         endEncounter,
         isLoading,
-        error,
+        notification: notification,
       }}
     >
       {children}
