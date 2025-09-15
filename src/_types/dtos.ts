@@ -295,6 +295,7 @@ export interface AddClinicRecordDto {
   patientId: string;
   diagnosis: string;
   doctorNotes?: string;
+  visitDate: string;
   followUpDate?: string;
   prescriptions?: AddPrescriptionDto[];
 }
@@ -303,7 +304,8 @@ export interface AddPrescriptionDto {
   medicineName: string;
   dosage: string;
   timesPerDay: number;
-  durationDays: number;
+  isLongTermUse?: boolean;
+  duration?: string;
   notes?: string;
 }
 

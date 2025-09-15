@@ -31,7 +31,7 @@ export default function EncounterStatusBar({
 
   return (
     <div
-      className={`w-full py-3 px-4 mb-6 border-default border-border-primary rounded-large ${isActive ? 'bg-green-200' : 'bg-disabled'}`}
+      className={`w-full py-3 px-4 mb-6 border-default border-border-primary rounded-large ${isActive ? 'bg-green-50 text-green-primary border-green-primary' : 'bg-disabled'}`}
     >
       {isLoading && <AppLoader />}
       {isActive ? (
@@ -39,12 +39,17 @@ export default function EncounterStatusBar({
           <div className="flex flex-col gap-1">
             <p>
               Patient:
-              {`${meta.patientData?.demographics?.firstName} ${meta.patientData?.demographics?.lastName}`}
+              <span className="font-semibold ml-2">{`${meta.patientData?.demographics?.firstName} ${meta.patientData?.demographics?.lastName}`}</span>
             </p>
-            <p>Appointment No: {meta.appointmentData?.appointmentNumber}</p>
+            <p>
+              Appointment No:{' '}
+              <span className="font-semibold ml-2">
+                0{meta.appointmentData?.appointmentNumber}
+              </span>
+            </p>
           </div>
           <QuickActionButton
-            text="End Encounter"
+            text="Finish Encounter"
             icon={IconStopCircle}
             onClick={endEncounter}
           />

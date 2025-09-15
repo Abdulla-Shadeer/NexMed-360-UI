@@ -19,7 +19,7 @@ interface PatientData {
   demographics?: ViewPatientDto;
 }
 
-interface EncounterMeta {
+export interface EncounterMeta {
   appointmentData?: ViewAppointmentDto;
   patientData?: PatientData;
 }
