@@ -137,9 +137,9 @@ const navPaths: NavPath[] = [
         roles: [patient],
       },
       {
-        name: 'View All',
-        icon: IconList,
-        path: '/ehr/view-all',
+        name: 'Patient EHRs',
+        icon: IconDocumentList,
+        path: '/ehr/patient-ehrs',
         roles: [doctor],
       },
       {
