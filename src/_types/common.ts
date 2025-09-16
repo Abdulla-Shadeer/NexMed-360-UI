@@ -41,6 +41,11 @@ export interface DateInputProps extends InputProps {
   onPick: (value: string) => void;
 }
 
+export interface TimeInputProps extends InputProps {
+  pickedTime?: string;
+  onPick: (value: string) => void;
+}
+
 export interface RangeInputProps extends InputProps {
   min: number;
   max: number;

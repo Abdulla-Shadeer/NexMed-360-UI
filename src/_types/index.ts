@@ -50,6 +50,7 @@ export type {
   ViewDoctorSessionDto,
   ViewSessionSlotDto,
   GetSessionSlotsDto,
+  CreateDoctorSessionDto,
 } from './dtos';
 
 export { AppointmentStatusDto, SessionOccurrenceDto } from './dtos';

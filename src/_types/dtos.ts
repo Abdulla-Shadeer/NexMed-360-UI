@@ -356,3 +356,12 @@ export interface GetSessionSlotsDto {
   sessionId: string;
   date: string;
 }
+
+export interface CreateDoctorSessionDto {
+  doctorId: string;
+  startTime: string;
+  endTime: string;
+  hospitalId: string;
+  slotDurationMinutes?: number;
+  occurrences: SessionOccurrenceDto[];
+}

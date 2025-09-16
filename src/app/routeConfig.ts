@@ -2,6 +2,7 @@ import { NavPath } from '@/types';
 import { userRoles } from '@/constants';
 import {
   IconBuildingOffice,
+  IconCalendarDays,
   IconClock,
   IconDocumentList,
   IconDocumentText,
@@ -67,6 +68,19 @@ const navPaths: NavPath[] = [
       },
     ],
     roles: [superUser, hospitalAdmin],
+  },
+  {
+    name: 'Sessions',
+    icon: IconCalendarDays,
+    roles: [hospitalAdmin, doctor],
+    children: [
+      {
+        name: 'Create',
+        path: '/session/create',
+        icon: IconPlusCircle,
+        roles: [doctor, hospitalAdmin],
+      },
+    ],
   },
   {
     name: 'Appointments',
