@@ -273,7 +273,8 @@ export interface ViewPrescriptionDto {
   medicineName: string;
   dosage: string;
   timesPerDay: number;
-  durationDays: number;
+  isLongTermUse: boolean;
+  duration?: string;
   notes?: string;
   isActive: boolean;
 }

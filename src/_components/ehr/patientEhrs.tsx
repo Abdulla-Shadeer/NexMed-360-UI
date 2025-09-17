@@ -1,6 +1,8 @@
+'use client';
+
 import { apiPaths } from '@/constants';
 import { useAppQuery } from '@/hooks';
-import { AppNotification, ViewClinicRecordDto } from '@/types';
+import { AppNotification, ViewClinicRecordDto, ViewPatientDto } from '@/types';
 import { useAuth } from '_context';
 import { useEffect, useState } from 'react';
 import Paginator from '../misc/paginator';
@@ -8,28 +10,31 @@ import AppLoader from '../misc/loader';
 import { toDefaultDateFormat, toDisplayDateTimeFormat } from '_utils/dateUtils';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import RefreshData from '../misc/refresh';
+import KeyValueData from '@/components/misc/keyValueData';
+import { SecondaryButton } from '../buttons';
+import { useRouter } from 'next/navigation';
 
 export default function PatientEHRs({
-  patientId,
-  patientName,
+  patient,
   onNotification,
 }: {
-  patientId: string;
-  patientName?: string;
+  patient: ViewPatientDto;
   onNotification: (notification: AppNotification) => void;
 }) {
   const { accessToken } = useAuth();
   const queryKey = {
-    path: apiPaths.getClinicRecords(patientId),
+    path: apiPaths.getClinicRecords(patient.id),
     method: 'GET',
     accessToken,
   };
+
   const { data, isLoading, error } = useAppQuery<ViewClinicRecordDto[]>(
     queryKey as ApiRequestOption,
   );
   const [currentPageData, setCurrentPageData] = useState<
     ViewClinicRecordDto[] | undefined
   >(undefined);
+  const router = useRouter();
 
   useEffect(() => {
     if (error) {
@@ -41,8 +46,8 @@ export default function PatientEHRs({
     <div className="w-full space-y-6 justify-between">
       {isLoading && <AppLoader />}
       <h2 className="text-title">
-        {patientName ? `${patientName}\'s` : 'Your'} EHRs (Electronic Health
-        Records)
+        {`${patient.gender === 'Male' ? 'Mr. ' : 'Ms. '}${patient.firstName} ${patient.lastName}'s  EHRs (Electronic Health
+        Records`}
       </h2>
       <RefreshData queryKey={queryKey as ApiRequestOption} />
       {currentPageData && currentPageData?.length > 0 ? (
@@ -73,6 +78,17 @@ export default function PatientEHRs({
                 _key="Prescriptions added"
                 value={ehr.prescriptions?.length.toString() ?? '0'}
               />
+              {ehr.prescriptions && ehr.prescriptions.length > 0 && (
+                <SecondaryButton
+                  type="button"
+                  buttonText="View Prescriptions"
+                  onClick={() =>
+                    router.push(`/ehr/prescriptions/view/${ehr.id}`)
+                  }
+                  initialState="active"
+                  tw="w-full"
+                />
+              )}
             </div>
           ))}
         </div>
@@ -89,13 +105,5 @@ export default function PatientEHRs({
         />
       )}
     </div>
-  );
-}
-
-function KeyValueData({ _key, value }: { _key: string; value: string }) {
-  return (
-    <p>
-      {_key} :<span className="text-title-small ml-2">{value}</span>
-    </p>
   );
 }

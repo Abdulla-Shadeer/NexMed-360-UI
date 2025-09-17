@@ -14,10 +14,12 @@ export default function OwnEhrsPage() {
   return (
     <>
       {notification && <AppNotification notification={notification} />}
-      <PatientEHRs
-        patientId={user?.patientProfile?.id ?? ''}
-        onNotification={(notification) => setNotification(notification)}
-      />
+      {user?.patientProfile && (
+        <PatientEHRs
+          patient={user?.patientProfile}
+          onNotification={(notification) => setNotification(notification)}
+        />
+      )}
     </>
   );
 }
