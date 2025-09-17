@@ -47,7 +47,7 @@ export default function ButtonPrimary({
   withDropdown = false,
   dropdownButtons = [],
   disabled = false,
-  tw_width = 'lg:w-full md:w-fit sm:w-fit',
+  tw_width = 'w-fit',
   onClick,
 }: ButtonPrimaryProps) {
   const [open, setOpen] = useState(false);

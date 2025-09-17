@@ -1,7 +1,6 @@
 import { useEncounter } from '_context/_encounter/encounterContext';
 import { useState, useEffect } from 'react';
 import { SecondaryButton } from '../buttons';
-import QuickActionButton from '../buttons/quickActionButton';
 import { TextInput } from '../form';
 import { IconStopCircle, IconPlayCircle } from '../icons/icons';
 import AppLoader from '../misc/loader';
@@ -48,10 +47,13 @@ export default function EncounterStatusBar({
               </span>
             </p>
           </div>
-          <QuickActionButton
-            text="Finish Encounter"
+          <SecondaryButton
+            type="button"
+            buttonText="Finish Encounter"
+            withIcon
             icon={IconStopCircle}
             onClick={endEncounter}
+            initialState="active"
           />
         </div>
       ) : (
@@ -59,13 +61,16 @@ export default function EncounterStatusBar({
           <p className="text-title text-on-disabled font-mono">
             Encounter inactive !
           </p>
-          <QuickActionButton
-            text="Start Encounter"
+          <SecondaryButton
+            type="button"
+            buttonText="Start Encounter"
+            withIcon
             icon={IconPlayCircle}
             onClick={() => {
               setShowPrompt(true);
               onNotification(undefined);
             }}
+            initialState="active"
           />
         </div>
       )}

@@ -2,26 +2,15 @@
 
 import { ViewPrescriptionDto } from '_types/dtos';
 import { toDefaultDateFormat, toDisplayDateTimeFormat } from '_utils/dateUtils';
-import QuickActionButton from '../buttons/quickActionButton';
-import { IconArrowLeft } from '../icons/icons';
 import KeyValueData from '../misc/keyValueData';
-import { useRouter } from 'next/navigation';
 
 export default function ViewPrescriptions({
   prescriptions,
 }: {
   prescriptions: ViewPrescriptionDto[];
 }) {
-  const router = useRouter();
   return (
     <div className="w-full flex flex-row flex-wrap gap-6">
-      <div className="w-full">
-        <QuickActionButton
-          text="Go back"
-          icon={IconArrowLeft}
-          onClick={router.back}
-        />
-      </div>
       {prescriptions.map((item) => (
         <div
           key={item.id}

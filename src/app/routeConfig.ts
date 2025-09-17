@@ -10,6 +10,7 @@ import {
   IconHeart,
   IconHome,
   IconList,
+  IconPlayCircle,
   IconPlusCircle,
   IconSettings,
   IconShieldCheck,
@@ -25,6 +26,12 @@ const navPaths: NavPath[] = [
     path: '/',
     icon: IconHome,
     roles: [superUser, hospitalAdmin, receptionist, doctor, patient],
+  },
+  {
+    name: 'Encounter',
+    path: '/encounter',
+    icon: IconPlayCircle,
+    roles: [doctor],
   },
   {
     name: 'Hospital',

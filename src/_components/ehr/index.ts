@@ -1,3 +1,4 @@
 export { default as AddPrescriptionRowAction } from './addPrescriptionRowAction';
-export { default as CreateEHR } from './createEHR';
-export { default as CreatePrescription } from './createPrescription';
+export { default as CreateEhrForm } from './createEhrForm';
+export { default as CreatePrescription } from './createPrescriptionForm';
+export { default as CreateEHR } from './createEhr';

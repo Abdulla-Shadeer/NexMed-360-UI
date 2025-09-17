@@ -11,6 +11,7 @@ import {
 } from '@/types';
 import { useAuth } from '_context/_auth/authContext';
 import { toDefaultDateFormat } from '_utils/dateUtils';
+import { useRouter } from 'next/navigation';
 import { createContext, useContext, useState } from 'react';
 
 interface PatientData {
@@ -55,6 +56,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
   const [notification, setNotification] = useState<AppNotification | undefined>(
     undefined,
   );
+  const router = useRouter();
 
   function resetNotification() {
     setTimeout(() => {
@@ -106,6 +108,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
       title: 'Encounter Started Successfully!',
     });
     resetNotification();
+    router.push('/encounter');
   }
 
   async function startEncounter(patientId: string) {
