@@ -2,6 +2,7 @@
 
 import { CreateEHR } from '@/components/ehr';
 import PatientEHRs from '@/components/ehr/patientEhrs';
+import ViewPrescriptions from '@/components/ehr/viewPrescriptions';
 import { AppNotification } from '@/components/misc';
 import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
 import { useEncounter } from '_context/_encounter/encounterContext';
@@ -16,9 +17,9 @@ const tabButtonActive = `${tabButton} bg-blue-secondary text-text-light hover:bg
 
 export default function EncounterPage() {
   const { isActive, meta } = useEncounter();
-  const [activeTab, setActiveTab] = useState<'demography' | 'ehrs' | 'addEhr'>(
-    'demography',
-  );
+  const [activeTab, setActiveTab] = useState<
+    'demography' | 'ehrs' | 'prescriptions' | 'addEhr'
+  >('demography');
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
@@ -48,6 +49,12 @@ export default function EncounterPage() {
               Patient EHRs
             </button>
             <button
+              className={`${activeTab === 'prescriptions' ? tabButtonActive : tabButtonNormal}`}
+              onClick={() => setActiveTab('prescriptions')}
+            >
+              Prescriptions
+            </button>
+            <button
               className={`${activeTab === 'addEhr' ? tabButtonActive : tabButtonNormal}`}
               onClick={() => setActiveTab('addEhr')}
             >
@@ -69,6 +76,14 @@ export default function EncounterPage() {
               <PatientEHRs
                 patient={meta.patientData.demographics}
                 onNotification={(notification) => setNotification(notification)}
+              />
+            </div>
+          )}
+
+          {activeTab === 'prescriptions' && meta.patientData?.prescriptions && (
+            <div className="w-full ">
+              <ViewPrescriptions
+                prescriptions={meta.patientData.prescriptions}
               />
             </div>
           )}

@@ -3,6 +3,7 @@
 import ViewAppointmentCard from '@/components/appointments/viewAppointmentCard';
 import { SecondaryButton } from '@/components/buttons';
 import PatientIdForm from '@/components/forms/patientIdForm';
+import AddUserForm from '@/components/hospital/addUserForm';
 import { IconIdentification, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
@@ -13,8 +14,10 @@ import { useFrontOffice } from '_context/frontOffice/frontOfficeContext';
 import { AppNotificationType } from '_types/common';
 import {
   AppointmentStatusDto,
+  CreatePatientDto,
   ViewAppointmentDto,
   ViewAppointmentsFilterDto,
+  ViewUserDto,
 } from '_types/dtos';
 import { toDefaultDateFormat } from '_utils/dateUtils';
 import { useState } from 'react';
@@ -35,9 +38,38 @@ export default function FrontOfficePage() {
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
+  const { createQueryFunction, isLoading } = useQueryFunction();
+  const { accessToken } = useAuth();
+
+  async function addPatient(data: CreatePatientDto) {
+    const request = createQueryFunction<ViewUserDto>({
+      path: apiPaths.addPatient,
+      method: 'POST',
+      accessToken,
+      payload: data,
+    });
+
+    try {
+      setNotification(undefined);
+      await request();
+      setNotification({
+        type: 'success',
+        title: 'Added new Patient!',
+      });
+    } catch (error) {
+      const err = error as Error;
+      setNotification({
+        type: 'error',
+        title: 'Error Creating Patient!',
+        description: err.message,
+        cause: err.cause ? (err.cause as string) : '',
+      });
+    }
+  }
 
   return (
     <div className="w-full space-y-6">
+      {isLoading && <AppLoader />}
       {notification && <AppNotification notification={notification} />}
 
       <div className="w-full inline-flex gap-1 border-b-default border-border-primary">
@@ -64,7 +96,12 @@ export default function FrontOfficePage() {
       {activeTab === 'receivePatient' && (
         <ReceivePatient onNotification={(value) => setNotification(value)} />
       )}
-      {activeTab === 'registerPatient' && <></>}
+      {activeTab === 'registerPatient' && (
+        <AddUserForm
+          userType="patient"
+          onFormSubmit={(data) => addPatient(data as CreatePatientDto)}
+        />
+      )}
       {activeTab === 'ongoingSessions' && <></>}
     </div>
   );
