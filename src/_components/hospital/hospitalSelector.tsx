@@ -2,7 +2,7 @@ import { apiPaths } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { KeyValuePair } from '_types/common';
 import { ViewHospitalDto } from '_types/dtos';
-import { SelectInput } from '../form';
+import { SelectInput } from '../input';
 import { AppNotification } from '../misc';
 import AppLoader from '../misc/loader';
 import { useAuth } from '_context';

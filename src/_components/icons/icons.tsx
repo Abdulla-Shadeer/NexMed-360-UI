@@ -52,6 +52,7 @@ import IconRefresh from '@/appIcons/refresh.svg';
 import IconFace from '@/appIcons/face.svg';
 import IconPlayCircle from '@/appIcons/play-circle.svg';
 import IconStopCircle from '@/appIcons/stop-circle.svg';
+import IconComputerDesktop from '@/appIcons/computer-desktop.svg';
 export {
   IconArrowLeft,
   IconArrowRight,
@@ -107,4 +108,5 @@ export {
   IconFace,
   IconPlayCircle,
   IconStopCircle,
+  IconComputerDesktop,
 };

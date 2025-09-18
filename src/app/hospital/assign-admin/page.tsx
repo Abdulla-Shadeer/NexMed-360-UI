@@ -6,7 +6,7 @@ import AppLoader from '@/components/misc/loader';
 import { apiPaths } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import { CreateHospitalAdminDto, ViewUserDto } from '_types/dtos';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';

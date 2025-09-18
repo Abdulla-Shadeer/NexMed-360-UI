@@ -4,6 +4,7 @@ import {
   IconBuildingOffice,
   IconCalendarDays,
   IconClock,
+  IconComputerDesktop,
   IconDocumentList,
   IconDocumentText,
   IconFace,
@@ -26,6 +27,12 @@ const navPaths: NavPath[] = [
     path: '/',
     icon: IconHome,
     roles: [superUser, hospitalAdmin, receptionist, doctor, patient],
+  },
+  {
+    name: 'Front Office',
+    path: '/frontOffice',
+    icon: IconComputerDesktop,
+    roles: [receptionist],
   },
   {
     name: 'Encounter',

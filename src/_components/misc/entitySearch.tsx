@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { SelectInput, TextInput } from '../form';
+import { SelectInput, TextInput } from '../input';
 import AppIcon from '../icons/appIcon';
 import { IconChevronUpdown, IconSearch, IconTrash } from '../icons/icons';
 import ButtonSecondary from '../buttons/buttonSecondary';
 import { useQueryFunction } from '@/hooks';
 import { apiPaths } from '@/constants';
 import { useAuth } from '_context';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import AppNotification from './appNotification';
 import AppLoader from './loader';
 import { unknownObjectRenderer } from './unknownObjectRenderer';

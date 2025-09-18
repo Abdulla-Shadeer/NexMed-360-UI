@@ -10,7 +10,7 @@ import {
 import { startCase } from 'lodash';
 import { useState, useEffect } from 'react';
 import { SecondaryButton } from '@/components/buttons';
-import { Form, TextInput, RadioInput, DateInput } from '@/components/form';
+import { Form, TextInput, RadioInput, DateInput } from '@/components/input';
 import { IconUserPlus, IconTrash } from '@/components/icons/icons';
 import HospitalSelecter from './hospitalSelector';
 import { Divider } from '@/components/misc';

@@ -11,7 +11,7 @@ import AppIcon from '../icons/appIcon';
 import { IconMoreVertical } from '../icons/icons';
 import { useQueryFunction } from '@/hooks';
 import { apiPaths } from '@/constants';
-import { AppNotification } from '_types/common';
+import { AppNotificationType } from '_types/common';
 import AppLoader from '../misc/loader';
 
 export default function AppointmentRowActions({
@@ -19,7 +19,7 @@ export default function AppointmentRowActions({
   onError,
 }: {
   row: Row<ViewAppointmentDto>;
-  onError: (error: AppNotification | undefined) => void;
+  onError: (error: AppNotificationType | undefined) => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

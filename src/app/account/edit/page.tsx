@@ -1,6 +1,6 @@
 'use client';
 import { SecondaryButton } from '@/components/buttons';
-import { Form, TextInput } from '@/components/form';
+import { Form, TextInput } from '@/components/input';
 import AppIcon from '@/components/icons/appIcon';
 import { IconArrowLeft, IconSend, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
@@ -9,7 +9,7 @@ import { apiPaths } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import { ViewUserDto } from '_types/dtos';
 import Link from 'next/link';
 import { useState } from 'react';

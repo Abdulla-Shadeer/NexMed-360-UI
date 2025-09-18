@@ -1,7 +1,7 @@
 import { useEncounter } from '_context/_encounter/encounterContext';
 import { useState, useEffect } from 'react';
 import { SecondaryButton } from '../buttons';
-import { TextInput } from '../form';
+import { TextInput } from '../input';
 import { IconStopCircle, IconPlayCircle } from '../icons/icons';
 import AppLoader from '../misc/loader';
 import { AppNotification } from '@/types';

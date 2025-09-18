@@ -1,6 +1,6 @@
 'use client';
 import { SecondaryButton } from '@/components/buttons';
-import { Form, TextInput } from '@/components/form';
+import { Form, TextInput } from '@/components/input';
 import { IconArrowRight, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';

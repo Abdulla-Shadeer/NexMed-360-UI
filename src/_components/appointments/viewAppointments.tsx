@@ -11,11 +11,12 @@ import { useState, useMemo, useEffect } from 'react';
 import AppLoader from '../misc/loader';
 import { AppNotification, EntitySearch } from '../misc';
 import { AppointmentsTable } from '.';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import { useForm } from '@tanstack/react-form';
-import { DateInput, Form, SelectInput, TextInput } from '../form';
+import { DateInput, Form, SelectInput, TextInput } from '../input';
 import { SecondaryButton } from '../buttons';
 import { IconFilter, IconTrash } from '../icons/icons';
+import RefreshData from '../misc/refresh';
 
 export default function ViewAppointments({
   type,
@@ -178,9 +179,10 @@ export default function ViewAppointments({
       {error && <AppNotification notification={error} />}
       {tableError && <AppNotification notification={tableError} />}
       {data && (
-        <div>
+        <div className="space-y-6 w-full">
           <EntitySearch open={false} />
           <AppointmentFilter />
+          <RefreshData queryKey={requestOptions} />
           <AppointmentsTable
             appointments={data}
             title={title}

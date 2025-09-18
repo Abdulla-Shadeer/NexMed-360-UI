@@ -1,7 +1,7 @@
 'use client';
 import { SecondaryButton } from '@/components/buttons';
 import QuickActionButton from '@/components/buttons/quickActionButton';
-import { DateInput, Form, TextInput } from '@/components/form';
+import { DateInput, Form, TextInput } from '@/components/input';
 import { IconArrowLeft, IconSend, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
@@ -9,7 +9,7 @@ import { apiPaths } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import { ModifyAppointmentDto, ViewAppointmentDto } from '_types/dtos';
 import { toDefaultDateTimeFormat } from '_utils/dateUtils';
 import { useRouter } from 'next/navigation';

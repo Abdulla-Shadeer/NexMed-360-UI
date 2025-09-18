@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import useQueryFunction, { ApiRequestOption } from './useQueryFunction';
-import { AppNotification } from '_types/common';
+import { AppNotificationType } from '_types/common';
 
 export default function useAppQuery<T>(requestOptions: ApiRequestOption) {
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const [error, setError] = useState<AppNotification | undefined>(undefined);
+  const [error, setError] = useState<AppNotificationType | undefined>(
+    undefined,
+  );
   const [data, setData] = useState<T | undefined>(undefined);
 
   const queryResult = useQuery({

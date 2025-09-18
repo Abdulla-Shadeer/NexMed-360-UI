@@ -15,9 +15,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppIcon from '@/components/icons/appIcon';
 import { usePathname } from 'next/navigation';
 import { EncounterProvider } from '_context/_encounter/encounterContext';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import EncounterStatusBar from '@/components/encounter/encounterStatusBar';
 import Head from 'next/head';
+import { FrontOfficeProvider } from '_context/frontOffice/frontOfficeContext';
 
 export default function RootLayout({
   children,
@@ -33,9 +34,11 @@ export default function RootLayout({
       <body className="antialiased">
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <EncounterProvider>
-              <AppLayout> {children} </AppLayout>
-            </EncounterProvider>
+            <FrontOfficeProvider>
+              <EncounterProvider>
+                <AppLayout> {children} </AppLayout>
+              </EncounterProvider>
+            </FrontOfficeProvider>
           </AuthProvider>
         </QueryClientProvider>
       </body>

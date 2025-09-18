@@ -21,7 +21,7 @@ import {
   EncounterMeta,
   useEncounter,
 } from '_context/_encounter/encounterContext';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import {
   AddClinicRecordDto,
   AddPrescriptionDto,

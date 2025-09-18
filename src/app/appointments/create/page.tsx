@@ -2,7 +2,7 @@
 
 import { SecondaryButton } from '@/components/buttons';
 import QuickActionButton from '@/components/buttons/quickActionButton';
-import { DateInput, Form, RadioInput, TextInput } from '@/components/form';
+import { DateInput, Form, RadioInput, TextInput } from '@/components/input';
 import AppIcon from '@/components/icons/appIcon';
 import {
   IconArrowRight,
@@ -22,7 +22,7 @@ import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import {
   CreateAppointmentDto,
   GetSessionSlotsDto,

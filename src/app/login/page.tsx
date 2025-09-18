@@ -1,5 +1,5 @@
 'use client';
-import { Form, TextInput } from '@/components/form';
+import { Form, TextInput } from '@/components/input';
 import BgImage from '../../../public/loginBg.jpeg';
 import AppLogo from '../../../public/MedicoreLogoLarge.png';
 import Image from 'next/image';

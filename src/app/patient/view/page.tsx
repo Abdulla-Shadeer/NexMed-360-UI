@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import AppLoader from '@/components/misc/loader';
 import { AppNotification } from '@/components/misc';
 import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
-import { Form, TextInput } from '@/components/form';
+import { Form, TextInput } from '@/components/input';
 import { useForm } from '@tanstack/react-form';
 import { SecondaryButton } from '@/components/buttons';
 import { IconSearch, IconTrash } from '@/components/icons/icons';

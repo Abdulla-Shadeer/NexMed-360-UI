@@ -1,5 +1,5 @@
 'use client';
-import { RadioInput } from '@/components/form';
+import { RadioInput } from '@/components/input';
 import AddUserForm from '@/components/hospital/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';

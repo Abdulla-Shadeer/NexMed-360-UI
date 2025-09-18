@@ -7,7 +7,7 @@ export type {
   DateInputProps,
   RangeInputProps,
   ApiCallParams,
-  AppNotification,
+  AppNotificationType as AppNotification,
   KeyValuePair,
 } from './common';
 

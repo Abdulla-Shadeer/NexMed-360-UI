@@ -1,6 +1,11 @@
 'use client';
 
-import { CheckBoxInput, Form, NumberInput, TextInput } from '@/components/form';
+import {
+  CheckBoxInput,
+  Form,
+  NumberInput,
+  TextInput,
+} from '@/components/input';
 import DoctorSearch from '@/components/search/doctorSearch';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
@@ -12,7 +17,7 @@ import {
   ViewDoctorSessionDto,
 } from '@/types';
 import { useMemo, useState } from 'react';
-import TimeInput from '@/components/form/timeInput';
+import TimeInput from '@/components/input/timeInput';
 import { SecondaryButton } from '@/components/buttons';
 import {
   IconBell,

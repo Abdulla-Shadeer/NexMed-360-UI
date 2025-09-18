@@ -1,10 +1,10 @@
 'use client';
+import ViewAppointmentCard from '@/components/appointments/viewAppointmentCard';
 import QuickActionButton from '@/components/buttons/quickActionButton';
 import AppIcon from '@/components/icons/appIcon';
 import { IconArrowLeft, IconEdit } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
 import { apiPaths } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
@@ -52,7 +52,7 @@ export default function ViewAppointment({
             </Link>
           )}
       </div>
-      {data && unknownObjectRenderer(data)}
+      {data && <ViewAppointmentCard appointment={data} />}
     </div>
   );
 }

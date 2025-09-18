@@ -10,7 +10,7 @@ import { apiPaths } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import { ViewClinicRecordDto } from '_types/dtos';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';

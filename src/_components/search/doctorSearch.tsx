@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 import { SecondaryButton } from '../buttons';
 import QuickActionButton from '../buttons/quickActionButton';
-import { Form, TextInput } from '../form';
+import { Form, TextInput } from '../input';
 import {
   IconSearch,
   IconTrash,

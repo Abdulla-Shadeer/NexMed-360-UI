@@ -2,12 +2,12 @@
 
 import { useForm } from '@tanstack/react-form';
 import { AddClinicRecordDto, ViewClinicRecordDto } from '_types/dtos';
-import { DateInput, Form, TextInput } from '../form';
+import { DateInput, Form, TextInput } from '../input';
 import { SecondaryButton } from '../buttons';
 import { IconArrowRight, IconDocumentCheck, IconTrash } from '../icons/icons';
 import { useState } from 'react';
 import { useQueryFunction } from '@/hooks';
-import { AppNotification } from '_types/common';
+import { AppNotificationType } from '_types/common';
 import { apiPaths } from '@/constants';
 import { useAuth } from '_context';
 import AppLoader from '../misc/loader';
@@ -22,7 +22,7 @@ export default function CreateEhrForm({
 }: {
   defaultData?: AddClinicRecordDto;
   onFormSubmit: (data: AddClinicRecordDto) => void;
-  onNotification: (Notification: AppNotification) => void;
+  onNotification: (Notification: AppNotificationType) => void;
 }) {
   const [saveWithoutPrescriptions, setSaveWithoutPrescriptions] =
     useState(false);

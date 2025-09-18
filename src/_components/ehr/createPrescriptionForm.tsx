@@ -8,7 +8,7 @@ import {
   NumberInput,
   TextAreaInput,
   TextInput,
-} from '../form';
+} from '../input';
 import { SecondaryButton } from '../buttons';
 import { IconDocumentPlus, IconTrash } from '../icons/icons';
 

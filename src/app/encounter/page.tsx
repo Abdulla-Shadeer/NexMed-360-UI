@@ -5,7 +5,7 @@ import PatientEHRs from '@/components/ehr/patientEhrs';
 import { AppNotification } from '@/components/misc';
 import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
 import { useEncounter } from '_context/_encounter/encounterContext';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import { calculateAge } from '_utils/dateUtils';
 import { useState } from 'react';
 
