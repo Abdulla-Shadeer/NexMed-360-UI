@@ -22,16 +22,17 @@ import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
-import { AppNotificationType as AppNotificationType } from '_types/common';
 import {
   CreateAppointmentDto,
+  FilterDoctorSessionDto,
   GetSessionSlotsDto,
   ViewAppointmentDto,
   ViewDoctorDto,
   ViewDoctorSessionDto,
   ViewPatientDto,
   ViewSessionSlotDto,
-} from '_types/dtos';
+  AppNotificationType,
+} from '@/types';
 import { to12HourFormat, toDisplayDateTimeFormat } from '_utils/dateUtils';
 import { useEffect, useState } from 'react';
 
@@ -428,9 +429,12 @@ function SessionSelector({
 }) {
   const { accessToken } = useAuth();
   const requestOption: ApiRequestOption = {
-    path: API_PATHS.getDoctorSessions(doctorId),
+    path: API_PATHS.getDoctorSessions,
     method: 'GET',
     accessToken,
+    queryParams: {
+      doctorId,
+    } as FilterDoctorSessionDto,
   };
   const { data, error, isLoading } =
     useAppQuery<ViewDoctorSessionDto[]>(requestOption);

@@ -1,4 +1,4 @@
-import { AppNotification as AppNotificationType } from '@/types';
+import { AppNotificationType } from '@/types';
 import AppIcon from '../icons/appIcon';
 import { IconBell, IconCheckCircle, IconXCircle } from '../icons/icons';
 import PopupWindow from '../popup/popup';

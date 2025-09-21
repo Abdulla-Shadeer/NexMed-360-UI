@@ -7,7 +7,7 @@ export type {
   DateInputProps,
   RangeInputProps,
   ApiCallParams,
-  AppNotificationType as AppNotification,
+  AppNotificationType,
   KeyValuePair,
 } from './common';
 
@@ -51,6 +51,11 @@ export type {
   ViewSessionSlotDto,
   GetSessionSlotsDto,
   CreateDoctorSessionDto,
+  FilterDoctorSessionDto,
 } from './dtos';
 
-export { AppointmentStatusDto, SessionOccurrenceDto } from './dtos';
+export {
+  AppointmentStatusDto,
+  SessionOccurrenceDto,
+  SessionStatusDto,
+} from './dtos';

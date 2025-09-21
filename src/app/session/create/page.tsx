@@ -11,7 +11,7 @@ import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
 import {
-  AppNotification as AppNotificationType,
+  AppNotificationType,
   CreateDoctorSessionDto,
   SessionOccurrenceDto,
   ViewDoctorSessionDto,

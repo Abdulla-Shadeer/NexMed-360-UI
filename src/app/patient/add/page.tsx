@@ -5,11 +5,7 @@ import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
-import {
-  AppNotification as AppNotificationType,
-  CreatePatientDto,
-  ViewUserDto,
-} from '@/types';
+import { AppNotificationType, CreatePatientDto, ViewUserDto } from '@/types';
 import { useAuth } from '_context';
 import { useState } from 'react';
 

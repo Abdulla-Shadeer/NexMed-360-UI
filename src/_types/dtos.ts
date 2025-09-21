@@ -366,3 +366,16 @@ export interface CreateDoctorSessionDto {
   slotDurationMinutes?: number;
   occurrences: SessionOccurrenceDto[];
 }
+
+export interface FilterDoctorSessionDto {
+  date?: string;
+  hospitalId?: string;
+  doctorId?: string;
+  sessionStatus?: SessionStatusDto;
+}
+
+export enum SessionStatusDto {
+  Started = 'Started',
+  Ended = 'Ended',
+  Canceled = 'Canceled',
+}

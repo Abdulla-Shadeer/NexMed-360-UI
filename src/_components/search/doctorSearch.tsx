@@ -2,11 +2,7 @@ import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
-import {
-  ViewDoctorDto,
-  SearchDoctorDto,
-  AppNotification as AppNotificationType,
-} from '@/types';
+import { ViewDoctorDto, SearchDoctorDto, AppNotificationType } from '@/types';
 import { useState } from 'react';
 import { SecondaryButton } from '../buttons';
 import QuickActionButton from '../buttons/quickActionButton';

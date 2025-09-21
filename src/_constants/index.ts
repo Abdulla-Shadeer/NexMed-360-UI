@@ -35,10 +35,12 @@ const API_PATHS = {
   getClinicRecords: (patientId: string) =>
     `/Patient/GetClinicRecords/${patientId}`,
   addClinicRecord: '/Patient/AddClinicRecord',
-  getDoctorSessions: (doctorId: string) =>
-    `/Appointments/GetDoctorSessions/${doctorId}`,
-  getSessionSlots: '/Appointments/GetSessionSlots',
-  createDoctorSession: '/Appointments/CreateDoctorSession',
+  getDoctorSessions: '/DoctorSession/Get',
+  getSessionSlots: '/DoctorSession/GetSlots',
+  createDoctorSession: '/DoctorSession/Create',
+  startSession: (sessionId: string) => `/DoctorSession/Start/${sessionId}`,
+  updateHistory: '/DoctorSession/UpdateHistory',
+  getHistory: '/DoctorSession/GetHistory',
 };
 
 const USER_ROLES = {

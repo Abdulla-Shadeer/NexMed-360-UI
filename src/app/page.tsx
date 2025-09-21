@@ -16,7 +16,7 @@ import {
   OverviewDto,
   PatientOverviewDto,
   SystemOverviewDto,
-  AppNotification as AppNotificationType,
+  AppNotificationType,
 } from '@/types';
 import React, { useState } from 'react';
 import useAppQuery from '_hooks/_api/useAppQuery';

@@ -13,7 +13,7 @@ import {
   CreateHospitalDto,
   ViewHospitalDto,
   ViewUserDto,
-  AppNotification as AppNotificationType,
+  AppNotificationType,
 } from '@/types';
 import { useState } from 'react';
 import AddUserForm from '@/components/hospital/addUserForm';

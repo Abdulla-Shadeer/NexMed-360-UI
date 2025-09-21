@@ -2,7 +2,7 @@
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
-import { AppNotification as AppNotificationType, ViewUserDto } from '@/types';
+import { AppNotificationType, ViewUserDto } from '@/types';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import AppLoader from '@/components/misc/loader';

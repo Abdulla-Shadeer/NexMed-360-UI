@@ -6,7 +6,7 @@ import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import {
-  AppNotification as AppNotificationType,
+  AppNotificationType,
   CreateDoctorDto,
   CreateReceptionistDto,
   ViewUserDto,

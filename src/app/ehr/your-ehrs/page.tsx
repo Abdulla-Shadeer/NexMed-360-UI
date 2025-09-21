@@ -2,7 +2,7 @@
 
 import PatientEHRs from '@/components/ehr/patientEhrs';
 import { useAuth } from '_context';
-import { AppNotification as AppNotificationType } from '@/types';
+import { AppNotificationType } from '@/types';
 import { useState } from 'react';
 import { AppNotification } from '@/components/misc';
 
