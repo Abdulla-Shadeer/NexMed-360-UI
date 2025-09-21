@@ -7,7 +7,7 @@ import AddUserForm from '@/components/hospital/addUserForm';
 import { IconIdentification, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
 import { useFrontOffice } from '_context/frontOffice/frontOfficeContext';
@@ -43,7 +43,7 @@ export default function FrontOfficePage() {
 
   async function addPatient(data: CreatePatientDto) {
     const request = createQueryFunction<ViewUserDto>({
-      path: apiPaths.addPatient,
+      path: API_PATHS.addPatient,
       method: 'POST',
       accessToken,
       payload: data,
@@ -125,7 +125,7 @@ function ReceivePatient({
       status: AppointmentStatusDto.Confirmed,
     };
     const load = createQueryFunction<ViewAppointmentDto[]>({
-      path: apiPaths.viewHospitalAppointments,
+      path: API_PATHS.viewHospitalAppointments,
       method: 'GET',
       accessToken,
       queryParams: appointmentFilter,
@@ -151,7 +151,7 @@ function ReceivePatient({
 
   async function confirmPatientArrival(appointmentId: string) {
     const confirm = createQueryFunction<ViewAppointmentDto>({
-      path: apiPaths.confirmPatientArrival(appointmentId),
+      path: API_PATHS.confirmPatientArrival(appointmentId),
       method: 'GET',
       accessToken,
     });

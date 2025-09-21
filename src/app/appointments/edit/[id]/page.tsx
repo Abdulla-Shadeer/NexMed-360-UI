@@ -5,7 +5,7 @@ import { DateInput, Form, TextInput } from '@/components/input';
 import { IconArrowLeft, IconSend, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
@@ -34,7 +34,7 @@ export default function EditAppointment({
   useEffect(() => {
     async function fetchAppointmentData() {
       const request = createQueryFunction<ViewAppointmentDto>({
-        path: apiPaths.viewAppointmentById(id),
+        path: API_PATHS.viewAppointmentById(id),
         method: 'GET',
         accessToken,
       });
@@ -68,7 +68,7 @@ export default function EditAppointment({
 
   async function dispatchUpdate(data: ModifyAppointmentDto) {
     const request = createQueryFunction<ViewAppointmentDto>({
-      path: apiPaths.editAppointment,
+      path: API_PATHS.editAppointment,
       method: 'POST',
       accessToken,
       payload: data,

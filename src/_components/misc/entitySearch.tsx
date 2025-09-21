@@ -4,7 +4,7 @@ import AppIcon from '../icons/appIcon';
 import { IconChevronUpdown, IconSearch, IconTrash } from '../icons/icons';
 import ButtonSecondary from '../buttons/buttonSecondary';
 import { useQueryFunction } from '@/hooks';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAuth } from '_context';
 import { AppNotificationType as AppNotificationType } from '_types/common';
 import AppNotification from './appNotification';
@@ -61,7 +61,7 @@ export default function EntitySearch({ open = true }: { open?: boolean }) {
   async function handleSearch() {
     setError(undefined);
     const searchRequest = createQueryFunction<object>({
-      path: apiPaths.entitySearch,
+      path: API_PATHS.entitySearch,
       method: 'POST',
       accessToken,
       payload: searchDto,

@@ -4,7 +4,7 @@ import { Form, TextInput } from '@/components/input';
 import { IconArrowRight, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
@@ -38,7 +38,7 @@ export default function AddHospital() {
 
   async function dispatchCreateHospital(data: CreateHospitalDto) {
     const request = createQueryFunction<ViewHospitalDto>({
-      path: apiPaths.addHospital,
+      path: API_PATHS.addHospital,
       method: 'POST',
       accessToken,
       payload: data,
@@ -68,7 +68,7 @@ export default function AddHospital() {
 
   async function dispatchAssignAdmin(data: CreateHospitalAdminDto) {
     const request = createQueryFunction<ViewUserDto>({
-      path: apiPaths.assignHospitalAdmin,
+      path: API_PATHS.assignHospitalAdmin,
       method: 'POST',
       accessToken,
       payload: data,

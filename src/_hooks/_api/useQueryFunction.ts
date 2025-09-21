@@ -1,4 +1,4 @@
-import { apiPaths, endPointUrl } from '@/constants';
+import { API_PATHS, API_ENDPOINT } from '@/constants';
 import { ApiResultDto } from '_types/dtos';
 import { useState } from 'react';
 import status from 'statuses';
@@ -19,7 +19,7 @@ export default function useQueryFunction() {
       setIsLoading(true);
       const { path, method, payload, accessToken, queryParams } = requestOption;
 
-      let url = `${endPointUrl + path}`;
+      let url = `${API_ENDPOINT + path}`;
 
       if (queryParams) {
         const keyValues = Object.entries(queryParams);
@@ -38,7 +38,7 @@ export default function useQueryFunction() {
         body: body,
       });
       request.headers.set('Content-Type', 'application/json');
-      if ((path as string) !== apiPaths.login) {
+      if ((path as string) !== API_PATHS.login) {
         request.headers.append('Authorization', `Bearer ${accessToken}`);
       }
 

@@ -1,7 +1,7 @@
 // need to be passed via a config file or env variable
-const endPointUrl = 'https://localhost:7143/api/v1';
+const API_ENDPOINT = 'https://localhost:7143/api/v1';
 
-const apiPaths = {
+const API_PATHS = {
   login: '/Users/Login',
   getUser: '/Users/GetUser',
   updateUser: '/Users/UpdateUser',
@@ -41,7 +41,7 @@ const apiPaths = {
   createDoctorSession: '/Appointments/CreateDoctorSession',
 };
 
-const userRoles = {
+const USER_ROLES = {
   superUser: 'SuperUser',
   hospitalAdmin: 'HospitalAdmin',
   receptionist: 'Receptionist',
@@ -49,4 +49,4 @@ const userRoles = {
   patient: 'Patient',
 };
 
-export { endPointUrl, apiPaths, userRoles };
+export { API_ENDPOINT, API_PATHS, USER_ROLES };

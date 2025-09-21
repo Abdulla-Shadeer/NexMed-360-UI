@@ -1,4 +1,4 @@
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import {
   AppNotification,
@@ -69,13 +69,13 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
     appointment: ViewAppointmentDto,
   ) {
     const getDemographics = createQueryFunction<ViewPatientDto>({
-      path: apiPaths.getPatient(patientId),
+      path: API_PATHS.getPatient(patientId),
       method: 'GET',
       accessToken,
     });
 
     const getEhrs = createQueryFunction<ViewClinicRecordDto[]>({
-      path: apiPaths.getClinicRecords(patientId),
+      path: API_PATHS.getClinicRecords(patientId),
       method: 'GET',
       accessToken,
     });
@@ -98,7 +98,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
     setIsActive(true);
 
     const confirmInProgress = createQueryFunction<ViewAppointmentDto>({
-      path: apiPaths.confirmEncounterInProgress(appointment.bookingReference),
+      path: API_PATHS.confirmEncounterInProgress(appointment.bookingReference),
       method: 'GET',
       accessToken,
     });
@@ -129,7 +129,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
     };
 
     const getAppointments = createQueryFunction<ViewAppointmentDto[]>({
-      path: apiPaths.viewOwnAppointments, // docto's own appointment with given patient id
+      path: API_PATHS.viewOwnAppointments, // docto's own appointment with given patient id
       method: 'GET',
       accessToken,
       queryParams: loadAppointmentFilters(),
@@ -163,7 +163,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
     // check if the end Encounter called after a successfull Encounter start (isActive === true) and dispatch complete appointment req
     if (isActive) {
       const completeAppointment = createQueryFunction<ViewAppointmentDto>({
-        path: apiPaths.completeAppointment(
+        path: API_PATHS.completeAppointment(
           encounterMeta.appointmentData?.bookingReference || '',
         ),
         method: 'GET',

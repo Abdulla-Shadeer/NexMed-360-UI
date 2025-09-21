@@ -20,7 +20,7 @@ import {
 } from '@/types';
 import React, { useState } from 'react';
 import useAppQuery from '_hooks/_api/useAppQuery';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAuth } from '_context';
 import { LineChart } from '@/components/misc';
 import AppNotification from '@/components/misc/appNotification';
@@ -29,7 +29,7 @@ import { AppointmentsTable } from '@/components/appointments';
 export default function Home() {
   const { accessToken } = useAuth();
   const { data, error, isLoading } = useAppQuery<OverviewDto[]>({
-    path: apiPaths.getOverview,
+    path: API_PATHS.getOverview,
     method: 'GET',
     accessToken: accessToken,
   });

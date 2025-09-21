@@ -1,6 +1,6 @@
 'use client';
 
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { AppNotification, ViewClinicRecordDto, ViewPatientDto } from '@/types';
 import { useAuth } from '_context';
@@ -23,7 +23,7 @@ export default function PatientEHRs({
 }) {
   const { accessToken } = useAuth();
   const queryKey = {
-    path: apiPaths.getClinicRecords(patient.id),
+    path: API_PATHS.getClinicRecords(patient.id),
     method: 'GET',
     accessToken,
   };

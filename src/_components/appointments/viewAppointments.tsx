@@ -1,4 +1,4 @@
-import { apiPaths, userRoles } from '@/constants';
+import { API_PATHS, USER_ROLES } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
@@ -32,8 +32,8 @@ export default function ViewAppointments({
     const opt: ApiRequestOption = {
       path:
         type === 'own'
-          ? apiPaths.viewOwnAppointments
-          : apiPaths.viewHospitalAppointments,
+          ? API_PATHS.viewOwnAppointments
+          : API_PATHS.viewHospitalAppointments,
       method: 'GET',
       queryParams: filter,
       accessToken,
@@ -65,7 +65,7 @@ export default function ViewAppointments({
   function AppointmentFilter() {
     return (
       <Form title="Filter Appointments" action={handleSubmit}>
-        {(type === 'hospital' || user?.roles.includes(userRoles.doctor)) && (
+        {(type === 'hospital' || user?.roles.includes(USER_ROLES.doctor)) && (
           <Field name="patientId">
             {(field) => (
               <TextInput
@@ -79,7 +79,7 @@ export default function ViewAppointments({
           </Field>
         )}
 
-        {(type === 'hospital' || user?.roles.includes(userRoles.patient)) && (
+        {(type === 'hospital' || user?.roles.includes(USER_ROLES.patient)) && (
           <Field name="doctorId">
             {(field) => (
               <TextInput

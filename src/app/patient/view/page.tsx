@@ -1,5 +1,5 @@
 'use client';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
 import { AppNotification as AppNotificationType, ViewUserDto } from '@/types';
@@ -33,7 +33,7 @@ export default function ViewPatientPage() {
 
   async function fetchPatient(id: string) {
     const request = createQueryFunction<ViewUserDto>({
-      path: apiPaths.getPatient(id),
+      path: API_PATHS.getPatient(id),
       method: 'GET',
       accessToken,
     });

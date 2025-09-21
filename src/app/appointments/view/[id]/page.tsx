@@ -5,7 +5,7 @@ import AppIcon from '@/components/icons/appIcon';
 import { IconArrowLeft, IconEdit } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
 import { AppointmentStatusDto, ViewAppointmentDto } from '_types/dtos';
@@ -21,7 +21,7 @@ export default function ViewAppointment({
   const currentPath = usePathname();
   const { accessToken, user } = useAuth();
   const { data, error, isLoading } = useAppQuery<ViewAppointmentDto>({
-    path: apiPaths.viewAppointmentById(id),
+    path: API_PATHS.viewAppointmentById(id),
     method: 'GET',
     accessToken,
   });

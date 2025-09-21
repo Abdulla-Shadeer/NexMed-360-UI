@@ -17,7 +17,7 @@ import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import RefreshData from '@/components/misc/refresh';
 import DoctorSearch from '@/components/search/doctorSearch';
-import { apiPaths, userRoles } from '@/constants';
+import { API_PATHS, USER_ROLES } from '@/constants';
 import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
@@ -55,7 +55,7 @@ const stepButtonStyle =
 export default function CreateAppointmentPage() {
   const { user, accessToken } = useAuth();
   const [appointmentType, setappointmentType] = useState<'mySelf' | 'patient'>(
-    !user?.roles.includes(userRoles.patient) ? 'patient' : 'mySelf',
+    !user?.roles.includes(USER_ROLES.patient) ? 'patient' : 'mySelf',
   );
   const [step, setStep] = useState<CreationSteps>(CreationSteps.chooseDoctor);
   const [creationMeta, setCreationMeta] = useState<CreationMeta>({
@@ -71,7 +71,7 @@ export default function CreateAppointmentPage() {
 
   async function setPatient(patientId: string) {
     const getPatient = createQueryFunction<ViewPatientDto>({
-      path: apiPaths.getPatient(patientId),
+      path: API_PATHS.getPatient(patientId),
       method: 'GET',
       accessToken,
     });
@@ -96,7 +96,7 @@ export default function CreateAppointmentPage() {
 
   async function bookAppointment() {
     const createAppointment = createQueryFunction<ViewAppointmentDto>({
-      path: apiPaths.createAppointment,
+      path: API_PATHS.createAppointment,
       method: 'POST',
       accessToken,
       payload: {
@@ -428,7 +428,7 @@ function SessionSelector({
 }) {
   const { accessToken } = useAuth();
   const requestOption: ApiRequestOption = {
-    path: apiPaths.getDoctorSessions(doctorId),
+    path: API_PATHS.getDoctorSessions(doctorId),
     method: 'GET',
     accessToken,
   };
@@ -507,7 +507,7 @@ function SlotSelector({
 }) {
   const { accessToken } = useAuth();
   const requestOption: ApiRequestOption = {
-    path: apiPaths.getSessionSlots,
+    path: API_PATHS.getSessionSlots,
     method: 'GET',
     accessToken,
     queryParams: {

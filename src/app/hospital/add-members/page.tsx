@@ -3,7 +3,7 @@ import { RadioInput } from '@/components/input';
 import AddUserForm from '@/components/hospital/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import {
   AppNotification as AppNotificationType,
@@ -29,7 +29,9 @@ export default function AddMembersPage() {
   ) {
     const request = createQueryFunction<ViewUserDto>({
       path:
-        memberType === 'doctor' ? apiPaths.addDoctor : apiPaths.addReceptionist,
+        memberType === 'doctor'
+          ? API_PATHS.addDoctor
+          : API_PATHS.addReceptionist,
       method: 'POST',
       accessToken,
       payload: data,

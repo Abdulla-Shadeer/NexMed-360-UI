@@ -26,7 +26,7 @@ import {
 } from '@/components/icons/icons';
 import AppLoader from '@/components/misc/loader';
 import { AppNotification } from '@/components/misc';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import AppIcon from '@/components/icons/appIcon';
 
 export default function CreateSessionPage() {
@@ -56,7 +56,7 @@ export default function CreateSessionPage() {
     data.startTime = data.startTime.concat(':00');
     data.endTime = data.endTime.concat(':00');
     const create = createQueryFunction<ViewDoctorSessionDto>({
-      path: apiPaths.createDoctorSession,
+      path: API_PATHS.createDoctorSession,
       method: 'POST',
       accessToken,
       payload: data,

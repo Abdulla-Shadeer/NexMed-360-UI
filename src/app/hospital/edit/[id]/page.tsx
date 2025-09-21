@@ -5,7 +5,7 @@ import AppIcon from '@/components/icons/appIcon';
 import { IconArrowLeft, IconSend, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
@@ -23,7 +23,7 @@ export default function EditHospital({
   const router = useRouter();
   const { accessToken } = useAuth();
   const { data, error, isLoading } = useAppQuery<ViewHospitalDto>({
-    path: apiPaths.getHospitalById(id),
+    path: API_PATHS.getHospitalById(id),
     method: 'GET',
     accessToken,
   });
@@ -45,7 +45,7 @@ export default function EditHospital({
 
   async function dispatchUpdate(data: UpdateHospitalDto) {
     const request = createQueryFunction<ViewHospitalDto>({
-      path: apiPaths.updateHospital,
+      path: API_PATHS.updateHospital,
       method: 'PUT',
       accessToken,
       payload: data,

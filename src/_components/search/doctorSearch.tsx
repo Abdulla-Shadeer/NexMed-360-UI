@@ -1,4 +1,4 @@
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
@@ -37,7 +37,7 @@ export default function DoctorSearch({
 
   async function dispatchSearch(data: SearchDoctorDto) {
     const searchRequest = createQueryFunction<ViewDoctorDto[]>({
-      path: apiPaths.doctorSearch,
+      path: API_PATHS.doctorSearch,
       method: 'POST',
       accessToken,
       payload: data,

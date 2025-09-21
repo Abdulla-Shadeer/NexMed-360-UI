@@ -3,7 +3,7 @@
 import AddUserForm from '@/components/hospital/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import {
   AppNotification as AppNotificationType,
@@ -22,7 +22,7 @@ export default function AddPatientPage() {
 
   async function handleFormSubmit(data: CreatePatientDto) {
     const request = createQueryFunction<ViewUserDto>({
-      path: apiPaths.addPatient,
+      path: API_PATHS.addPatient,
       method: 'POST',
       accessToken,
       payload: data,

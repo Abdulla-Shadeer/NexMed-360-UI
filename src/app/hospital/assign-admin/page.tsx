@@ -3,7 +3,7 @@
 import AddUserForm from '@/components/hospital/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
 import { AppNotificationType as AppNotificationType } from '_types/common';
@@ -24,7 +24,7 @@ export default function AssignAdminPage() {
 
   async function dispatchCreateRequest(dto: CreateHospitalAdminDto) {
     const request = createQueryFunction<ViewUserDto>({
-      path: apiPaths.assignHospitalAdmin,
+      path: API_PATHS.assignHospitalAdmin,
       method: 'POST',
       accessToken,
       payload: dto,

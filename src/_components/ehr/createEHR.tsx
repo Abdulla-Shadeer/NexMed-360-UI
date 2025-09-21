@@ -9,7 +9,7 @@ import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import DialogWindow from '@/components/popup/dialogWindow';
 import CustomTable from '@/components/table';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import {
   createColumnHelper,
@@ -63,7 +63,7 @@ export default function CreateEHR() {
 
   async function createEHR() {
     const create = createQueryFunction<ViewClinicRecordDto>({
-      path: apiPaths.addClinicRecord,
+      path: API_PATHS.addClinicRecord,
       method: 'POST',
       accessToken,
       payload: EHR,

@@ -6,7 +6,7 @@ import { IconArrowLeft } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import RefreshData from '@/components/misc/refresh';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
@@ -23,7 +23,7 @@ export default function ViewPrescriptionsPage({
   const { ehrId } = use(params);
   const { accessToken } = useAuth();
   const requestOption: ApiRequestOption = {
-    path: apiPaths.getClinicRecord(ehrId),
+    path: API_PATHS.getClinicRecord(ehrId),
     method: 'GET',
     accessToken,
   };

@@ -1,5 +1,5 @@
 import { NavPath } from '@/types';
-import { userRoles } from '@/constants';
+import { USER_ROLES } from '@/constants';
 import {
   IconBuildingOffice,
   IconCalendarDays,
@@ -19,7 +19,7 @@ import {
   IconUsers,
 } from '@/components/icons/icons';
 
-const { superUser, hospitalAdmin, receptionist, doctor, patient } = userRoles;
+const { superUser, hospitalAdmin, receptionist, doctor, patient } = USER_ROLES;
 
 const navPaths: NavPath[] = [
   {

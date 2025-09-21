@@ -10,7 +10,7 @@ import { useState, useRef, useEffect } from 'react';
 import AppIcon from '../icons/appIcon';
 import { IconMoreVertical } from '../icons/icons';
 import { useQueryFunction } from '@/hooks';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { AppNotificationType } from '_types/common';
 import AppLoader from '../misc/loader';
 
@@ -28,7 +28,7 @@ export default function AppointmentRowActions({
 
   async function dispatchConfirmRequest(id: string) {
     const request = createQueryFunction<ViewAppointmentDto>({
-      path: apiPaths.confirmAppointment(id),
+      path: API_PATHS.confirmAppointment(id),
       method: 'GET',
       accessToken,
     });
@@ -58,7 +58,7 @@ export default function AppointmentRowActions({
       reason,
     };
     const request = createQueryFunction<ViewAppointmentDto>({
-      path: apiPaths.cancelAppointment,
+      path: API_PATHS.cancelAppointment,
       method: 'POST',
       accessToken,
       payload: cancelReq,

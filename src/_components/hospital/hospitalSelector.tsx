@@ -1,4 +1,4 @@
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { KeyValuePair } from '_types/common';
 import { ViewHospitalDto } from '_types/dtos';
@@ -18,7 +18,7 @@ export default function HospitalSelecter({
 }) {
   const { accessToken } = useAuth();
   const { data, error, isLoading } = useAppQuery<ViewHospitalDto[]>({
-    path: apiPaths.getAllHospitals,
+    path: API_PATHS.getAllHospitals,
     method: 'GET',
     accessToken,
   });

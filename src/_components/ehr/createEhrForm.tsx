@@ -8,7 +8,7 @@ import { IconArrowRight, IconDocumentCheck, IconTrash } from '../icons/icons';
 import { useState } from 'react';
 import { useQueryFunction } from '@/hooks';
 import { AppNotificationType } from '_types/common';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAuth } from '_context';
 import AppLoader from '../misc/loader';
 
@@ -31,7 +31,7 @@ export default function CreateEhrForm({
 
   async function save(data: AddClinicRecordDto) {
     const save = createQueryFunction<ViewClinicRecordDto>({
-      path: apiPaths.addClinicRecord,
+      path: API_PATHS.addClinicRecord,
       method: 'POST',
       accessToken,
       payload: data,

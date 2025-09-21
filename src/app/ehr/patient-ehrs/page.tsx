@@ -3,7 +3,7 @@
 import PatientEHRs from '@/components/ehr/patientEhrs';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
 import { AppNotificationType as AppNotificationType } from '_types/common';
@@ -21,7 +21,7 @@ export default function FindEhrPage() {
 
   async function fetchPatientData(id: string) {
     const getPatient = createQueryFunction<ViewPatientDto>({
-      path: apiPaths.getPatient(id),
+      path: API_PATHS.getPatient(id),
       method: 'GET',
       accessToken,
     });

@@ -5,7 +5,7 @@ import AppIcon from '@/components/icons/appIcon';
 import { IconArrowLeft, IconSend, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
@@ -38,7 +38,7 @@ export default function EditAppointment() {
 
   async function dispatchUpdate(data: UpdateUserDto) {
     const request = createQueryFunction<ViewUserDto>({
-      path: apiPaths.updateUser,
+      path: API_PATHS.updateUser,
       method: 'POST',
       accessToken,
       payload: data,
