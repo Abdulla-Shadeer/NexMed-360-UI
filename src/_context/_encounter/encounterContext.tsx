@@ -1,13 +1,14 @@
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import {
-  AppNotification,
+  AppNotificationType,
   AppointmentStatusDto,
+  UpdateSessionHistoryDto,
   ViewAppointmentDto,
-  ViewAppointmentsFilterDto,
   ViewClinicRecordDto,
   ViewPatientDto,
   ViewPrescriptionDto,
+  ViewSessionHistoryDto,
 } from '@/types';
 import { useAuth } from '_context/_auth/authContext';
 import { toDefaultDateFormat } from '_utils/dateUtils';
@@ -28,16 +29,21 @@ export interface EncounterMeta {
 interface EncounterContext {
   isActive: boolean;
   meta: EncounterMeta;
-  startEncounter: (patientId: string) => void;
+  startEncounter: (doctorSessionId: string, patientId: string) => void;
+  tryContinueEncounter: (
+    doctorSessionId: string,
+    lastKnownApptId: string,
+  ) => void;
   endEncounter: () => void;
   isLoading: boolean;
-  notification?: AppNotification;
+  notification?: AppNotificationType;
 }
 
 const defaultEncounterContext: EncounterContext = {
   isActive: false,
   meta: {},
   startEncounter: () => {},
+  tryContinueEncounter: () => {},
   endEncounter: () => {},
   isLoading: false,
 };
@@ -53,9 +59,9 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
   );
   const { accessToken, user } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const [notification, setNotification] = useState<AppNotification | undefined>(
-    undefined,
-  );
+  const [notification, setNotification] = useState<
+    AppNotificationType | undefined
+  >(undefined);
   const router = useRouter();
 
   function resetNotification() {
@@ -67,6 +73,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
   async function loadPatientDataAndStart(
     patientId: string,
     appointment: ViewAppointmentDto,
+    doctorSessionId: string,
   ) {
     const getDemographics = createQueryFunction<ViewPatientDto>({
       path: API_PATHS.getPatient(patientId),
@@ -102,22 +109,36 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
       method: 'GET',
       accessToken,
     });
-    await confirmInProgress();
+
+    const update: UpdateSessionHistoryDto = {
+      sessionId: doctorSessionId,
+      date: toDefaultDateFormat(new Date()),
+      lastKnownAppointmentId: appointment.bookingReference,
+    };
+    const updateSessionHistory = createQueryFunction<ViewSessionHistoryDto>({
+      path: API_PATHS.updateDoctorSessionHistory,
+      method: 'POST',
+      accessToken,
+      payload: update,
+    });
+
+    await Promise.all([confirmInProgress(), updateSessionHistory()]);
+
     setNotification({
       type: 'success',
-      title: 'Encounter Started Successfully!',
+      title: 'Encounter Started/Continued Successfully!',
     });
     resetNotification();
     router.push('/encounter');
   }
 
-  async function startEncounter(patientId: string) {
+  async function startEncounter(sessionId: string, patientId: string) {
     console.log('Encounter Context => Starting...');
     setNotification(undefined);
 
     const loadAppointmentFilters = () => {
       const today = new Date();
-      const appointmentFilter: ViewAppointmentsFilterDto = {
+      return {
         fromDate: toDefaultDateFormat(today),
         toDate: toDefaultDateFormat(today),
         patientId,
@@ -125,11 +146,10 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
         hospitalId: user?.doctorProfile?.hospitalId, // Might be removed in future to allow multiple hospital IDs per doctor
         status: AppointmentStatusDto.Arrived,
       };
-      return appointmentFilter;
     };
 
     const getAppointments = createQueryFunction<ViewAppointmentDto[]>({
-      path: API_PATHS.viewOwnAppointments, // docto's own appointment with given patient id
+      path: API_PATHS.viewOwnAppointments, // doctor's own appointment with given patient id
       method: 'GET',
       accessToken,
       queryParams: loadAppointmentFilters(),
@@ -139,7 +159,11 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
       const appointments = await getAppointments();
 
       if (appointments.data?.length === 1) {
-        await loadPatientDataAndStart(patientId, appointments.data[0]);
+        await loadPatientDataAndStart(
+          patientId,
+          appointments.data[0],
+          sessionId,
+        );
       } else {
         setNotification({
           type: 'error',
@@ -153,6 +177,46 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
       setNotification({
         type: 'error',
         title: 'Something went wrong while starting Encounter!',
+        description: err.message,
+        cause: err.cause ? (err.cause as string) : '',
+      });
+    }
+  }
+
+  async function tryContinueEncounter(
+    doctorSessionId: string,
+    lastKnownApptId: string,
+  ) {
+    console.log('Encounter Context => Continuing...');
+    setNotification(undefined);
+
+    const getAppointment = createQueryFunction<ViewAppointmentDto>({
+      path: API_PATHS.viewAppointmentById(lastKnownApptId),
+      method: 'GET',
+      accessToken,
+    });
+
+    try {
+      const appointment = (await getAppointment()).data;
+      if (
+        appointment &&
+        appointment.status === AppointmentStatusDto.InProgress
+      ) {
+        loadPatientDataAndStart(
+          appointment.patientId,
+          appointment,
+          doctorSessionId,
+        );
+      } else {
+        console.log(
+          "Encounter Context => Can't continue, appointment not InProgress",
+        );
+      }
+    } catch (error) {
+      const err = error as Error;
+      setNotification({
+        type: 'error',
+        title: 'Something went wrong while continuing Encounter!',
         description: err.message,
         cause: err.cause ? (err.cause as string) : '',
       });
@@ -188,6 +252,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
         isActive,
         meta: encounterMeta,
         startEncounter,
+        tryContinueEncounter,
         endEncounter,
         isLoading,
         notification: notification,

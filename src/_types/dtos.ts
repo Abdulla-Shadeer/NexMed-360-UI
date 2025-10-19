@@ -379,3 +379,42 @@ export enum SessionStatusDto {
   Ended = 'Ended',
   Canceled = 'Canceled',
 }
+
+export interface FilterSessionsForCurrentDayDto {
+  date: string;
+  doctorId: string;
+  hospitalId: string;
+}
+
+export interface ViewCurrentOrNextSessionDto {
+  isCurrent: boolean;
+  sessionId: string;
+  startTime: string;
+  endTime: string;
+  // below are applicable only if the session is current
+  startedTime?: string;
+  lastKnownAppointmentId?: string;
+  encountersCount?: number;
+}
+
+export interface ViewSessionHistoryDto {
+  id: string;
+  doctorSessionId: string;
+  doctorName: string;
+  doctorSpeciality: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  endedTime: string;
+  startedTime: string;
+  sessionStatus: SessionStatusDto;
+  encountersCount: number;
+  lastKnownAppointmentId?: string;
+}
+
+export interface UpdateSessionHistoryDto {
+  sessionId: string;
+  date: string;
+  sessionStatus?: SessionStatusDto;
+  lastKnownAppointmentId?: string;
+}

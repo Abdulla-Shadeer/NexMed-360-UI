@@ -38,9 +38,13 @@ const API_PATHS = {
   getDoctorSessions: '/DoctorSession/Get',
   getSessionSlots: '/DoctorSession/GetSlots',
   createDoctorSession: '/DoctorSession/Create',
-  startSession: (sessionId: string) => `/DoctorSession/Start/${sessionId}`,
-  updateHistory: '/DoctorSession/UpdateHistory',
-  getHistory: '/DoctorSession/GetHistory',
+  startDoctorSession: (sessionId: string) =>
+    `/DoctorSession/Start/${sessionId}`,
+  updateDoctorSessionHistory: '/DoctorSession/UpdateHistory',
+  getDoctorSessionHistory: '/DoctorSession/GetHistory',
+  getCurrentOrUpcomingSession: '/DoctorSession/GetCurrentOrUpcoming',
+  getHasAnySessionToday: '/DoctorSession/HasAnySessionToday',
+  getOngoingSessions: '/DoctorSession/GetOngoing',
 };
 
 const USER_ROLES = {

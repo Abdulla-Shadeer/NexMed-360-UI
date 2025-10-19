@@ -4,13 +4,16 @@ import { SecondaryButton } from '../buttons';
 import { TextInput } from '../input';
 import { IconStopCircle, IconPlayCircle } from '../icons/icons';
 import AppLoader from '../misc/loader';
-import { AppNotification } from '@/types';
+import { AppNotificationType } from '@/types';
 import DialogWindow from '../popup/dialogWindow';
+import QuickActionButton from '../buttons/quickActionButton';
 
 export default function EncounterStatusBar({
   onNotification,
+  doctorSessionId,
 }: {
-  onNotification: (notification: AppNotification | undefined) => void;
+  onNotification: (notification: AppNotificationType | undefined) => void;
+  doctorSessionId: string;
 }) {
   const {
     startEncounter,
@@ -30,7 +33,7 @@ export default function EncounterStatusBar({
 
   return (
     <div
-      className={`w-full py-3 px-4 mb-6 border-default border-border-primary rounded-large ${isActive ? 'bg-green-50 text-green-primary border-green-primary' : 'bg-disabled'}`}
+      className={`w-full py-3 px-4 border-default border-border-primary rounded-large ${isActive ? 'bg-green-50 text-green-primary border-green-primary' : 'bg-disabled'}`}
     >
       {isLoading && <AppLoader />}
       {isActive ? (
@@ -47,13 +50,10 @@ export default function EncounterStatusBar({
               </span>
             </p>
           </div>
-          <SecondaryButton
-            type="button"
-            buttonText="Finish Encounter"
-            withIcon
+          <QuickActionButton
+            text="Finish Encounter"
             icon={IconStopCircle}
             onClick={endEncounter}
-            initialState="active"
           />
         </div>
       ) : (
@@ -61,16 +61,13 @@ export default function EncounterStatusBar({
           <p className="text-title text-on-disabled font-mono">
             Encounter inactive !
           </p>
-          <SecondaryButton
-            type="button"
-            buttonText="Start Encounter"
-            withIcon
-            icon={IconPlayCircle}
+          <QuickActionButton
+            text="Start Encounter"
             onClick={() => {
               setShowPrompt(true);
               onNotification(undefined);
             }}
-            initialState="active"
+            icon={IconPlayCircle}
           />
         </div>
       )}
@@ -95,7 +92,7 @@ export default function EncounterStatusBar({
               icon={IconPlayCircle}
               onClick={() => {
                 if (patientId) {
-                  startEncounter(patientId);
+                  startEncounter(doctorSessionId, patientId);
                   setShowPrompt(false);
                 }
               }}

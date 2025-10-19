@@ -7,20 +7,23 @@ import AddUserForm from '@/components/hospital/addUserForm';
 import { IconIdentification, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
+import RefreshData from '@/components/misc/refresh';
 import { API_PATHS } from '@/constants';
-import { useQueryFunction } from '@/hooks';
+import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
 import { useFrontOffice } from '_context/frontOffice/frontOfficeContext';
+import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import { AppNotificationType } from '_types/common';
 import {
   AppointmentStatusDto,
   CreatePatientDto,
   ViewAppointmentDto,
   ViewAppointmentsFilterDto,
+  ViewSessionHistoryDto,
   ViewUserDto,
 } from '_types/dtos';
-import { toDefaultDateFormat } from '_utils/dateUtils';
-import { useState } from 'react';
+import { to12HourFormat, toDefaultDateFormat } from '_utils/dateUtils';
+import { useEffect, useState } from 'react';
 
 const tabButton =
   'hover:cursor-pointer px-6 py-2 border-default border-border-primary rounded-t-default';
@@ -102,7 +105,9 @@ export default function FrontOfficePage() {
           onFormSubmit={(data) => addPatient(data as CreatePatientDto)}
         />
       )}
-      {activeTab === 'ongoingSessions' && <></>}
+      {activeTab === 'ongoingSessions' && (
+        <OngoingSessions onNotification={(noti) => setNotification(noti)} />
+      )}
     </div>
   );
 }
@@ -255,6 +260,60 @@ function ReceivePatient({
             <ViewAppointmentCard appointment={patientMeta.currentAppointment} />
           </div>
         )}
+    </div>
+  );
+}
+
+function OngoingSessions({
+  onNotification,
+}: {
+  onNotification: (notification: AppNotificationType) => void;
+}) {
+  const { accessToken } = useAuth();
+  const queryKey: ApiRequestOption = {
+    path: API_PATHS.getOngoingSessions,
+    method: 'GET',
+    accessToken,
+  };
+
+  const { isLoading, error, data } =
+    useAppQuery<ViewSessionHistoryDto[]>(queryKey);
+
+  useEffect(() => {
+    if (error) {
+      onNotification(error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  return (
+    <div className="w-full h-full space-y-4">
+      <RefreshData queryKey={queryKey} />
+      <div className="w-full h-full flex items-center justify-center border-default border-border-primary bg-background rounded-default drop-shadow-default">
+        {isLoading && <AppLoader />}
+        {data && data.length > 0 && (
+          <div className="w-full flex flex-row flex-wrap gap-4 p-4">
+            {data.map((session) => (
+              <div
+                className="bg-background border-default border-border-primary rounded-default p-4 space-y-2 drop-shadow-default"
+                key={session.id}
+              >
+                <h2 className="text-title text-center text-green-primary pb-1 mb-2 border-b-2 border-border-primary border-dashed">{`${to12HourFormat(session.startTime)} - ${to12HourFormat(session.endTime)}`}</h2>
+                <p>
+                  Dr. {session.doctorName} ({session.doctorSpeciality})
+                </p>
+                <p>Started at: {to12HourFormat(session.startedTime)}</p>
+                <p>Patients arrived: {session.encountersCount}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {data && data.length === 0 && (
+          <p className="text-title text-on-disabled">
+            No Ongoing Sessions Found!
+          </p>
+        )}
+      </div>
     </div>
   );
 }

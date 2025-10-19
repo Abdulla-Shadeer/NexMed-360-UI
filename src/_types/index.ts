@@ -52,6 +52,10 @@ export type {
   GetSessionSlotsDto,
   CreateDoctorSessionDto,
   FilterDoctorSessionDto,
+  FilterSessionsForCurrentDayDto,
+  ViewCurrentOrNextSessionDto,
+  ViewSessionHistoryDto,
+  UpdateSessionHistoryDto,
 } from './dtos';
 
 export {
