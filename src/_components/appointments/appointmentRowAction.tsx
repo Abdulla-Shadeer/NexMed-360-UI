@@ -23,7 +23,7 @@ export default function AppointmentRowActions({
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { user, accessToken } = useAuth();
+  const { accessToken } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
 
   async function dispatchConfirmRequest(id: string) {
@@ -127,15 +127,6 @@ export default function AppointmentRowActions({
             row.original.status === AppointmentStatusDto.Cancelled
           ) && (
             <>
-              {user?.id === row.original.createdByUserId && (
-                <Link
-                  href={`/appointments/edit/${row.original.bookingReference}`}
-                  className="hover:text-blue-secondary"
-                >
-                  Edit
-                </Link>
-              )}
-
               <a
                 className="hover:cursor-pointer hover:text-blue-secondary"
                 onClick={(e) => {

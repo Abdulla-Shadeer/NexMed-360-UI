@@ -7,7 +7,6 @@ const API_PATHS = {
   updateUser: '/Users/UpdateUser',
   getOverview: '/Users/GetOverview',
   createAppointment: '/Appointments/Create',
-  editAppointment: '/Appointments/Edit',
   viewOwnAppointments: '/Appointments/ViewOwn',
   viewHospitalAppointments: '/Appointments/ViewHospital',
   viewAppointmentById: (id: string): string => `/Appointments/View/${id}`,
