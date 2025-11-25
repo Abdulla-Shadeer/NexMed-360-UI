@@ -21,7 +21,7 @@ export default function TimeInput({
     >
       <input
         type="time"
-        defaultValue={pickedTime}
+        value={pickedTime}
         onChange={(e) => onPick(e.target.value)}
         className="border-default border-border-primary rounded-default px-3 py-2 text-default focus:outline-none focus:ring-1 focus:ring-blue-primary focus:bg-panel-light active:bg-panel-light bg-background"
         disabled={disabled}
