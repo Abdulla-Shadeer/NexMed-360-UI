@@ -1,5 +1,5 @@
 // need to be passed via a config file or env variable
-const API_ENDPOINT = 'https://localhost:7143/api/v1';
+const API_ENDPOINT = 'http://localhost:5098/api/v1';
 
 const API_PATHS = {
   login: '/Users/Login',
