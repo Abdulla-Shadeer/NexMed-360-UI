@@ -94,6 +94,12 @@ const navPaths: NavPath[] = [
         icon: IconPlusCircle,
         roles: [doctor, hospitalAdmin],
       },
+      {
+        name: 'Your Sessions',
+        path: '/session/view',
+        icon: IconCalendarDays,
+        roles: [doctor],
+      },
     ],
   },
   {

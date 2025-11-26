@@ -327,6 +327,7 @@ export interface ViewDoctorSessionDto {
   slotDurationMinutes: string;
   totalSlots: string;
   occurrences: SessionOccurrenceDto[];
+  isActive: boolean;
 }
 
 export enum SessionOccurrenceDto {
@@ -417,4 +418,12 @@ export interface UpdateSessionHistoryDto {
   date: string;
   sessionStatus?: SessionStatusDto;
   lastKnownAppointmentId?: string;
+}
+
+export interface UpdateDoctorSessionDto {
+  startTime: string;
+  endTime: string;
+  slotDurationMinutes: number;
+  occurrences: SessionOccurrenceDto[];
+  isActive: boolean;
 }

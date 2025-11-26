@@ -56,6 +56,7 @@ export type {
   ViewCurrentOrNextSessionDto,
   ViewSessionHistoryDto,
   UpdateSessionHistoryDto,
+  UpdateDoctorSessionDto,
 } from './dtos';
 
 export {

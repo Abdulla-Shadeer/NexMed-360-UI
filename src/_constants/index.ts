@@ -44,6 +44,10 @@ const API_PATHS = {
   getCurrentOrUpcomingSession: '/DoctorSession/GetCurrentOrUpcoming',
   getHasAnySessionToday: '/DoctorSession/HasAnySessionToday',
   getOngoingSessions: '/DoctorSession/GetOngoing',
+  updateDoctorSession: (sessionId: string) =>
+    `/DoctorSession/Update/${sessionId}`,
+  deleteDoctorSession: (sessionId: string) =>
+    `/DoctorSession/Delete/${sessionId}`,
 };
 
 const USER_ROLES = {
