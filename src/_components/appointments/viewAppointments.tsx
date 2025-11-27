@@ -1,21 +1,22 @@
-import { apiPaths, userRoles } from '@/constants';
+import { API_PATHS, USER_ROLES } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import {
   ViewAppointmentsFilterDto,
   ViewAppointmentDto,
-  AppointmentStatus,
+  AppointmentStatusDto,
 } from '_types/dtos';
 import { useState, useMemo, useEffect } from 'react';
 import AppLoader from '../misc/loader';
 import { AppNotification, EntitySearch } from '../misc';
 import { AppointmentsTable } from '.';
-import { AppNotification as AppNotificationType } from '_types/common';
+import { AppNotificationType as AppNotificationType } from '_types/common';
 import { useForm } from '@tanstack/react-form';
-import { DateInput, Form, SelectInput, TextInput } from '../form';
+import { DateInput, Form, SelectInput, TextInput } from '../input';
 import { SecondaryButton } from '../buttons';
 import { IconFilter, IconTrash } from '../icons/icons';
+import RefreshData from '../misc/refresh';
 
 export default function ViewAppointments({
   type,
@@ -31,8 +32,8 @@ export default function ViewAppointments({
     const opt: ApiRequestOption = {
       path:
         type === 'own'
-          ? apiPaths.viewOwnAppointments
-          : apiPaths.viewHospitalAppointments,
+          ? API_PATHS.viewOwnAppointments
+          : API_PATHS.viewHospitalAppointments,
       method: 'GET',
       queryParams: filter,
       accessToken,
@@ -64,7 +65,7 @@ export default function ViewAppointments({
   function AppointmentFilter() {
     return (
       <Form title="Filter Appointments" action={handleSubmit}>
-        {(type === 'hospital' || user?.roles.includes(userRoles.doctor)) && (
+        {(type === 'hospital' || user?.roles.includes(USER_ROLES.doctor)) && (
           <Field name="patientId">
             {(field) => (
               <TextInput
@@ -78,7 +79,7 @@ export default function ViewAppointments({
           </Field>
         )}
 
-        {(type === 'hospital' || user?.roles.includes(userRoles.patient)) && (
+        {(type === 'hospital' || user?.roles.includes(USER_ROLES.patient)) && (
           <Field name="doctorId">
             {(field) => (
               <TextInput
@@ -110,10 +111,12 @@ export default function ViewAppointments({
           {(field) => (
             <SelectInput
               name={field.name}
-              options={Object.entries(AppointmentStatus).flatMap((e) => e[1])}
+              options={Object.entries(AppointmentStatusDto).flatMap(
+                (e) => e[1],
+              )}
               selected={field.state.value}
               onSelect={(value) =>
-                field.handleChange(value as AppointmentStatus)
+                field.handleChange(value as AppointmentStatusDto)
               }
               error=""
               tw_width="w-fit"
@@ -176,9 +179,10 @@ export default function ViewAppointments({
       {error && <AppNotification notification={error} />}
       {tableError && <AppNotification notification={tableError} />}
       {data && (
-        <div>
+        <div className="space-y-6 w-full">
           <EntitySearch open={false} />
           <AppointmentFilter />
+          <RefreshData queryKey={requestOptions} />
           <AppointmentsTable
             appointments={data}
             title={title}

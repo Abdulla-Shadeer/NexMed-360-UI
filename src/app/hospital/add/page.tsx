@@ -1,10 +1,10 @@
 'use client';
 import { SecondaryButton } from '@/components/buttons';
-import { Form, TextInput } from '@/components/form';
+import { Form, TextInput } from '@/components/input';
 import { IconArrowRight, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
@@ -13,7 +13,7 @@ import {
   CreateHospitalDto,
   ViewHospitalDto,
   ViewUserDto,
-  AppNotification as AppNotificationType,
+  AppNotificationType,
 } from '@/types';
 import { useState } from 'react';
 import AddUserForm from '@/components/hospital/addUserForm';
@@ -38,7 +38,7 @@ export default function AddHospital() {
 
   async function dispatchCreateHospital(data: CreateHospitalDto) {
     const request = createQueryFunction<ViewHospitalDto>({
-      path: apiPaths.addHospital,
+      path: API_PATHS.addHospital,
       method: 'POST',
       accessToken,
       payload: data,
@@ -68,7 +68,7 @@ export default function AddHospital() {
 
   async function dispatchAssignAdmin(data: CreateHospitalAdminDto) {
     const request = createQueryFunction<ViewUserDto>({
-      path: apiPaths.assignHospitalAdmin,
+      path: API_PATHS.assignHospitalAdmin,
       method: 'POST',
       accessToken,
       payload: data,

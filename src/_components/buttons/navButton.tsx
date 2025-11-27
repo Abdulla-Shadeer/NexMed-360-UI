@@ -23,6 +23,7 @@ export default function NavButton({ navPath, userRoles }: NavButtonProps) {
           <Link
             key={`${navPath.name}-${childPath.name}`}
             href={childPath.path || '#'}
+            className="w-full"
           >
             <PrimaryButton
               isActive={path === childPath.path}
@@ -30,6 +31,7 @@ export default function NavButton({ navPath, userRoles }: NavButtonProps) {
               icon={childPath.icon}
               buttonText={childPath.name}
               onClick={() => {}}
+              tw_width="w-full"
             />
           </Link>
         ) : (
@@ -37,15 +39,17 @@ export default function NavButton({ navPath, userRoles }: NavButtonProps) {
         ),
       )}
       onClick={() => {}}
+      tw_width="w-full"
     />
   ) : (
-    <Link href={navPath.path || '#'}>
+    <Link href={navPath.path || '#'} className="w-full">
       <PrimaryButton
         isActive={path === navPath.path}
         withIcon={true}
         icon={navPath.icon}
         buttonText={navPath.name}
         onClick={() => {}}
+        tw_width="w-full"
       />
     </Link>
   );

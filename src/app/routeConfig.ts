@@ -1,14 +1,17 @@
 import { NavPath } from '@/types';
-import { userRoles } from '@/constants';
+import { USER_ROLES } from '@/constants';
 import {
   IconBuildingOffice,
+  IconCalendarDays,
   IconClock,
+  IconComputerDesktop,
   IconDocumentList,
   IconDocumentText,
   IconFace,
   IconHeart,
   IconHome,
   IconList,
+  IconPlayCircle,
   IconPlusCircle,
   IconSettings,
   IconShieldCheck,
@@ -16,7 +19,7 @@ import {
   IconUsers,
 } from '@/components/icons/icons';
 
-const { superUser, hospitalAdmin, receptionist, doctor, patient } = userRoles;
+const { superUser, hospitalAdmin, receptionist, doctor, patient } = USER_ROLES;
 
 const navPaths: NavPath[] = [
   {
@@ -24,6 +27,18 @@ const navPaths: NavPath[] = [
     path: '/',
     icon: IconHome,
     roles: [superUser, hospitalAdmin, receptionist, doctor, patient],
+  },
+  {
+    name: 'Front Office',
+    path: '/frontOffice',
+    icon: IconComputerDesktop,
+    roles: [receptionist],
+  },
+  {
+    name: 'Encounter',
+    path: '/encounter',
+    icon: IconPlayCircle,
+    roles: [doctor],
   },
   {
     name: 'Hospital',
@@ -67,6 +82,25 @@ const navPaths: NavPath[] = [
       },
     ],
     roles: [superUser, hospitalAdmin],
+  },
+  {
+    name: 'Sessions',
+    icon: IconCalendarDays,
+    roles: [hospitalAdmin, doctor],
+    children: [
+      {
+        name: 'Create',
+        path: '/session/create',
+        icon: IconPlusCircle,
+        roles: [doctor, hospitalAdmin],
+      },
+      {
+        name: 'Your Sessions',
+        path: '/session/view',
+        icon: IconCalendarDays,
+        roles: [doctor],
+      },
+    ],
   },
   {
     name: 'Appointments',
@@ -123,9 +157,9 @@ const navPaths: NavPath[] = [
         roles: [patient],
       },
       {
-        name: 'View All',
-        icon: IconList,
-        path: '/ehr/view-all',
+        name: 'Patient EHRs',
+        icon: IconDocumentList,
+        path: '/ehr/patient-ehrs',
         roles: [doctor],
       },
       {

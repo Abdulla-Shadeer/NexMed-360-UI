@@ -7,7 +7,7 @@ export type {
   DateInputProps,
   RangeInputProps,
   ApiCallParams,
-  AppNotification,
+  AppNotificationType,
   KeyValuePair,
 } from './common';
 
@@ -33,7 +33,6 @@ export type {
   ViewDoctorDto,
   ViewHospitalDto,
   ViewPatientDto,
-  AppointmentStatus,
   CreateHospitalDto,
   UpdateHospitalDto,
   RegisterUserDto,
@@ -41,4 +40,27 @@ export type {
   CreateDoctorDto,
   CreateReceptionistDto,
   CreatePatientDto,
+  ViewClinicRecordDto,
+  ViewPrescriptionDto,
+  ViewHospitalAdminDto,
+  ViewReceptionistDto,
+  AddClinicRecordDto,
+  AddPrescriptionDto,
+  SearchDoctorDto,
+  ViewDoctorSessionDto,
+  ViewSessionSlotDto,
+  GetSessionSlotsDto,
+  CreateDoctorSessionDto,
+  FilterDoctorSessionDto,
+  FilterSessionsForCurrentDayDto,
+  ViewCurrentOrNextSessionDto,
+  ViewSessionHistoryDto,
+  UpdateSessionHistoryDto,
+  UpdateDoctorSessionDto,
+} from './dtos';
+
+export {
+  AppointmentStatusDto,
+  SessionOccurrenceDto,
+  SessionStatusDto,
 } from './dtos';

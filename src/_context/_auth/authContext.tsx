@@ -13,7 +13,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import status from 'statuses';
 
 interface AuthContext {
@@ -52,7 +52,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loginUser(loginUser: LoginUserDto) {
     const queryFn = createQueryFunction<LoginResponseDto>({
-      path: apiPaths.login,
+      path: API_PATHS.login,
       method: 'POST',
       payload: loginUser,
     });
@@ -101,7 +101,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
     async function getUserData(accessToken: string) {
       const queryFn = createQueryFunction<ViewUserDto>({
-        path: apiPaths.getUser,
+        path: API_PATHS.getUser,
         method: 'GET',
         accessToken: accessToken,
       });
@@ -132,7 +132,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   async function refetchUser() {
     const fetch = createQueryFunction<ViewUserDto>({
-      path: apiPaths.getUser,
+      path: API_PATHS.getUser,
       method: 'GET',
       accessToken,
     });

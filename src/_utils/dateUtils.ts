@@ -41,8 +41,37 @@ function toDefaultDateTimeFormat(date: string): string {
   return `${year}-${monthStr}-${dayStr}T${hoursStr}:${minutesStr}`;
 }
 
+function to12HourFormat(timeString: string): string {
+  const [hoursStr, minutesStr] = timeString.split(':');
+  let hours = parseInt(hoursStr, 10);
+  const minutes = parseInt(minutesStr, 10);
+
+  const suffix = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12; // Convert 0 -> 12 and 13-23 -> 1-11
+
+  return `${hours}:${minutes.toString().padStart(2, '0')} ${suffix}`;
+}
+
+function calculateAge(birthDate: Date): number {
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+
+  const hasBirthdayPassed =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() &&
+      today.getDate() >= birthDate.getDate());
+
+  if (!hasBirthdayPassed) {
+    age--;
+  }
+
+  return age;
+}
+
 export {
   toDefaultDateFormat,
   toDisplayDateTimeFormat,
   toDefaultDateTimeFormat,
+  to12HourFormat,
+  calculateAge,
 };

@@ -41,6 +41,11 @@ export interface DateInputProps extends InputProps {
   onPick: (value: string) => void;
 }
 
+export interface TimeInputProps extends InputProps {
+  pickedTime?: string;
+  onPick: (value: string) => void;
+}
+
 export interface RangeInputProps extends InputProps {
   min: number;
   max: number;
@@ -56,7 +61,7 @@ export interface ApiCallParams {
   accessToken?: string;
 }
 
-export interface AppNotification {
+export interface AppNotificationType {
   type: 'error' | 'notification' | 'success';
   title?: string;
   description?: string;

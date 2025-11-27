@@ -1,7 +1,6 @@
 'use client';
 import { InputProps } from '@/types';
 import InputWrapper from './inputWrapper';
-import { useEffect, useState } from 'react';
 
 interface CheckBoxInputProps extends InputProps {
   checkItems: string[];
@@ -21,12 +20,6 @@ export default function CheckBoxInput({
   tw_width,
   disabled = false,
 }: CheckBoxInputProps) {
-  const [selections, setSelection] = useState<string[]>(checkedItems ?? []);
-  useEffect(() => {
-    onChange(selections);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selections]);
-
   return (
     <InputWrapper
       name={name}
@@ -46,14 +39,14 @@ export default function CheckBoxInput({
                 type="checkbox"
                 name={name}
                 value={item}
-                defaultChecked={checkedItems?.includes(item)}
+                checked={checkedItems?.includes(item)}
                 onChange={(e) => {
                   const value = e.target.value;
-                  setSelection((prev) =>
-                    prev.includes(value)
-                      ? prev.filter((v) => v !== value)
-                      : [...prev, value],
-                  );
+                  if (e.target.checked) {
+                    onChange([...(checkedItems ?? []), value]);
+                  } else {
+                    onChange((checkedItems ?? []).filter((v) => v !== value));
+                  }
                 }}
                 className="w-4 h-4"
                 disabled={disabled}

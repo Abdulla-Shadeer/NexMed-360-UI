@@ -1,5 +1,5 @@
 'use client';
-import { apiPaths, userRoles } from '@/constants';
+import { API_PATHS, USER_ROLES } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
 import { ViewHospitalDto } from '_types/dtos';
@@ -17,7 +17,7 @@ import RefreshData from '../misc/refresh';
 export function ViewHospitalById({ id }: { id: string }) {
   const { accessToken, user } = useAuth();
   const queryKey: ApiRequestOption = {
-    path: apiPaths.getHospitalById(id),
+    path: API_PATHS.getHospitalById(id),
     method: 'GET',
     accessToken,
   };
@@ -38,7 +38,8 @@ export function ViewHospitalById({ id }: { id: string }) {
         {data &&
           user?.roles.some(
             (role) =>
-              role === userRoles.superUser || role === userRoles.hospitalAdmin,
+              role === USER_ROLES.superUser ||
+              role === USER_ROLES.hospitalAdmin,
           ) && (
             <Link
               href={`/hospital/edit/${id}`}

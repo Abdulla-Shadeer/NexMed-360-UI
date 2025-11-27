@@ -89,15 +89,18 @@ export interface DatewiseStatsDto {
 // Appointment
 // ***********
 
-export enum AppointmentStatus {
-  Pending = 'pending',
-  Confirmed = 'confirmed',
-  CancelRequested = 'cancelRequested',
-  Cancelled = 'cancelled',
-  Completed = 'completed',
+export enum AppointmentStatusDto {
+  Pending = 'Pending',
+  Confirmed = 'Confirmed',
+  Arrived = 'Arrived',
+  InProgress = 'InProgress',
+  CancelRequested = 'CancelRequested',
+  Cancelled = 'Cancelled',
+  Completed = 'Completed',
 }
+
 export interface ViewAppointmentDto {
-  id: string;
+  bookingReference: string;
   patientId: string;
   patientName: string;
   patientEmail: string;
@@ -112,15 +115,14 @@ export interface ViewAppointmentDto {
   createdByUserId: string;
   createdByUserName: string;
   appointmentDateTime: string;
+  appointmentNumber: string;
   remarks?: string;
-  status: AppointmentStatus;
+  status: AppointmentStatusDto;
 }
 
 export interface CreateAppointmentDto {
   patientId: string;
-  doctorId: string;
-  hospitalId: string;
-  appointmentDateTime: string;
+  sessionSlotId: string;
   remarks?: string;
 }
 
@@ -130,7 +132,7 @@ export interface ViewAppointmentsFilterDto {
   hospitalId?: string;
   fromDate?: string;
   toDate?: string;
-  status?: AppointmentStatus;
+  status?: AppointmentStatusDto;
 }
 
 export interface ModifyAppointmentDto {
@@ -167,6 +169,11 @@ export interface ViewHospitalDto {
 
 export interface ViewDoctorDto {
   id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
   speciality: string;
   hospitalId: string;
   hospitalName: string;
@@ -174,18 +181,33 @@ export interface ViewDoctorDto {
 
 export interface ViewPatientDto {
   id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
   birthDate: string;
   gender: string;
 }
 
 export interface ViewHospitalAdminDto {
   id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
   hospitalId: string;
   hospitalName: string;
 }
 
 export interface ViewReceptionistDto {
   id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
   location?: string;
   department?: string;
   hospitalId: string;
@@ -240,4 +262,168 @@ export interface CreatePatientDto {
   personalInformation: RegisterUserDto;
   birthDate: string;
   gender: 'Male' | 'Female';
+}
+
+export interface ViewPrescriptionDto {
+  id: string;
+  clinicRecordId: string;
+  issuedOn: string;
+  issuedByDoctor: string;
+  issuedAtHospital: string;
+  medicineName: string;
+  dosage: string;
+  timesPerDay: number;
+  isLongTermUse: boolean;
+  duration?: string;
+  notes?: string;
+  isActive: boolean;
+}
+
+export interface ViewClinicRecordDto {
+  id: string;
+  patientId: string;
+  patientName: string;
+  doctorId: string;
+  doctorName: string;
+  visitDate: string;
+  diagnosis: string;
+  doctorNotes?: string;
+  followUpDate?: string;
+  prescriptions?: ViewPrescriptionDto[];
+}
+
+export interface AddClinicRecordDto {
+  patientId: string;
+  diagnosis: string;
+  doctorNotes?: string;
+  visitDate: string;
+  followUpDate?: string;
+  prescriptions?: AddPrescriptionDto[];
+}
+
+export interface AddPrescriptionDto {
+  medicineName: string;
+  dosage: string;
+  timesPerDay: number;
+  isLongTermUse?: boolean;
+  duration?: string;
+  notes?: string;
+}
+
+export interface SearchDoctorDto {
+  name?: string;
+  email?: string;
+  speciality?: string;
+}
+
+export interface ViewDoctorSessionDto {
+  id: string;
+  doctorId: string;
+  startTime: string;
+  endTime: string;
+  hospitalId: string;
+  hospitalName: string;
+  hospitalAddress: string;
+  slotDurationMinutes: string;
+  totalSlots: string;
+  occurrences: SessionOccurrenceDto[];
+  isActive: boolean;
+}
+
+export enum SessionOccurrenceDto {
+  Weekdays = 'Weekdays',
+  Weekend = 'Weekend',
+  AllDays = 'AllDays',
+  Monday = 'Monday',
+  Tuesday = 'Tuesday',
+  Wednesday = 'Wednesday',
+  Thursday = 'Thursday',
+  Friday = 'Friday',
+  Saturday = 'Saturday',
+  Sunday = 'Sunday',
+}
+
+export interface ViewSessionSlotDto {
+  id: string;
+  sessionId: string;
+  startTime: string;
+  endTime: string;
+  date: string;
+  isAvailable: boolean;
+  bookingAllowed: boolean;
+  slotNumber: number;
+}
+
+export interface GetSessionSlotsDto {
+  sessionId: string;
+  date: string;
+}
+
+export interface CreateDoctorSessionDto {
+  doctorId: string;
+  startTime: string;
+  endTime: string;
+  hospitalId: string;
+  slotDurationMinutes?: number;
+  occurrences: SessionOccurrenceDto[];
+}
+
+export interface FilterDoctorSessionDto {
+  date?: string;
+  hospitalId?: string;
+  doctorId?: string;
+  sessionStatus?: SessionStatusDto;
+}
+
+export enum SessionStatusDto {
+  Started = 'Started',
+  Ended = 'Ended',
+  Canceled = 'Canceled',
+}
+
+export interface FilterSessionsForCurrentDayDto {
+  date: string;
+  doctorId: string;
+  hospitalId: string;
+}
+
+export interface ViewCurrentOrNextSessionDto {
+  isCurrent: boolean;
+  sessionId: string;
+  startTime: string;
+  endTime: string;
+  // below are applicable only if the session is current
+  startedTime?: string;
+  lastKnownAppointmentId?: string;
+  encountersCount?: number;
+}
+
+export interface ViewSessionHistoryDto {
+  id: string;
+  doctorSessionId: string;
+  doctorName: string;
+  doctorSpeciality: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  endedTime: string;
+  startedTime: string;
+  sessionStatus: SessionStatusDto;
+  encountersCount: number;
+  lastKnownAppointmentId?: string;
+}
+
+export interface UpdateSessionHistoryDto {
+  sessionId: string;
+  date: string;
+  sessionStatus?: SessionStatusDto;
+  lastKnownAppointmentId?: string;
+}
+
+export interface UpdateDoctorSessionDto {
+  startTime: string;
+  endTime: string;
+  slotDurationMinutes: number;
+  occurrences: SessionOccurrenceDto[];
+  isActive: boolean;
 }

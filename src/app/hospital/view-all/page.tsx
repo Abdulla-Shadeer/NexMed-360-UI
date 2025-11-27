@@ -2,7 +2,7 @@
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import CustomTable from '@/components/table';
-import { apiPaths, userRoles } from '@/constants';
+import { API_PATHS, USER_ROLES } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import {
   createColumnHelper,
@@ -22,7 +22,7 @@ import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 export default function ViewAllHospitals() {
   const { accessToken } = useAuth();
   const queryKey: ApiRequestOption = {
-    path: apiPaths.getAllHospitals,
+    path: API_PATHS.getAllHospitals,
     method: 'GET',
     accessToken,
   };
@@ -55,7 +55,8 @@ function HospitalTable({ hospitals }: { hospitals: ViewHospitalDto[] }) {
 
           {user?.roles.some(
             (role) =>
-              role === userRoles.superUser || role === userRoles.hospitalAdmin,
+              role === USER_ROLES.superUser ||
+              role === USER_ROLES.hospitalAdmin,
           ) && (
             <Link
               href={`/hospital/edit/${row.original.id}`}
@@ -65,7 +66,7 @@ function HospitalTable({ hospitals }: { hospitals: ViewHospitalDto[] }) {
             </Link>
           )}
 
-          {user?.roles.some((role) => role === userRoles.superUser) && (
+          {user?.roles.some((role) => role === USER_ROLES.superUser) && (
             <Link
               href={`/hospital/assign-admin?id=${row.original.id}`}
               className="text-default text-blue-secondary hover:text-blue-primary"

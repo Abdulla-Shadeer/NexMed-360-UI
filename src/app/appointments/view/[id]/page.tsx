@@ -1,14 +1,14 @@
 'use client';
+import ViewAppointmentCard from '@/components/appointments/viewAppointmentCard';
 import QuickActionButton from '@/components/buttons/quickActionButton';
 import AppIcon from '@/components/icons/appIcon';
 import { IconArrowLeft, IconEdit } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
-import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
-import { AppointmentStatus, ViewAppointmentDto } from '_types/dtos';
+import { AppointmentStatusDto, ViewAppointmentDto } from '_types/dtos';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { use } from 'react';
@@ -21,7 +21,7 @@ export default function ViewAppointment({
   const currentPath = usePathname();
   const { accessToken, user } = useAuth();
   const { data, error, isLoading } = useAppQuery<ViewAppointmentDto>({
-    path: apiPaths.viewAppointmentById(id),
+    path: API_PATHS.viewAppointmentById(id),
     method: 'GET',
     accessToken,
   });
@@ -40,8 +40,8 @@ export default function ViewAppointment({
         {data &&
           data.createdByUserId === user?.id &&
           !(
-            data.status.toLowerCase() === AppointmentStatus.Cancelled ||
-            data.status.toLowerCase() === AppointmentStatus.Completed
+            data.status === AppointmentStatusDto.Cancelled ||
+            data.status === AppointmentStatusDto.Completed
           ) && (
             <Link
               href={`/appointments/edit/${id}?returnPath=${currentPath}`}
@@ -52,7 +52,7 @@ export default function ViewAppointment({
             </Link>
           )}
       </div>
-      {data && unknownObjectRenderer(data)}
+      {data && <ViewAppointmentCard appointment={data} />}
     </div>
   );
 }

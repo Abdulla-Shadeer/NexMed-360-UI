@@ -16,10 +16,11 @@ import {
   OverviewDto,
   PatientOverviewDto,
   SystemOverviewDto,
-} from '_types/dtos';
-import React from 'react';
+  AppNotificationType,
+} from '@/types';
+import React, { useState } from 'react';
 import useAppQuery from '_hooks/_api/useAppQuery';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAuth } from '_context';
 import { LineChart } from '@/components/misc';
 import AppNotification from '@/components/misc/appNotification';
@@ -28,15 +29,19 @@ import { AppointmentsTable } from '@/components/appointments';
 export default function Home() {
   const { accessToken } = useAuth();
   const { data, error, isLoading } = useAppQuery<OverviewDto[]>({
-    path: apiPaths.getOverview,
+    path: API_PATHS.getOverview,
     method: 'GET',
     accessToken: accessToken,
   });
+  const [tableError, setTableError] = useState<AppNotificationType | undefined>(
+    undefined,
+  );
 
   return (
     <div className="w-full flex flex-col">
       {isLoading && <AppLoader />}
       {error && <AppNotification notification={error} />}
+      {tableError && <AppNotification notification={tableError} />}
       {!isLoading &&
         data &&
         data.map((overview) => {
@@ -44,7 +49,11 @@ export default function Home() {
             case 'Doctor':
               const doctorOverview = overview as DoctorOverviewDto;
               return (
-                <DoctorOverview overview={doctorOverview} key={overview.name} />
+                <DoctorOverview
+                  overview={doctorOverview}
+                  key={overview.name}
+                  onError={(err) => setTableError(err)}
+                />
               );
             case 'Patient':
               const patientOverview = overview as PatientOverviewDto;
@@ -52,6 +61,7 @@ export default function Home() {
                 <PatientOverview
                   overview={patientOverview}
                   key={overview.name}
+                  onError={(err) => setTableError(err)}
                 />
               );
             case 'System':
@@ -65,6 +75,7 @@ export default function Home() {
                 <HospitalOverview
                   overview={hospitalOverview}
                   key={overview.name}
+                  onError={(err) => setTableError(err)}
                 />
               );
             default:
@@ -92,7 +103,13 @@ function OverviewFrame({
   );
 }
 
-function PatientOverview({ overview }: { overview: PatientOverviewDto }) {
+function PatientOverview({
+  overview,
+  onError,
+}: {
+  overview: PatientOverviewDto;
+  onError: (error: AppNotificationType) => void;
+}) {
   return (
     <OverviewFrame title="Patient Overview">
       <DateWiseStats stats={overview.totalEHRs} name="Total EHRs" />
@@ -110,13 +127,20 @@ function PatientOverview({ overview }: { overview: PatientOverviewDto }) {
         <AppointmentsTable
           appointments={overview.recentAppointments}
           title="Recent Appointments"
+          onError={(error) => error && onError(error)}
         />
       )}
     </OverviewFrame>
   );
 }
 
-function DoctorOverview({ overview }: { overview: DoctorOverviewDto }) {
+function DoctorOverview({
+  overview,
+  onError,
+}: {
+  overview: DoctorOverviewDto;
+  onError: (error: AppNotificationType) => void;
+}) {
   return (
     <OverviewFrame title="Doctor Overview">
       <DateWiseStats
@@ -137,6 +161,7 @@ function DoctorOverview({ overview }: { overview: DoctorOverviewDto }) {
         <AppointmentsTable
           appointments={overview.recentAppointments}
           title="Recent Appointments"
+          onError={(error) => error && onError(error)}
         />
       )}
     </OverviewFrame>
@@ -175,7 +200,13 @@ function SystemOverview({ overview }: { overview: SystemOverviewDto }) {
   );
 }
 
-function HospitalOverview({ overview }: { overview: HospitalOverviewDto }) {
+function HospitalOverview({
+  overview,
+  onError,
+}: {
+  overview: HospitalOverviewDto;
+  onError: (error: AppNotificationType) => void;
+}) {
   return (
     <OverviewFrame title="Hospital Overview">
       <DateWiseStats stats={overview.totalPatients} name="Total Patients" />
@@ -204,6 +235,7 @@ function HospitalOverview({ overview }: { overview: HospitalOverviewDto }) {
         <AppointmentsTable
           appointments={overview.recentAppointments}
           title="Recent Appointments"
+          onError={(error) => error && onError(error)}
         />
       )}
       {overview.patientTrendsOverMonths && (

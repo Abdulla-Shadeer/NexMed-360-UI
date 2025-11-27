@@ -3,12 +3,14 @@ import {
   useReactTable,
   getCoreRowModel,
 } from '@tanstack/react-table';
-import { AppointmentStatus, ViewAppointmentDto } from '_types/dtos';
+import { ViewAppointmentDto } from '_types/dtos';
 import { useMemo } from 'react';
 import CustomTable from '@/components/table';
 import AppointmentRowActions from './appointmentRowAction';
 import { toDisplayDateTimeFormat } from '_utils/dateUtils';
-import { AppNotification } from '_types/common';
+import { AppNotificationType } from '_types/common';
+import { getAppointmentStatusStyle } from '_utils/styleUtils';
+import { startCase } from 'lodash';
 
 export default function ViewAppointmentsTable({
   appointments,
@@ -17,7 +19,7 @@ export default function ViewAppointmentsTable({
 }: {
   appointments: ViewAppointmentDto[];
   title: string;
-  onError: (error: AppNotification | undefined) => void;
+  onError: (error: AppNotificationType | undefined) => void;
 }) {
   const columnHelper = createColumnHelper<ViewAppointmentDto>();
   const columns = useMemo(
@@ -42,10 +44,8 @@ export default function ViewAppointmentsTable({
       }),
       columnHelper.accessor('status', {
         cell: (info) => (
-          <p
-            className={`py-1 px-2 rounded-default ${info.getValue() === ('Completed' as AppointmentStatus) ? 'bg-green-primary text-text-light dark:text-text-light' : info.getValue() === ('Pending' as AppointmentStatus) ? 'bg-amber-300 text-text-dark dark:text-background' : info.getValue() === ('Cancelled' as AppointmentStatus) ? 'bg-amber-700 text-text-light' : info.getValue() === ('Confirmed' as AppointmentStatus) ? 'bg-green-200 text-text-dark' : info.getValue() === ('CancelRequested' as AppointmentStatus) ? 'bg-amber-500 text-text-light' : ''}`}
-          >
-            {info.getValue()}
+          <p className={getAppointmentStatusStyle(info.getValue())}>
+            {startCase(info.getValue())}
           </p>
         ),
         header: 'Status',

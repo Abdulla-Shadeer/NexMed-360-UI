@@ -1,7 +1,7 @@
 import { Row } from '@tanstack/react-table';
 import { useAuth } from '_context';
 import {
-  AppointmentStatus,
+  AppointmentStatusDto,
   CancellationRequestDto,
   ViewAppointmentDto,
 } from '_types/dtos';
@@ -10,8 +10,8 @@ import { useState, useRef, useEffect } from 'react';
 import AppIcon from '../icons/appIcon';
 import { IconMoreVertical } from '../icons/icons';
 import { useQueryFunction } from '@/hooks';
-import { apiPaths } from '@/constants';
-import { AppNotification } from '_types/common';
+import { API_PATHS } from '@/constants';
+import { AppNotificationType } from '_types/common';
 import AppLoader from '../misc/loader';
 
 export default function AppointmentRowActions({
@@ -19,16 +19,16 @@ export default function AppointmentRowActions({
   onError,
 }: {
   row: Row<ViewAppointmentDto>;
-  onError: (error: AppNotification | undefined) => void;
+  onError: (error: AppNotificationType | undefined) => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { user, accessToken } = useAuth();
+  const { accessToken } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
 
   async function dispatchConfirmRequest(id: string) {
     const request = createQueryFunction<ViewAppointmentDto>({
-      path: apiPaths.confirmAppointment(id),
+      path: API_PATHS.confirmAppointment(id),
       method: 'GET',
       accessToken,
     });
@@ -58,7 +58,7 @@ export default function AppointmentRowActions({
       reason,
     };
     const request = createQueryFunction<ViewAppointmentDto>({
-      path: apiPaths.cancelAppointment,
+      path: API_PATHS.cancelAppointment,
       method: 'POST',
       accessToken,
       payload: cancelReq,
@@ -117,30 +117,21 @@ export default function AppointmentRowActions({
           className="absolute w-fit h-fit p-4 flex flex-col gap-1 bg-panel-light border-default border-border-primary rounded-default drop-shadow-default"
         >
           <Link
-            href={`/appointments/view/${row.original.id}`}
+            href={`/appointments/view/${row.original.bookingReference}`}
             className="hover:text-blue-secondary"
           >
             View
           </Link>
           {!(
-            row.original.status.toLowerCase() === AppointmentStatus.Completed ||
-            row.original.status.toLowerCase() === AppointmentStatus.Cancelled
+            row.original.status === AppointmentStatusDto.Completed ||
+            row.original.status === AppointmentStatusDto.Cancelled
           ) && (
             <>
-              {user?.id === row.original.createdByUserId && (
-                <Link
-                  href={`/appointments/edit/${row.original.id}`}
-                  className="hover:text-blue-secondary"
-                >
-                  Edit
-                </Link>
-              )}
-
               <a
                 className="hover:cursor-pointer hover:text-blue-secondary"
                 onClick={(e) => {
                   e.preventDefault();
-                  dispatchConfirmRequest(row.original.id);
+                  dispatchConfirmRequest(row.original.bookingReference);
                 }}
               >
                 Confirm
@@ -152,7 +143,10 @@ export default function AppointmentRowActions({
                   e.preventDefault();
                   const reason = window.prompt('Why do you want to cancle?');
                   if (reason) {
-                    dispatchCancelRequest(row.original.id, reason);
+                    dispatchCancelRequest(
+                      row.original.bookingReference,
+                      reason,
+                    );
                   }
                 }}
               >

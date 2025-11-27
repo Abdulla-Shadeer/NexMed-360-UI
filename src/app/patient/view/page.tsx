@@ -1,14 +1,14 @@
 'use client';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
-import { AppNotification as AppNotificationType, ViewUserDto } from '@/types';
+import { AppNotificationType, ViewUserDto } from '@/types';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import AppLoader from '@/components/misc/loader';
 import { AppNotification } from '@/components/misc';
 import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
-import { Form, TextInput } from '@/components/form';
+import { Form, TextInput } from '@/components/input';
 import { useForm } from '@tanstack/react-form';
 import { SecondaryButton } from '@/components/buttons';
 import { IconSearch, IconTrash } from '@/components/icons/icons';
@@ -33,7 +33,7 @@ export default function ViewPatientPage() {
 
   async function fetchPatient(id: string) {
     const request = createQueryFunction<ViewUserDto>({
-      path: apiPaths.getPatient(id),
+      path: API_PATHS.getPatient(id),
       method: 'GET',
       accessToken,
     });

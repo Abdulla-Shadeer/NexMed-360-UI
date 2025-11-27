@@ -1,5 +1,6 @@
 'use client';
 import { PrimaryButton } from '@/components/buttons';
+import { MouseEvent } from 'react';
 
 interface ButtonSecondaryProps {
   type?: 'button' | 'submit' | 'reset' | undefined;
@@ -9,7 +10,7 @@ interface ButtonSecondaryProps {
   buttonText: string;
   disabled?: boolean;
   tw?: string;
-  onClick: () => void;
+  onClick: (e: MouseEvent<HTMLButtonElement>) => void;
 }
 
 const getLightTheme = () => {
@@ -26,9 +27,9 @@ export default function ButtonSecondary({
   tw = 'w-fit h-fit',
   onClick,
 }: ButtonSecondaryProps) {
-  const handleClick = () => {
+  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (disabled) return;
-    onClick();
+    onClick(e);
   };
 
   return (
@@ -37,7 +38,7 @@ export default function ButtonSecondary({
       disabled={disabled}
       isActive={initialState === 'active'}
       buttonText={buttonText}
-      onClick={handleClick}
+      onClick={(e) => handleClick(e)}
       withIcon={withIcon}
       icon={icon}
       tw_width={`${tw} ${initialState === 'light' ? getLightTheme() : ''}`}

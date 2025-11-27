@@ -3,7 +3,7 @@ import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import RefreshData from '@/components/misc/refresh';
 import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
-import { apiPaths } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
@@ -13,7 +13,7 @@ import { randomUUID } from 'crypto';
 export default function ViewMembersPage() {
   const { accessToken, user } = useAuth();
   const queryKey: ApiRequestOption = {
-    path: apiPaths.getHospitalMembers(
+    path: API_PATHS.getHospitalMembers(
       user?.hospitalAdminProfile?.hospitalId ?? randomUUID(),
     ),
     method: 'GET',

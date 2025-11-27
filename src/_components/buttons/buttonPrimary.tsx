@@ -1,7 +1,7 @@
 'use client';
 import AppIcon from '@/components/icons/appIcon';
 import { IconChevronUp, IconChevronDown } from '@/components/icons/icons';
-import { useState } from 'react';
+import { useState, MouseEvent } from 'react';
 
 enum ButtonVariant {
   Active,
@@ -20,7 +20,7 @@ interface ButtonPrimaryProps {
   dropdownButtons?: React.ReactElement[];
   disabled?: boolean;
   tw_width?: string;
-  onClick: () => void;
+  onClick: (e: MouseEvent<HTMLButtonElement>) => void;
 }
 
 const getButtonClass = (variant: ButtonVariant) => {
@@ -47,7 +47,7 @@ export default function ButtonPrimary({
   withDropdown = false,
   dropdownButtons = [],
   disabled = false,
-  tw_width = 'w-full',
+  tw_width = 'w-fit',
   onClick,
 }: ButtonPrimaryProps) {
   const [open, setOpen] = useState(false);
@@ -61,14 +61,14 @@ export default function ButtonPrimary({
           : ButtonVariant.None,
   );
 
-  const handleClick = () => {
+  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (disabled) return;
 
     if (withDropdown) {
       setOpen((prev) => !prev);
       return;
     }
-    onClick();
+    onClick(e);
   };
 
   return (
@@ -77,7 +77,7 @@ export default function ButtonPrimary({
         type={type}
         className={`w-full flex items-center justify-between px-4 py-3 border-default border-border-primary rounded-large drop-shadow-default cursor-pointer ${btnVarient}`}
         disabled={disabled}
-        onClick={handleClick}
+        onClick={(e) => handleClick(e)}
       >
         {
           <span className="flex items-center">
