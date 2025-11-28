@@ -373,6 +373,7 @@ export interface FilterDoctorSessionDto {
   hospitalId?: string;
   doctorId?: string;
   sessionStatus?: SessionStatusDto;
+  isActive?: boolean;
 }
 
 export enum SessionStatusDto {

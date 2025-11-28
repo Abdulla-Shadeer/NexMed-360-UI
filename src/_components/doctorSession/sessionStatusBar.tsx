@@ -34,7 +34,6 @@ export function DoctorSessionBar({
     doctorId,
     hospitalId,
   } as FilterSessionsForCurrentDayDto;
-  console.log('filter', filter);
   const {
     data: hasAnySessionToday,
     error,

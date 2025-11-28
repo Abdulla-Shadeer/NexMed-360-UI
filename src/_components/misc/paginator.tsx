@@ -39,8 +39,6 @@ export default function Paginator({
     }
   }, [currentPage, shouldChangeDisplayNumbers, totalPages]);
 
-  console.log('display numbers: ', displayNumbers);
-
   useEffect(() => {
     const dataStartIndex = (currentPage - 1) * itemsPerPage;
     const dataEndIndex = dataStartIndex + itemsPerPage;

@@ -2,7 +2,11 @@
 
 import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
-import { AppNotification, ViewClinicRecordDto, ViewPatientDto } from '@/types';
+import {
+  AppNotificationType,
+  ViewClinicRecordDto,
+  ViewPatientDto,
+} from '@/types';
 import { useAuth } from '_context';
 import { useEffect, useState } from 'react';
 import Paginator from '../misc/paginator';
@@ -19,7 +23,7 @@ export default function PatientEHRs({
   onNotification,
 }: {
   patient: ViewPatientDto;
-  onNotification: (notification: AppNotification) => void;
+  onNotification: (notification: AppNotificationType) => void;
 }) {
   const { accessToken } = useAuth();
   const queryKey = {

@@ -43,9 +43,7 @@ export default function useQueryFunction() {
       }
 
       try {
-        console.info('useQueryFunction => Invoking fetch request..');
         const fetchRes = await fetch(request);
-        console.info('useQueryFunction => Fetch request completed.');
 
         if (!(fetchRes.type === 'error') || !(fetchRes.status === 0)) {
           if (fetchRes.status === 403) {
@@ -92,14 +90,8 @@ export default function useQueryFunction() {
       } catch (err) {
         setIsLoading(false);
         if (err instanceof Error) {
-          console.info(
-            `useQueryFunction => Message: ${err.message}, Cause: ${err.cause ?? ''}`,
-          );
           throw err;
         }
-        console.info(
-          `useQueryFunction => Something went wrong: ${err as string}`,
-        );
         throw new Error(err as string);
       }
     };

@@ -1,5 +1,4 @@
-// need to be passed via a config file or env variable
-const API_ENDPOINT = 'http://localhost:5098/api/v1';
+const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
 const API_PATHS = {
   login: '/Users/Login',

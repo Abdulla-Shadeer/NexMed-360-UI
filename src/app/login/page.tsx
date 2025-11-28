@@ -1,7 +1,7 @@
 'use client';
 import { Form, TextInput } from '@/components/input';
 import BgImage from '../../../public/loginBg.jpeg';
-import AppLogo from '../../../public/MedicoreLogoLarge.png';
+import AppLogo from '../../../public/AppLogo.png';
 import Image from 'next/image';
 import { useForm } from '@tanstack/react-form';
 import ButtonSecondary from '@/components/buttons/buttonSecondary';
@@ -24,7 +24,6 @@ export default function Login() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      console.log('Login Page: User already logged in!');
       router.replace('/');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
