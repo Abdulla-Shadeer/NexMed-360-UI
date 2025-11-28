@@ -24,7 +24,6 @@ export default function Login() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      console.log('Login Page: User already logged in!');
       router.replace('/');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

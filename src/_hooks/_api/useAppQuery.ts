@@ -21,9 +21,6 @@ export default function useAppQuery<T>(requestOptions: ApiRequestOption) {
 
   useEffect(() => {
     if (queryResult.isError) {
-      console.info(
-        `useAppQuery: something went wrong!,\nError: ${queryResult.error.message}`,
-      );
       setError({
         type: 'error',
         title: 'Something went wrong!',
@@ -34,7 +31,6 @@ export default function useAppQuery<T>(requestOptions: ApiRequestOption) {
       });
     } else {
       if (queryResult.data && queryResult.data.data) {
-        console.info('useAppQuery: data received.');
         setData(queryResult.data.data);
       }
     }

@@ -60,9 +60,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
     });
     try {
       setError(undefined);
-      console.log('Auth context => executing login request..');
       const res = await queryFn();
-      console.log('Auth context => result received.');
       setUser(res.data?.user);
       setIsLoggedIn(true);
       setAccessToken(res.data?.accessToken);
@@ -82,22 +80,14 @@ function AuthProvider({ children }: { children: ReactNode }) {
     setUser(undefined);
     localStorage.removeItem(accessTokenKey);
     setIsLoggedIn(false);
-    console.log('Auth Context: User logged out');
   }
 
   useEffect(() => {
-    console.log('Auth context => Renders...');
     if (!hasAutoLoginAttempted) {
-      console.log('Auth context => Auto login has attempted..');
       sethasAutoLoginAttempted(true);
       const token = localStorage.getItem(accessTokenKey);
       if (token && !isLoggedIn) {
-        console.log(
-          'Auth context => Token found and user not logged in, calling getUser..',
-        );
         getUserData(token);
-      } else {
-        console.log('No token found or already logged in!');
       }
     }
 
@@ -109,15 +99,12 @@ function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       try {
-        console.log('Auth context => executing get user request..');
         const res = await queryFn();
-        console.log('Auth context => result received.');
         setUser(res.data);
         setIsLoggedIn(true);
         setAccessToken(accessToken);
       } catch (err) {
         const _err = err as Error;
-        console.log(`Auth context => Error get user: ${_err.message}`);
         setError({
           type: 'error',
           title: 'Get user failed!',
@@ -140,12 +127,10 @@ function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     try {
-      console.log('Auth context => Refetching user data...');
       const res = await fetch();
       setUser(res.data);
     } catch (err) {
       const _err = err as Error;
-      console.log(`Auth context => Error get user: ${_err.message}`);
       setError({
         type: 'error',
         title: 'Get user failed!',

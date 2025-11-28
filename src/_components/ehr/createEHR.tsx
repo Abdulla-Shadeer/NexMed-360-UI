@@ -173,12 +173,9 @@ export default function CreateEHR() {
                 onAction={(action, medicineName) => {
                   switch (action) {
                     case 'edit':
-                      console.log('Prescriptions in EHR:', EHR.prescriptions);
-                      console.log('Looking for:', medicineName);
                       const toEdit = EHR.prescriptions?.find(
                         (pr) => pr.medicineName === medicineName,
                       );
-                      console.log('Found:', toEdit);
                       setPrescriptionToEdit(toEdit as AddPrescriptionDto);
                       setIsPrescriptionEditOpen(true);
                       break;

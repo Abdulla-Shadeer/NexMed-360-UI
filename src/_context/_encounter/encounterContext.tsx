@@ -101,7 +101,6 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
     };
 
     setEncounterMeta(meta);
-    console.log('Encounter Context => Encounter Started!');
     setIsActive(true);
 
     const confirmInProgress = createQueryFunction<ViewAppointmentDto>({
@@ -133,7 +132,6 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function startEncounter(sessionId: string, patientId: string) {
-    console.log('Encounter Context => Starting...');
     setNotification(undefined);
 
     const loadAppointmentFilters = () => {
@@ -187,7 +185,6 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
     doctorSessionId: string,
     lastKnownApptId: string,
   ) {
-    console.log('Encounter Context => Continuing...');
     setNotification(undefined);
 
     const getAppointment = createQueryFunction<ViewAppointmentDto>({
@@ -206,10 +203,6 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
           appointment.patientId,
           appointment,
           doctorSessionId,
-        );
-      } else {
-        console.log(
-          "Encounter Context => Can't continue, appointment not InProgress",
         );
       }
     } catch (error) {
@@ -243,7 +236,6 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
     }
     setIsActive(false);
     setEncounterMeta(defaultEncounterContext.meta);
-    console.log('Encounter Context => Encounter ended.');
   }
 
   return (

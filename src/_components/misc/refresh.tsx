@@ -11,7 +11,6 @@ export default function RefreshData({
 }) {
   const queryClient = useQueryClient();
   function invalidate() {
-    console.log('Refresh => Invalidatin queries..');
     queryClient.invalidateQueries({
       exact: true,
       queryKey: [queryKey],

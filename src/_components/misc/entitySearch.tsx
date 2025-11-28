@@ -69,11 +69,9 @@ export default function EntitySearch({ open = true }: { open?: boolean }) {
 
     try {
       const res = await searchRequest();
-      console.log(`Entity Search => Search Completed: ${JSON.stringify(res)}`);
       setSearchResult(res.data);
     } catch (error) {
       const err = error as Error;
-      console.log(`Entity Search => Search Error: ${JSON.stringify(err)}`);
       setError({
         type: 'error',
         title: 'Search failed',
