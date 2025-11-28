@@ -434,6 +434,7 @@ function SessionSelector({
     accessToken,
     queryParams: {
       doctorId,
+      isActive: true,
     } as FilterDoctorSessionDto,
   };
   const { data, error, isLoading } =
