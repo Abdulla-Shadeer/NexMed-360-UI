@@ -1,6 +1,6 @@
 'use client';
 import {
-  AppNotification,
+  AppNotificationType,
   LoginResponseDto,
   LoginUserDto,
   ViewUserDto,
@@ -23,7 +23,7 @@ interface AuthContext {
   accessToken: string | undefined;
   loginUser: (loginUser: LoginUserDto) => void;
   logout: () => void;
-  error: AppNotification | undefined;
+  error: AppNotificationType | undefined;
   refetchUser: () => void;
 }
 
@@ -45,7 +45,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
   const [user, setUser] = useState<ViewUserDto | undefined>(undefined);
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const [error, setError] = useState<AppNotification | undefined>(undefined);
+  const [error, setError] = useState<AppNotificationType | undefined>(
+    undefined,
+  );
   const [hasAutoLoginAttempted, sethasAutoLoginAttempted] = useState(false);
 
   const accessTokenKey = 'accessToken';
