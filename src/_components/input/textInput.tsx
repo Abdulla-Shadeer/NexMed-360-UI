@@ -1,0 +1,36 @@
+'use client';
+import { TextInputProps } from '@/types';
+import InputWrapper from './inputWrapper';
+
+export default function TextInput({
+  name,
+  description = '',
+  required = false,
+  error = '',
+  placeholder = 'Enter value here..',
+  value = '',
+  onChange,
+  tw_width = '',
+  disabled = false,
+  type = 'text',
+}: TextInputProps) {
+  return (
+    <InputWrapper
+      name={name}
+      description={description}
+      required={required}
+      error={error}
+      tw_width={tw_width}
+    >
+      <input
+        type={type}
+        className="border-default text-default border-border-primary rounded-default px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-primary disabled:hover:cursor-not-allowed disabled:text-black-secondary bg-background"
+        placeholder={placeholder}
+        aria-label="Text input"
+        onChange={(e) => onChange(e.target.value)}
+        value={value}
+        disabled={disabled}
+      />
+    </InputWrapper>
+  );
+}
