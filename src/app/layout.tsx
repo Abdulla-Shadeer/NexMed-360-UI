@@ -20,12 +20,12 @@ import Head from 'next/head';
 import { FrontOfficeProvider } from '_context/frontOffice/frontOfficeContext';
 import { DoctorSessionBar } from '@/components/doctorSession/sessionStatusBar';
 
+const queryClient = new QueryClient();
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const queryClient = new QueryClient();
   return (
     <html lang="en">
       <Head>
