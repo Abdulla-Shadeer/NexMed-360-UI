@@ -5,7 +5,9 @@ env:
 on:
   push:
     branches:
-      - develop
+      - 'release/**'
+  workflow_dispatch:
+
 jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
