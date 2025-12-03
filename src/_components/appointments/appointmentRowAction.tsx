@@ -11,8 +11,9 @@ import AppIcon from '../icons/appIcon';
 import { IconMoreVertical } from '../icons/icons';
 import { useQueryFunction } from '@/hooks';
 import { API_PATHS } from '@/constants';
-import { AppNotificationType } from '_types/common';
+import { AppNotificationType, ConfirmationDialogContext } from '_types/common';
 import AppLoader from '../misc/loader';
+import ConfirmationDialog from '../popup/confirmationDialog';
 
 export default function AppointmentRowActions({
   row,
@@ -25,6 +26,9 @@ export default function AppointmentRowActions({
   const menuRef = useRef<HTMLDivElement>(null);
   const { accessToken } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
+  const [confirmationContext, setConfirmationContext] = useState<
+    ConfirmationDialogContext | undefined
+  >(undefined);
 
   async function dispatchConfirmRequest(id: string) {
     const request = createQueryFunction<ViewAppointmentDto>({
@@ -103,6 +107,19 @@ export default function AppointmentRowActions({
   return (
     <>
       {isLoading && <AppLoader />}
+      {confirmationContext && (
+        <ConfirmationDialog
+          isOpen={confirmationContext !== undefined}
+          message={confirmationContext.message}
+          withPrompt={confirmationContext.withPrompt || false}
+          promptName={confirmationContext.promptName || 'Enter a value'}
+          promptRequired={confirmationContext.promptRequired || false}
+          onConfirm={(prompt) => confirmationContext.onConfirm(prompt)}
+          onClose={confirmationContext.onClose}
+          yesText={confirmationContext.yesText ?? 'Yes'}
+          noText={confirmationContext.noText ?? 'No'}
+        />
+      )}
       <a
         onClick={(e) => {
           e.preventDefault();
@@ -124,14 +141,24 @@ export default function AppointmentRowActions({
           </Link>
           {!(
             row.original.status === AppointmentStatusDto.Completed ||
-            row.original.status === AppointmentStatusDto.Cancelled
+            row.original.status === AppointmentStatusDto.Cancelled ||
+            row.original.status === AppointmentStatusDto.Confirmed ||
+            row.original.status === AppointmentStatusDto.Arrived ||
+            row.original.status === AppointmentStatusDto.InProgress
           ) && (
             <>
               <a
                 className="hover:cursor-pointer hover:text-blue-secondary"
                 onClick={(e) => {
                   e.preventDefault();
-                  dispatchConfirmRequest(row.original.bookingReference);
+                  setConfirmationContext({
+                    message: 'Are sure to confirm this appointment?',
+                    onConfirm: () => {
+                      setConfirmationContext(undefined);
+                      dispatchConfirmRequest(row.original.bookingReference);
+                    },
+                    onClose: () => setConfirmationContext(undefined),
+                  });
                 }}
               >
                 Confirm
@@ -141,13 +168,22 @@ export default function AppointmentRowActions({
                 className="hover:cursor-pointer hover:text-blue-secondary"
                 onClick={(e) => {
                   e.preventDefault();
-                  const reason = window.prompt('Why do you want to cancle?');
-                  if (reason) {
-                    dispatchCancelRequest(
-                      row.original.bookingReference,
-                      reason,
-                    );
-                  }
+                  setConfirmationContext({
+                    message: 'Why do you want to cancel this appointment?',
+                    withPrompt: true,
+                    promptName: 'Reason',
+                    promptRequired: true,
+                    onConfirm: (prompt) => {
+                      setConfirmationContext(undefined);
+                      dispatchCancelRequest(
+                        row.original.bookingReference,
+                        prompt || 'undefined',
+                      );
+                    },
+                    onClose: () => setConfirmationContext(undefined),
+                    yesText: 'Cancel',
+                    noText: 'Close',
+                  });
                 }}
               >
                 Cancel

@@ -75,6 +75,11 @@ export interface KeyValuePair<K, V> {
 
 export interface ConfirmationDialogContext {
   message: string;
-  onConfirm: () => void;
+  onConfirm: (prompt?: string) => void;
   onClose: () => void;
+  yesText?: string;
+  noText?: string;
+  withPrompt?: boolean;
+  promptName?: string;
+  promptRequired?: boolean;
 }
