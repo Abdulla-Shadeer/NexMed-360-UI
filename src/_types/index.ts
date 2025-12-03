@@ -9,6 +9,7 @@ export type {
   ApiCallParams,
   AppNotificationType,
   KeyValuePair,
+  ConfirmationDialogContext,
 } from './common';
 
 export type {

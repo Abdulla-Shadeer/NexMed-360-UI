@@ -14,6 +14,7 @@ import {
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import RefreshData from '@/components/misc/refresh';
+import ConfirmationDialog from '@/components/popup/confirmationDialog';
 import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,12 +22,13 @@ import { useAuth } from '_context';
 import useQueryFunction, {
   ApiRequestOption,
 } from '_hooks/_api/useQueryFunction';
-import { AppNotificationType } from '_types/common';
 import {
+  AppNotificationType,
+  ConfirmationDialogContext,
   FilterDoctorSessionDto,
   UpdateDoctorSessionDto,
   ViewDoctorSessionDto,
-} from '_types/dtos';
+} from '@/types';
 import { to12HourFormat } from '_utils/dateUtils';
 import { toNumber } from 'lodash';
 import { useState } from 'react';
@@ -61,6 +63,9 @@ export default function ViewSessionsPage() {
 
   const { createQueryFunction, isLoading: isLoading1 } = useQueryFunction();
   const queryClient = useQueryClient();
+  const [confirmationContext, setConfirmationContext] = useState<
+    ConfirmationDialogContext | undefined
+  >(undefined);
 
   function invalidateQueries() {
     setSessionToEdit(undefined);
@@ -127,6 +132,14 @@ export default function ViewSessionsPage() {
       {(isLoading || isLoading1) && <AppLoader />}
       {error && <AppNotification notification={error} />}
       {notification && <AppNotification notification={notification} />}
+      {confirmationContext && (
+        <ConfirmationDialog
+          isOpen={confirmationContext !== undefined}
+          message={confirmationContext.message}
+          onConfirm={confirmationContext.onConfirm}
+          onClose={confirmationContext.onClose}
+        />
+      )}
       <div className="w-full flex flex-row flex-wrap gap-6 p-6 bg-background border-default border-border-primary rounded-default drop-shadow-default">
         <div className="w-full pb-2 border-b-default border-border-primary space-y-4">
           <h2 className="text-title">Your Sessions</h2>
@@ -137,7 +150,19 @@ export default function ViewSessionsPage() {
                 <QuickActionButton
                   text="Delete"
                   icon={IconTrash}
-                  onClick={() => deleteSession(sessionToEdit!.id)}
+                  onClick={() =>
+                    setConfirmationContext({
+                      message: 'Are you sure want to delete this session?',
+                      onConfirm: () => {
+                        setConfirmationContext(undefined);
+                        deleteSession(sessionToEdit!.id);
+                      },
+                      onClose: () => {
+                        setConfirmationContext(undefined);
+                        setSessionToEdit(undefined);
+                      },
+                    })
+                  }
                   isDisabled={!sessionToEdit}
                 />
                 <QuickActionButton
@@ -151,17 +176,27 @@ export default function ViewSessionsPage() {
                       ? IconStopCircle
                       : IconPlayCircle
                   }
-                  onClick={() => {
-                    updateSession({
-                      startTime: sessionToEdit!.startTime,
-                      endTime: sessionToEdit!.endTime,
-                      slotDurationMinutes: toNumber(
-                        sessionToEdit!.slotDurationMinutes,
-                      ),
-                      occurrences: sessionToEdit!.occurrences,
-                      isActive: sessionToEdit!.isActive ? false : true,
-                    });
-                  }}
+                  onClick={() =>
+                    setConfirmationContext({
+                      message: `Are you sure want to ${sessionToEdit?.isActive ? 'Deactivate' : 'Activate'} this session?`,
+                      onConfirm: () => {
+                        setConfirmationContext(undefined);
+                        updateSession({
+                          startTime: sessionToEdit!.startTime,
+                          endTime: sessionToEdit!.endTime,
+                          slotDurationMinutes: toNumber(
+                            sessionToEdit!.slotDurationMinutes,
+                          ),
+                          occurrences: sessionToEdit!.occurrences,
+                          isActive: sessionToEdit!.isActive ? false : true,
+                        });
+                      },
+                      onClose: () => {
+                        setConfirmationContext(undefined);
+                        setSessionToEdit(undefined);
+                      },
+                    })
+                  }
                   isDisabled={!sessionToEdit}
                 />
                 <QuickActionButton
