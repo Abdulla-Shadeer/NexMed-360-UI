@@ -1,12 +1,10 @@
 import { useEncounter } from '_context/_encounter/encounterContext';
 import { useState, useEffect } from 'react';
-import { SecondaryButton } from '../buttons';
-import { TextInput } from '../input';
 import { IconStopCircle, IconPlayCircle } from '../icons/icons';
 import AppLoader from '../misc/loader';
-import { AppNotificationType } from '@/types';
-import DialogWindow from '../popup/dialogWindow';
+import { AppNotificationType, ConfirmationDialogContext } from '@/types';
 import QuickActionButton from '../buttons/quickActionButton';
+import ConfirmationDialog from '../popup/confirmationDialog';
 
 export default function EncounterStatusBar({
   onNotification,
@@ -23,8 +21,9 @@ export default function EncounterStatusBar({
     notification,
     meta,
   } = useEncounter();
-  const [showStartPrompt, setShowPrompt] = useState(false);
-  const [patientId, setPatientId] = useState('');
+  const [confirmationContext, setConfirmationContext] = useState<
+    ConfirmationDialogContext | undefined
+  >(undefined);
 
   useEffect(() => {
     onNotification(notification);
@@ -36,6 +35,19 @@ export default function EncounterStatusBar({
       className={`w-full py-3 px-4 border-default border-border-primary rounded-large ${isActive ? 'bg-green-50 text-green-primary border-green-primary' : 'bg-disabled'}`}
     >
       {isLoading && <AppLoader />}
+      {confirmationContext && (
+        <ConfirmationDialog
+          isOpen={confirmationContext !== undefined}
+          message={confirmationContext.message}
+          onConfirm={(prompt) => confirmationContext.onConfirm(prompt)}
+          onClose={confirmationContext.onClose}
+          yesText={confirmationContext.yesText ?? 'Yes'}
+          noText={confirmationContext.noText ?? 'No'}
+          withPrompt={confirmationContext.withPrompt ?? false}
+          promptName={confirmationContext.promptName ?? 'Enter a value'}
+          promptRequired={confirmationContext.promptRequired ?? false}
+        />
+      )}
       {isActive ? (
         <div className="w-full flex flex-row items-center justify-between">
           <div className="flex flex-col gap-1">
@@ -53,7 +65,17 @@ export default function EncounterStatusBar({
           <QuickActionButton
             text="Finish Encounter"
             icon={IconStopCircle}
-            onClick={endEncounter}
+            onClick={() =>
+              setConfirmationContext({
+                message:
+                  'Are you sure want to finish encounter for this patient?',
+                onConfirm: () => {
+                  setConfirmationContext(undefined);
+                  endEncounter();
+                },
+                onClose: () => setConfirmationContext(undefined),
+              })
+            }
           />
         </div>
       ) : (
@@ -64,42 +86,24 @@ export default function EncounterStatusBar({
           <QuickActionButton
             text="Start Encounter"
             onClick={() => {
-              setShowPrompt(true);
+              setConfirmationContext({
+                message: 'Please enter/scan patient ID to start',
+                yesText: 'Start',
+                noText: 'Cancel',
+                withPrompt: true,
+                promptName: 'Patient ID',
+                promptRequired: true,
+                onConfirm: (prompt) => {
+                  setConfirmationContext(undefined);
+                  startEncounter(doctorSessionId, prompt!);
+                },
+                onClose: () => setConfirmationContext(undefined),
+              });
               onNotification(undefined);
             }}
             icon={IconPlayCircle}
           />
         </div>
-      )}
-
-      {showStartPrompt && (
-        <DialogWindow
-          isOpen={showStartPrompt}
-          onClose={() => setShowPrompt(false)}
-        >
-          <div className="w-full border-default border-border-primary rounded-default flex flex-row flex-wrap items-center gap-4 p-6 bg-background">
-            <TextInput
-              name="Patient Id"
-              value={patientId}
-              onChange={(value) => setPatientId(value)}
-              error=""
-              required
-            />
-            <SecondaryButton
-              type="button"
-              buttonText="Start"
-              withIcon
-              icon={IconPlayCircle}
-              onClick={() => {
-                if (patientId) {
-                  startEncounter(doctorSessionId, patientId);
-                  setShowPrompt(false);
-                }
-              }}
-              initialState="active"
-            />
-          </div>
-        </DialogWindow>
       )}
     </div>
   );

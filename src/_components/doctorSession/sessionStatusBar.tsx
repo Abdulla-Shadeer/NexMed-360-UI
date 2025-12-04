@@ -11,6 +11,7 @@ import {
   UpdateSessionHistoryDto,
   SessionStatusDto,
   AppNotificationType,
+  ConfirmationDialogContext,
 } from '@/types';
 import { toDefaultDateFormat, to12HourFormat } from '_utils/dateUtils';
 import { useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ import { SecondaryButton } from '../buttons';
 import { IconClock, IconXCircle } from '../icons/icons';
 import AppLoader from '../misc/loader';
 import EncounterStatusBar from './encounterStatusBar';
+import ConfirmationDialog from '../popup/confirmationDialog';
 
 export function DoctorSessionBar({
   doctorId,
@@ -85,6 +87,9 @@ function SessionStatus({
   const [timerId, setTimerId] = useState<NodeJS.Timeout | undefined>(undefined);
   const queryClient = useQueryClient();
   const { tryContinueEncounter } = useEncounter();
+  const [confirmationContext, setConfirmationContext] = useState<
+    ConfirmationDialogContext | undefined
+  >(undefined);
 
   useEffect(() => {
     if (error) {
@@ -195,6 +200,14 @@ function SessionStatus({
   return (
     <div className="w-full">
       {(isLoading || isLoading1) && <AppLoader />}
+      {confirmationContext && (
+        <ConfirmationDialog
+          isOpen={confirmationContext !== undefined}
+          message={confirmationContext.message}
+          onConfirm={confirmationContext.onConfirm}
+          onClose={confirmationContext.onClose}
+        />
+      )}
       {data ? (
         <div
           className={`w-full bg-panel-light border-default border-border-primary ${data.isCurrent ? 'text-green-primary' : 'text-text-dark'} p-4 rounded-default mb-4 drop-shadow-default`}
@@ -208,7 +221,17 @@ function SessionStatus({
                 buttonText="End Session"
                 type="button"
                 initialState="active"
-                onClick={() => endOrCancelSession(data.sessionId)}
+                onClick={() =>
+                  setConfirmationContext({
+                    message:
+                      'Please ensure that you have completed all encounters for this session',
+                    onConfirm: () => {
+                      setConfirmationContext(undefined);
+                      endOrCancelSession(data.sessionId);
+                    },
+                    onClose: () => setConfirmationContext(undefined),
+                  })
+                }
               />
             ) : (
               <div className="inline-flex items-center gap-2">
@@ -216,7 +239,16 @@ function SessionStatus({
                   buttonText="Start Session"
                   type="button"
                   initialState="active"
-                  onClick={() => startSession(data.sessionId)}
+                  onClick={() =>
+                    setConfirmationContext({
+                      message: 'Are you sure want to start this session now?',
+                      onConfirm: () => {
+                        setConfirmationContext(undefined);
+                        startSession(data.sessionId);
+                      },
+                      onClose: () => setConfirmationContext(undefined),
+                    })
+                  }
                   withIcon
                   icon={IconClock}
                 />
@@ -224,7 +256,17 @@ function SessionStatus({
                   buttonText="Cancel Session"
                   type="button"
                   initialState="light"
-                  onClick={() => endOrCancelSession(data.sessionId, true)}
+                  onClick={() =>
+                    setConfirmationContext({
+                      message:
+                        'Are you sure want to Cancel this session for today?',
+                      onConfirm: () => {
+                        setConfirmationContext(undefined);
+                        endOrCancelSession(data.sessionId, true);
+                      },
+                      onClose: () => setConfirmationContext(undefined),
+                    })
+                  }
                   withIcon
                   icon={IconXCircle}
                 />
