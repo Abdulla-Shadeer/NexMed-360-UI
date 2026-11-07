@@ -4,24 +4,24 @@ import { useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
 import {
   AppNotificationType,
-  CreateDoctorSessionDto,
-  ViewDoctorSessionDto,
+  CreatePractitionerScheduleDto,
+  ViewPractitionerScheduleDto,
 } from '@/types';
 import { useMemo, useState } from 'react';
 import AppLoader from '@/components/misc/loader';
 import { AppNotification } from '@/components/misc';
 import { API_PATHS } from '@/constants';
-import CreateDoctorSessionForm from '@/components/doctorSession/createDoctorSession';
+import CreatePractitionerScheduleForm from '@/components/practitionerSchedule/createPractitionerSchedule';
 
 export default function CreateSessionPage() {
   const { accessToken, user } = useAuth();
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const defaultData = useMemo<CreateDoctorSessionDto>(() => {
+  const defaultData = useMemo<CreatePractitionerScheduleDto>(() => {
     return {
-      doctorId: user?.doctorProfile?.id ?? '',
-      hospitalId:
-        user?.doctorProfile?.hospitalId ??
-        user?.hospitalAdminProfile?.hospitalId ??
+      practitionerRoleId: user?.practitionerRoleProfile?.id ?? '',
+      organizationId:
+        user?.practitionerRoleProfile?.organizationId ??
+        user?.organizationManagerProfile?.organizationId ??
         '',
       startTime: '',
       endTime: '',
@@ -33,11 +33,11 @@ export default function CreateSessionPage() {
     AppNotificationType | undefined
   >(undefined);
 
-  async function createSession(data: CreateDoctorSessionDto) {
+  async function createSession(data: CreatePractitionerScheduleDto) {
     data.startTime = data.startTime.concat(':00');
     data.endTime = data.endTime.concat(':00');
-    const create = createQueryFunction<ViewDoctorSessionDto>({
-      path: API_PATHS.createDoctorSession,
+    const create = createQueryFunction<ViewPractitionerScheduleDto>({
+      path: API_PATHS.createPractitionerSchedule,
       method: 'POST',
       accessToken,
       payload: data,
@@ -67,7 +67,7 @@ export default function CreateSessionPage() {
     <div className="w-full">
       {isLoading && <AppLoader />}
       {notification && <AppNotification notification={notification} />}
-      <CreateDoctorSessionForm
+      <CreatePractitionerScheduleForm
         defaultData={defaultData}
         onFormSubmit={(data) => createSession(data)}
         onNotification={(notification) => setNotification(notification)}

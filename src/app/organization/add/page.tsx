@@ -9,22 +9,22 @@ import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
 import {
-  CreateHospitalAdminDto,
-  CreateHospitalDto,
-  ViewHospitalDto,
+  CreateOrganizationManagerDto,
+  CreateOrganizationDto,
+  ViewOrganizationDto,
   ViewUserDto,
   AppNotificationType,
 } from '@/types';
 import { useState } from 'react';
-import AddUserForm from '@/components/hospital/addUserForm';
+import AddUserForm from '@/components/organization/addUserForm';
 
 const stepButtonStyle =
   'text-default text-left py-1 px-2 border-border-primary border-default cursor-pointer';
 
-export default function AddHospital() {
+export default function AddOrganization() {
   const [step, setStep] = useState<'one' | 'two'>('one');
-  const [defaultHospitalData, setDefaultHospitalData] = useState<
-    CreateHospitalDto | undefined
+  const [defaultOrganizationData, setDefaultOrganizationData] = useState<
+    CreateOrganizationDto | undefined
   >(undefined);
 
   const { accessToken } = useAuth();
@@ -32,13 +32,13 @@ export default function AddHospital() {
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
-  const [createdHospitalId, setCreatedHospitalId] = useState<
+  const [createdOrganizationId, setCreatedOrganizationId] = useState<
     string | undefined
   >(undefined);
 
-  async function dispatchCreateHospital(data: CreateHospitalDto) {
-    const request = createQueryFunction<ViewHospitalDto>({
-      path: API_PATHS.addHospital,
+  async function dispatchCreateOrganization(data: CreateOrganizationDto) {
+    const request = createQueryFunction<ViewOrganizationDto>({
+      path: API_PATHS.addOrganization,
       method: 'POST',
       accessToken,
       payload: data,
@@ -47,28 +47,28 @@ export default function AddHospital() {
     try {
       setNotification(undefined);
       const response = await request();
-      setCreatedHospitalId(response.data?.id);
-      setDefaultHospitalData(undefined);
+      setCreatedOrganizationId(response.data?.id);
+      setDefaultOrganizationData(undefined);
       setStep('two');
       setNotification({
         type: 'success',
-        title: 'Hospital Added Successfully!',
-        description: `Hospital ID: ${response.data?.id}`,
+        title: 'Organization Added Successfully!',
+        description: `Organization ID: ${response.data?.id}`,
       });
     } catch (error) {
       const err = error as Error;
       setNotification({
         type: 'error',
-        title: 'Failed to create Hospital!',
+        title: 'Failed to create Organization!',
         description: err.message,
         cause: err.cause ? (err.cause as string) : undefined,
       });
     }
   }
 
-  async function dispatchAssignAdmin(data: CreateHospitalAdminDto) {
+  async function dispatchAssignAdmin(data: CreateOrganizationManagerDto) {
     const request = createQueryFunction<ViewUserDto>({
-      path: API_PATHS.assignHospitalAdmin,
+      path: API_PATHS.assignOrganizationManager,
       method: 'POST',
       accessToken,
       payload: data,
@@ -77,8 +77,8 @@ export default function AddHospital() {
     try {
       setNotification(undefined);
       const response = await request();
-      setCreatedHospitalId(undefined);
-      setDefaultHospitalData(undefined);
+      setCreatedOrganizationId(undefined);
+      setDefaultOrganizationData(undefined);
       setNotification({
         type: 'success',
         title: 'Admin User Assigned!',
@@ -116,34 +116,34 @@ export default function AddHospital() {
         </button>
       </div>
       {step === 'one' && (
-        <HospitalInfo
-          defaultData={defaultHospitalData}
+        <OrganizationInfo
+          defaultData={defaultOrganizationData}
           submitCallback={(data) => {
-            setDefaultHospitalData(data);
-            dispatchCreateHospital(data);
+            setDefaultOrganizationData(data);
+            dispatchCreateOrganization(data);
           }}
         />
       )}
 
       {step === 'two' && (
         <AddUserForm
-          userType="hospitalAdmin"
+          userType="organizationManager"
           onFormSubmit={(data) => {
-            dispatchAssignAdmin(data as CreateHospitalAdminDto);
+            dispatchAssignAdmin(data as CreateOrganizationManagerDto);
           }}
-          hospitalId={createdHospitalId}
+          organizationId={createdOrganizationId}
         />
       )}
     </div>
   );
 }
 
-function HospitalInfo({
+function OrganizationInfo({
   submitCallback,
   defaultData,
 }: {
-  submitCallback: (data: CreateHospitalDto) => void;
-  defaultData: CreateHospitalDto | undefined;
+  submitCallback: (data: CreateOrganizationDto) => void;
+  defaultData: CreateOrganizationDto | undefined;
 }) {
   const { Field, Subscribe, reset, handleSubmit } = useForm({
     defaultValues: defaultData,
@@ -151,7 +151,7 @@ function HospitalInfo({
   });
 
   return (
-    <Form title="Hospital Info" action={handleSubmit}>
+    <Form title="Organization Info" action={handleSubmit}>
       <Field
         name="name"
         validators={{
@@ -228,6 +228,18 @@ function HospitalInfo({
             onChange={field.handleChange}
             required
             error={field.state.meta.errorMap.onChange ?? ''}
+          />
+        )}
+      </Field>
+
+      <Field name="type">
+        {(field) => (
+          <TextInput
+            name={field.name}
+            description="For example, Hospital or Clinic"
+            value={field.state.value ?? ''}
+            onChange={field.handleChange}
+            error=""
           />
         )}
       </Field>

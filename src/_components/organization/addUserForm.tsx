@@ -3,27 +3,28 @@
 import { useForm } from '@tanstack/react-form';
 import {
   CreatePatientDto,
-  CreateDoctorDto,
-  CreateReceptionistDto,
-  CreateHospitalAdminDto,
+  CreatePractitionerRoleDto,
+  CreateOrganizationMemberDto,
+  CreateOrganizationManagerDto,
 } from '@/types';
 import { startCase } from 'lodash';
 import { useState, useEffect } from 'react';
 import { SecondaryButton } from '@/components/buttons';
 import { Form, TextInput, RadioInput, DateInput } from '@/components/input';
 import { IconUserPlus, IconTrash } from '@/components/icons/icons';
-import HospitalSelecter from './hospitalSelector';
+import OrganizationSelecter from './organizationSelector';
 import { Divider } from '@/components/misc';
 
 interface UserFormData {
-  hospitalId?: string;
+  organizationId?: string;
   firstName?: string;
   lastName?: string;
   email?: string;
   phoneNumber?: string;
   password?: string;
   confirmPassword?: string;
-  speciality?: string;
+  roleName?: string;
+  specialty?: string;
   location?: string;
   department?: string;
   gender?: 'Male' | 'Female';
@@ -33,17 +34,21 @@ interface UserFormData {
 export default function AddUserForm({
   userType,
   onFormSubmit,
-  hospitalId,
+  organizationId,
 }: {
-  userType: 'doctor' | 'receptionist' | 'hospitalAdmin' | 'patient';
+  userType:
+    | 'practitionerRole'
+    | 'organizationMember'
+    | 'organizationManager'
+    | 'patient';
   onFormSubmit: (
     data:
       | CreatePatientDto
-      | CreateDoctorDto
-      | CreateHospitalAdminDto
-      | CreateReceptionistDto,
+      | CreatePractitionerRoleDto
+      | CreateOrganizationManagerDto
+      | CreateOrganizationMemberDto,
   ) => void;
-  hospitalId?: string;
+  organizationId?: string;
 }) {
   const [defaultFormData, setDefaultFormData] = useState<
     UserFormData | undefined
@@ -65,9 +70,9 @@ export default function AddUserForm({
         };
         onFormSubmit(createPatientDto);
         break;
-      case 'doctor':
-        const createDoctorDto: CreateDoctorDto = {
-          hospitalId: formData.hospitalId ?? '',
+      case 'practitionerRole':
+        const createPractitionerRoleDto: CreatePractitionerRoleDto = {
+          organizationId: formData.organizationId ?? '',
           personalInformation: {
             firstName: formData.firstName!,
             lastName: formData.lastName!,
@@ -75,13 +80,14 @@ export default function AddUserForm({
             phoneNumber: formData.phoneNumber,
             password: formData.password!,
           },
-          speciality: formData.speciality ?? '',
+          roleName: formData.roleName?.trim() || 'Practitioner',
+          specialty: formData.specialty ?? '',
         };
-        onFormSubmit(createDoctorDto);
+        onFormSubmit(createPractitionerRoleDto);
         break;
-      case 'receptionist':
-        const createReceptionistDto: CreateReceptionistDto = {
-          hospitalId: formData.hospitalId ?? '',
+      case 'organizationMember':
+        const createOrganizationMemberDto: CreateOrganizationMemberDto = {
+          organizationId: formData.organizationId ?? '',
           personalInformation: {
             firstName: formData.firstName!,
             lastName: formData.lastName!,
@@ -92,11 +98,11 @@ export default function AddUserForm({
           department: formData.department ?? '',
           location: formData.location ?? '',
         };
-        onFormSubmit(createReceptionistDto);
+        onFormSubmit(createOrganizationMemberDto);
         break;
-      case 'hospitalAdmin':
-        const createAdminDto: CreateHospitalAdminDto = {
-          hospitalId: formData.hospitalId ?? '',
+      case 'organizationManager':
+        const createAdminDto: CreateOrganizationManagerDto = {
+          organizationId: formData.organizationId ?? '',
           personalInformation: {
             firstName: formData.firstName!,
             lastName: formData.lastName!,
@@ -116,23 +122,23 @@ export default function AddUserForm({
   });
 
   useEffect(() => {
-    if (hospitalId) {
-      setDefaultFormData({ hospitalId: hospitalId });
+    if (organizationId) {
+      setDefaultFormData({ organizationId: organizationId });
     }
-  }, [hospitalId]);
+  }, [organizationId]);
 
   return (
     <Form action={handleSubmit} title={`Add ${startCase(userType)}`}>
       {userType !== 'patient' && (
         <Field
-          name="hospitalId"
+          name="organizationId"
           validators={{
             onChange: ({ value }) =>
-              !value ? 'Hospital ID is required!' : undefined,
+              !value ? 'Organization ID is required!' : undefined,
           }}
         >
           {(field) =>
-            hospitalId ? (
+            organizationId ? (
               <TextInput
                 name={field.name}
                 value={field.state.value ?? ''}
@@ -142,7 +148,7 @@ export default function AddUserForm({
                 error={field.state.meta.errorMap.onChange ?? ''}
               />
             ) : (
-              <HospitalSelecter
+              <OrganizationSelecter
                 onChange={field.handleChange}
                 fieldError={field.state.meta.errorMap.onChange ?? ''}
                 selected={undefined}
@@ -302,25 +308,31 @@ export default function AddUserForm({
             )}
           </Field>
         </>
-      ) : userType === 'doctor' ? (
-        <Field
-          name="speciality"
-          validators={{
-            onChange: ({ value }) =>
-              !value ? 'Speciality required!' : undefined,
-          }}
-        >
-          {(field) => (
-            <TextInput
-              name={field.name}
-              value={field.state.value ?? ''}
-              onChange={field.handleChange}
-              required
-              error={field.state.meta.errorMap.onChange ?? ''}
-            />
-          )}
-        </Field>
-      ) : userType === 'receptionist' ? (
+      ) : userType === 'practitionerRole' ? (
+        <>
+          <Field name="roleName">
+            {(field) => (
+              <TextInput
+                name={field.name}
+                description="For example, Doctor, Nurse, or Care assistant"
+                value={field.state.value ?? ''}
+                onChange={field.handleChange}
+                error=""
+              />
+            )}
+          </Field>
+          <Field name="specialty">
+            {(field) => (
+              <TextInput
+                name={field.name}
+                value={field.state.value ?? ''}
+                onChange={field.handleChange}
+                error=""
+              />
+            )}
+          </Field>
+        </>
+      ) : userType === 'organizationMember' ? (
         <>
           <Field
             name="department"

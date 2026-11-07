@@ -18,7 +18,7 @@ import { EncounterProvider } from '_context/_encounter/encounterContext';
 import { AppNotificationType as AppNotificationType } from '_types/common';
 import Head from 'next/head';
 import { FrontOfficeProvider } from '_context/frontOffice/frontOfficeContext';
-import { DoctorSessionBar } from '@/components/doctorSession/sessionStatusBar';
+import { PractitionerScheduleBar } from '@/components/practitionerSchedule/sessionStatusBar';
 
 const queryClient = new QueryClient();
 export default function RootLayout({
@@ -96,10 +96,10 @@ function AppLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex flex-col w-full min-h-screen max-h-screen overflow-y-scroll p-6">
             {<Breadcrumb navPaths={navPaths} />}
-            {user?.doctorProfile && (
-              <DoctorSessionBar
-                doctorId={user.doctorProfile.id}
-                hospitalId={user.doctorProfile.hospitalId}
+            {user?.practitionerRoleProfile && (
+              <PractitionerScheduleBar
+                practitionerRoleId={user.practitionerRoleProfile.id}
+                organizationId={user.practitionerRoleProfile.organizationId}
                 onError={(error) => setNotification(error)}
               />
             )}

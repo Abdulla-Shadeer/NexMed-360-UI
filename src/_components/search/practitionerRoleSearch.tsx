@@ -2,7 +2,11 @@ import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
-import { ViewDoctorDto, SearchDoctorDto, AppNotificationType } from '@/types';
+import {
+  ViewPractitionerRoleDto,
+  SearchPractitionerRoleDto,
+  AppNotificationType,
+} from '@/types';
 import { useState } from 'react';
 import { SecondaryButton } from '../buttons';
 import QuickActionButton from '../buttons/quickActionButton';
@@ -15,25 +19,26 @@ import {
 } from '../icons/icons';
 import AppLoader from '../misc/loader';
 
-export default function DoctorSearch({
-  onDoctorSelect,
+export default function PractitionerRoleSearch({
+  onPractitionerRoleSelect,
   onError,
 }: {
-  onDoctorSelect: (docto?: ViewDoctorDto) => void;
+  onPractitionerRoleSelect: (docto?: ViewPractitionerRoleDto) => void;
   onError: (error: AppNotificationType) => void;
 }) {
-  const [searchDto] = useState<SearchDoctorDto>({});
+  const [searchDto] = useState<SearchPractitionerRoleDto>({});
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const [searchResult, setSearchResult] = useState<ViewDoctorDto[] | undefined>(
-    undefined,
-  );
+  const [searchResult, setSearchResult] = useState<
+    ViewPractitionerRoleDto[] | undefined
+  >(undefined);
   const [inputError, setInputError] = useState<string | undefined>(undefined);
   const { accessToken } = useAuth();
-  const [selectedDoctorId, setSelectedDoctorId] = useState('');
+  const [selectedPractitionerRoleId, setSelectedPractitionerRoleId] =
+    useState('');
 
-  async function dispatchSearch(data: SearchDoctorDto) {
-    const searchRequest = createQueryFunction<ViewDoctorDto[]>({
-      path: API_PATHS.doctorSearch,
+  async function dispatchSearch(data: SearchPractitionerRoleDto) {
+    const searchRequest = createQueryFunction<ViewPractitionerRoleDto[]>({
+      path: API_PATHS.practitionerRoleSearch,
       method: 'POST',
       accessToken,
       payload: data,
@@ -68,7 +73,7 @@ export default function DoctorSearch({
     <div className="w-full flex flex-col gap-6">
       {isLoading && <AppLoader />}
       {inputError && <p className="w-full text-red-primary">{inputError}</p>}
-      <Form action={handleSubmit} title="Search Doctor">
+      <Form action={handleSubmit} title="Search PractitionerRole">
         <Field name="name">
           {(field) => (
             <TextInput
@@ -92,7 +97,7 @@ export default function DoctorSearch({
             />
           )}
         </Field>
-        <Field name="speciality">
+        <Field name="specialty">
           {(field) => (
             <TextInput
               name={field.name}
@@ -119,7 +124,7 @@ export default function DoctorSearch({
               reset(searchDto);
               setInputError(undefined);
               setSearchResult(undefined);
-              onDoctorSelect(undefined);
+              onPractitionerRoleSelect(undefined);
             }}
             withIcon
             icon={IconTrash}
@@ -129,26 +134,30 @@ export default function DoctorSearch({
       </Form>
       {searchResult && (
         <div className="w-full flex flex-row flex-wrap gap-6 items-stretch max-h-[430px] overflow-auto">
-          {searchResult.map((doctor) => (
+          {searchResult.map((practitionerRole) => (
             <div
-              key={doctor.id}
-              className={`w-fit bg-background ${selectedDoctorId === doctor.id ? 'border-green-primary border-2' : 'border-border-primary border-default'} rounded-default flex flex-col gap-2 p-6 justify-between`}
+              key={practitionerRole.id}
+              className={`w-fit bg-background ${selectedPractitionerRoleId === practitionerRole.id ? 'border-green-primary border-2' : 'border-border-primary border-default'} rounded-default flex flex-col gap-2 p-6 justify-between`}
             >
               <p className="text-title-small">
-                Dr. {doctor.firstName + ' ' + doctor.lastName}
+                {practitionerRole.firstName + ' ' + practitionerRole.lastName}
               </p>
-              <p className="text-small"> {doctor.speciality} </p>
-              <p className="text-black-secondary">{doctor.hospitalName}</p>
+              <p className="text-small"> {practitionerRole.specialty} </p>
+              <p className="text-black-secondary">
+                {practitionerRole.organizationName}
+              </p>
               <QuickActionButton
                 text={
-                  selectedDoctorId === doctor.id ? 'Selected' : 'Select Doctor'
+                  selectedPractitionerRoleId === practitionerRole.id
+                    ? 'Selected'
+                    : 'Select PractitionerRole'
                 }
                 onClick={() => {
-                  onDoctorSelect(doctor);
-                  setSelectedDoctorId(doctor.id);
+                  onPractitionerRoleSelect(practitionerRole);
+                  setSelectedPractitionerRoleId(practitionerRole.id);
                 }}
                 icon={
-                  selectedDoctorId === doctor.id
+                  selectedPractitionerRoleId === practitionerRole.id
                     ? IconCheckCircle
                     : IconPlusCircle
                 }

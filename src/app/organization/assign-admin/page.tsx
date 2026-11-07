@@ -1,19 +1,19 @@
 'use client';
 
-import AddUserForm from '@/components/hospital/addUserForm';
+import AddUserForm from '@/components/organization/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useAuth } from '_context';
 import { AppNotificationType as AppNotificationType } from '_types/common';
-import { CreateHospitalAdminDto, ViewUserDto } from '_types/dtos';
+import { CreateOrganizationManagerDto, ViewUserDto } from '_types/dtos';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 export default function AssignAdminPage() {
   const searchParams = useSearchParams();
-  const [hospitalId] = useState<string | undefined>(
+  const [organizationId] = useState<string | undefined>(
     searchParams.get('id') ?? undefined,
   );
   const { accessToken } = useAuth();
@@ -22,9 +22,9 @@ export default function AssignAdminPage() {
     AppNotificationType | undefined
   >(undefined);
 
-  async function dispatchCreateRequest(dto: CreateHospitalAdminDto) {
+  async function dispatchCreateRequest(dto: CreateOrganizationManagerDto) {
     const request = createQueryFunction<ViewUserDto>({
-      path: API_PATHS.assignHospitalAdmin,
+      path: API_PATHS.assignOrganizationManager,
       method: 'POST',
       accessToken,
       payload: dto,
@@ -54,11 +54,11 @@ export default function AssignAdminPage() {
       {notification && <AppNotification notification={notification} />}
       {isLoading && <AppLoader />}
       <AddUserForm
-        userType="hospitalAdmin"
+        userType="organizationManager"
         onFormSubmit={(data) =>
-          dispatchCreateRequest(data as CreateHospitalAdminDto)
+          dispatchCreateRequest(data as CreateOrganizationManagerDto)
         }
-        hospitalId={hospitalId}
+        organizationId={organizationId}
       />
     </div>
   );

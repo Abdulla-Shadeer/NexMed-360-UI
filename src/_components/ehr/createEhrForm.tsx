@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm } from '@tanstack/react-form';
-import { AddClinicRecordDto, ViewClinicRecordDto } from '_types/dtos';
+import { AddClinicalRecordDto, ViewClinicalRecordDto } from '_types/dtos';
 import { DateInput, Form, TextInput } from '../input';
 import { SecondaryButton } from '../buttons';
 import { IconArrowRight, IconDocumentCheck, IconTrash } from '../icons/icons';
@@ -13,15 +13,15 @@ import { useAuth } from '_context';
 import AppLoader from '../misc/loader';
 
 /**
- * This will return partial `AddClinicRecordDto` without `AddPrescriptionDto`.
+ * This will return partial `AddClinicalRecordDto` without `AddPrescriptionDto`.
  */
 export default function CreateEhrForm({
   defaultData,
   onFormSubmit,
   onNotification,
 }: {
-  defaultData?: AddClinicRecordDto;
-  onFormSubmit: (data: AddClinicRecordDto) => void;
+  defaultData?: AddClinicalRecordDto;
+  onFormSubmit: (data: AddClinicalRecordDto) => void;
   onNotification: (Notification: AppNotificationType) => void;
 }) {
   const [saveWithoutPrescriptions, setSaveWithoutPrescriptions] =
@@ -29,9 +29,9 @@ export default function CreateEhrForm({
   const { createQueryFunction, isLoading } = useQueryFunction();
   const { accessToken } = useAuth();
 
-  async function save(data: AddClinicRecordDto) {
-    const save = createQueryFunction<ViewClinicRecordDto>({
-      path: API_PATHS.addClinicRecord,
+  async function save(data: AddClinicalRecordDto) {
+    const save = createQueryFunction<ViewClinicalRecordDto>({
+      path: API_PATHS.addClinicalRecord,
       method: 'POST',
       accessToken,
       payload: data,
@@ -112,7 +112,7 @@ export default function CreateEhrForm({
           )}
         </Field>
 
-        <Field name="doctorNotes">
+        <Field name="practitionerNotes">
           {(field) => (
             <TextInput
               name={field.name}

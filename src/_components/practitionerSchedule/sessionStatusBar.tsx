@@ -21,20 +21,20 @@ import AppLoader from '../misc/loader';
 import EncounterStatusBar from './encounterStatusBar';
 import ConfirmationDialog from '../popup/confirmationDialog';
 
-export function DoctorSessionBar({
-  doctorId,
-  hospitalId,
+export function PractitionerScheduleBar({
+  practitionerRoleId,
+  organizationId,
   onError,
 }: {
-  doctorId: string;
-  hospitalId: string;
+  practitionerRoleId: string;
+  organizationId: string;
   onError: (error?: AppNotificationType) => void;
 }) {
   const { accessToken } = useAuth();
   const filter = {
     date: toDefaultDateFormat(new Date()),
-    doctorId,
-    hospitalId,
+    practitionerRoleId,
+    organizationId,
   } as FilterSessionsForCurrentDayDto;
   const {
     data: hasAnySessionToday,
@@ -146,7 +146,7 @@ function SessionStatus({
 
   async function startSession(sessionId: string) {
     const start = createQueryFunction<ViewSessionHistoryDto>({
-      path: API_PATHS.startDoctorSession(sessionId),
+      path: API_PATHS.startPractitionerSchedule(sessionId),
       method: 'GET',
       accessToken,
     });
@@ -176,7 +176,7 @@ function SessionStatus({
     };
 
     const update = createQueryFunction<ViewSessionHistoryDto>({
-      path: API_PATHS.updateDoctorSessionHistory,
+      path: API_PATHS.updatePractitionerScheduleHistory,
       method: 'POST',
       accessToken,
       payload: body,
@@ -314,7 +314,7 @@ function SessionStatus({
               <div className="lg:w-[70%] md:w-full sm:w-full lg:mt-0 md:mt-4 sm:mt-4">
                 <EncounterStatusBar
                   onNotification={(notification) => onError(notification)}
-                  doctorSessionId={data.sessionId}
+                  practitionerScheduleId={data.sessionId}
                 />
               </div>
             )}

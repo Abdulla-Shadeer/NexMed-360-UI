@@ -19,6 +19,9 @@ export interface ApiResultDto<T> {
 }
 
 export interface ViewUserDto {
+  personId: string;
+  practitionerRoleProfiles: ViewPractitionerRoleDto[];
+  memberships: ViewOrganizationMemberDto[];
   id: string;
   firstName: string;
   lastName: string;
@@ -26,9 +29,9 @@ export interface ViewUserDto {
   phoneNumber: string;
   roles: string[];
   patientProfile?: ViewPatientDto;
-  doctorProfile?: ViewDoctorDto;
-  receptionistProfile?: ViewReceptionistDto;
-  hospitalAdminProfile?: ViewHospitalAdminDto;
+  practitionerRoleProfile?: ViewPractitionerRoleDto;
+  organizationMemberProfile?: ViewOrganizationMemberDto;
+  organizationManagerProfile?: ViewOrganizationManagerDto;
 }
 
 export interface LoginResponseDto {
@@ -43,14 +46,14 @@ export interface OverviewDto {
   name: string;
 }
 
-export interface DoctorOverviewDto extends OverviewDto {
+export interface PractitionerRoleOverviewDto extends OverviewDto {
   totalPatientsTreated: DatewiseStatsDto;
   upcomingAppointments: number;
   pendingAppointments: number;
   recentAppointments: ViewAppointmentDto[];
 }
 
-export interface HospitalOverviewDto extends OverviewDto {
+export interface OrganizationOverviewDto extends OverviewDto {
   totalPatients: DatewiseStatsDto;
   availableBeds: CapacityDto;
   staffOnDutyToday?: CapacityDto;
@@ -69,7 +72,7 @@ export interface PatientOverviewDto extends OverviewDto {
 
 export interface SystemOverviewDto extends OverviewDto {
   totalPatients: number;
-  totalHospitals: number;
+  totalOrganizations: number;
   totalMedicalStaff: number;
   totalUsers: number;
   totalEHRs: number;
@@ -105,13 +108,13 @@ export interface ViewAppointmentDto {
   patientName: string;
   patientEmail: string;
   patientPhone: string;
-  doctorId: string;
-  doctorName: string;
-  doctorSpeciality: string;
-  hospitalId: string;
-  hospitalName: string;
-  hospitalAddress: string;
-  hospitalPhone: string;
+  practitionerRoleId: string;
+  practitionerName: string;
+  practitionerSpecialty: string;
+  organizationId: string;
+  organizationName: string;
+  organizationAddress: string;
+  organizationPhone: string;
   createdByUserId: string;
   createdByUserName: string;
   appointmentDateTime: string;
@@ -128,8 +131,8 @@ export interface CreateAppointmentDto {
 
 export interface ViewAppointmentsFilterDto {
   patientId?: string;
-  doctorId?: string;
-  hospitalId?: string;
+  practitionerRoleId?: string;
+  organizationId?: string;
   fromDate?: string;
   toDate?: string;
   status?: AppointmentStatusDto;
@@ -138,7 +141,7 @@ export interface ViewAppointmentsFilterDto {
 export interface ModifyAppointmentDto {
   id: string;
   patientId?: string;
-  doctorId?: string;
+  practitionerRoleId?: string;
   appointmentDateTime?: string;
   remarks?: string;
 }
@@ -151,12 +154,13 @@ export interface CancellationRequestDto {
 // Search
 // ******
 export interface SearchDto {
-  entity: 'patient' | 'doctor' | 'hospital';
+  entity: 'patient' | 'practitionerRole' | 'organization';
   inputType: 'name' | 'fullName' | 'email';
   input: string;
 }
 
-export interface ViewHospitalDto {
+export interface ViewOrganizationDto {
+  type?: string;
   id: string;
   name: string;
   street?: string;
@@ -167,19 +171,22 @@ export interface ViewHospitalDto {
   admins?: ViewUserDto[];
 }
 
-export interface ViewDoctorDto {
+export interface ViewPractitionerRoleDto {
+  practitionerId: string;
+  roleName: string;
   id: string;
   userId: string;
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
-  speciality: string;
-  hospitalId: string;
-  hospitalName: string;
+  specialty: string;
+  organizationId: string;
+  organizationName: string;
 }
 
 export interface ViewPatientDto {
+  personId: string;
   id: string;
   userId: string;
   firstName: string;
@@ -190,18 +197,18 @@ export interface ViewPatientDto {
   gender: string;
 }
 
-export interface ViewHospitalAdminDto {
+export interface ViewOrganizationManagerDto {
   id: string;
   userId: string;
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
-  hospitalId: string;
-  hospitalName: string;
+  organizationId: string;
+  organizationName: string;
 }
 
-export interface ViewReceptionistDto {
+export interface ViewOrganizationMemberDto {
   id: string;
   userId: string;
   firstName: string;
@@ -210,11 +217,12 @@ export interface ViewReceptionistDto {
   phoneNumber: string;
   location?: string;
   department?: string;
-  hospitalId: string;
-  hospitalName: string;
+  organizationId: string;
+  organizationName: string;
 }
 
-export interface CreateHospitalDto {
+export interface CreateOrganizationDto {
+  type?: string;
   name: string;
   street?: string;
   city?: string;
@@ -222,7 +230,8 @@ export interface CreateHospitalDto {
   phone: string;
   grade?: string;
 }
-export interface UpdateHospitalDto {
+export interface UpdateOrganizationDto {
+  type?: string;
   id: string;
   name?: string;
   street?: string;
@@ -240,20 +249,21 @@ export interface RegisterUserDto {
   password: string;
 }
 
-export interface CreateHospitalAdminDto {
+export interface CreateOrganizationManagerDto {
   personalInformation: RegisterUserDto;
-  hospitalId: string;
+  organizationId: string;
 }
 
-export interface CreateDoctorDto {
+export interface CreatePractitionerRoleDto {
+  roleName?: string;
   personalInformation: RegisterUserDto;
-  hospitalId: string;
-  speciality: string;
+  organizationId: string;
+  specialty: string;
 }
 
-export interface CreateReceptionistDto {
+export interface CreateOrganizationMemberDto {
   personalInformation: RegisterUserDto;
-  hospitalId: string;
+  organizationId: string;
   department: string;
   location: string;
 }
@@ -266,10 +276,10 @@ export interface CreatePatientDto {
 
 export interface ViewPrescriptionDto {
   id: string;
-  clinicRecordId: string;
+  clinicalRecordId: string;
   issuedOn: string;
-  issuedByDoctor: string;
-  issuedAtHospital: string;
+  issuedByPractitioner: string;
+  issuedAtOrganization: string;
   medicineName: string;
   dosage: string;
   timesPerDay: number;
@@ -279,23 +289,24 @@ export interface ViewPrescriptionDto {
   isActive: boolean;
 }
 
-export interface ViewClinicRecordDto {
+export interface ViewClinicalRecordDto {
   id: string;
   patientId: string;
   patientName: string;
-  doctorId: string;
-  doctorName: string;
+  practitionerRoleId: string;
+  practitionerName: string;
   visitDate: string;
   diagnosis: string;
-  doctorNotes?: string;
+  practitionerNotes?: string;
   followUpDate?: string;
   prescriptions?: ViewPrescriptionDto[];
 }
 
-export interface AddClinicRecordDto {
+export interface AddClinicalRecordDto {
+  practitionerRoleId: string;
   patientId: string;
   diagnosis: string;
-  doctorNotes?: string;
+  practitionerNotes?: string;
   visitDate: string;
   followUpDate?: string;
   prescriptions?: AddPrescriptionDto[];
@@ -310,20 +321,20 @@ export interface AddPrescriptionDto {
   notes?: string;
 }
 
-export interface SearchDoctorDto {
+export interface SearchPractitionerRoleDto {
   name?: string;
   email?: string;
-  speciality?: string;
+  specialty?: string;
 }
 
-export interface ViewDoctorSessionDto {
+export interface ViewPractitionerScheduleDto {
   id: string;
-  doctorId: string;
+  practitionerRoleId: string;
   startTime: string;
   endTime: string;
-  hospitalId: string;
-  hospitalName: string;
-  hospitalAddress: string;
+  organizationId: string;
+  organizationName: string;
+  organizationAddress: string;
   slotDurationMinutes: string;
   totalSlots: string;
   occurrences: SessionOccurrenceDto[];
@@ -359,19 +370,19 @@ export interface GetSessionSlotsDto {
   date: string;
 }
 
-export interface CreateDoctorSessionDto {
-  doctorId: string;
+export interface CreatePractitionerScheduleDto {
+  practitionerRoleId: string;
   startTime: string;
   endTime: string;
-  hospitalId: string;
+  organizationId: string;
   slotDurationMinutes?: number;
   occurrences: SessionOccurrenceDto[];
 }
 
-export interface FilterDoctorSessionDto {
+export interface FilterPractitionerScheduleDto {
   date?: string;
-  hospitalId?: string;
-  doctorId?: string;
+  organizationId?: string;
+  practitionerRoleId?: string;
   sessionStatus?: SessionStatusDto;
   isActive?: boolean;
 }
@@ -384,8 +395,8 @@ export enum SessionStatusDto {
 
 export interface FilterSessionsForCurrentDayDto {
   date: string;
-  doctorId: string;
-  hospitalId: string;
+  practitionerRoleId: string;
+  organizationId: string;
 }
 
 export interface ViewCurrentOrNextSessionDto {
@@ -401,9 +412,9 @@ export interface ViewCurrentOrNextSessionDto {
 
 export interface ViewSessionHistoryDto {
   id: string;
-  doctorSessionId: string;
-  doctorName: string;
-  doctorSpeciality: string;
+  practitionerScheduleId: string;
+  practitionerName: string;
+  practitionerSpecialty: string;
   date: string;
   startTime: string;
   endTime: string;
@@ -421,7 +432,7 @@ export interface UpdateSessionHistoryDto {
   lastKnownAppointmentId?: string;
 }
 
-export interface UpdateDoctorSessionDto {
+export interface UpdatePractitionerScheduleDto {
   startTime: string;
   endTime: string;
   slotDurationMinutes: number;

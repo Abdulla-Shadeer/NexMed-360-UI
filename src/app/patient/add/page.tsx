@@ -1,6 +1,6 @@
 'use client';
 
-import AddUserForm from '@/components/hospital/addUserForm';
+import AddUserForm from '@/components/organization/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';

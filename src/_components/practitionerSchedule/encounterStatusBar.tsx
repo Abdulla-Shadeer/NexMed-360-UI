@@ -8,10 +8,10 @@ import ConfirmationDialog from '../popup/confirmationDialog';
 
 export default function EncounterStatusBar({
   onNotification,
-  doctorSessionId,
+  practitionerScheduleId,
 }: {
   onNotification: (notification: AppNotificationType | undefined) => void;
-  doctorSessionId: string;
+  practitionerScheduleId: string;
 }) {
   const {
     startEncounter,
@@ -95,7 +95,7 @@ export default function EncounterStatusBar({
                 promptRequired: true,
                 onConfirm: (prompt) => {
                   setConfirmationContext(undefined);
-                  startEncounter(doctorSessionId, prompt!);
+                  startEncounter(practitionerScheduleId, prompt!);
                 },
                 onClose: () => setConfirmationContext(undefined),
               });

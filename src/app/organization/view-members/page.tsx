@@ -13,8 +13,8 @@ import { randomUUID } from 'crypto';
 export default function ViewMembersPage() {
   const { accessToken, user } = useAuth();
   const queryKey: ApiRequestOption = {
-    path: API_PATHS.getHospitalMembers(
-      user?.hospitalAdminProfile?.hospitalId ?? randomUUID(),
+    path: API_PATHS.getOrganizationMembers(
+      user?.organizationManagerProfile?.organizationId ?? randomUUID(),
     ),
     method: 'GET',
     accessToken,
@@ -28,7 +28,9 @@ export default function ViewMembersPage() {
       {<RefreshData queryKey={queryKey} />}
       <div className="w-full flex flex-row gap-6 flex-wrap">
         {data?.map((dto) => {
-          const memberType = dto.doctorProfile ? 'Doctor' : 'Receptionist';
+          const memberType = dto.practitionerRoleProfile
+            ? 'PractitionerRole'
+            : 'OrganizationMember';
           return (
             <div key={dto.id + memberType} className="w-[373px] bg-background">
               {unknownObjectRenderer(dto, memberType)}

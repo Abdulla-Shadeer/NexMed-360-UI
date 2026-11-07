@@ -23,9 +23,9 @@ import {
 } from '_context/_encounter/encounterContext';
 import { AppNotificationType as AppNotificationType } from '_types/common';
 import {
-  AddClinicRecordDto,
+  AddClinicalRecordDto,
   AddPrescriptionDto,
-  ViewClinicRecordDto,
+  ViewClinicalRecordDto,
 } from '_types/dtos';
 import { toDefaultDateFormat } from '_utils/dateUtils';
 import { useEffect, useMemo, useState } from 'react';
@@ -34,9 +34,11 @@ const stepButtonStyle =
   'text-default text-left py-1 px-2 border-border-primary border-default cursor-pointer';
 
 export default function CreateEHR() {
+  const { accessToken, user } = useAuth();
   const { isActive, isLoading, meta } = useEncounter();
-  const [defaultEHR, setDefaultEHR] = useState<AddClinicRecordDto>({
+  const [defaultEHR, setDefaultEHR] = useState<AddClinicalRecordDto>({
     patientId: '',
+    practitionerRoleId: user?.practitionerRoleProfile?.id ?? '',
     diagnosis: '',
     visitDate: toDefaultDateFormat(new Date()),
   });
@@ -53,17 +55,16 @@ export default function CreateEHR() {
   const [step, setStep] = useState<'Create EHR' | 'Create Prescriptions'>(
     'Create EHR',
   );
-  const [EHR, setEHR] = useState<AddClinicRecordDto | undefined>(undefined);
+  const [EHR, setEHR] = useState<AddClinicalRecordDto | undefined>(undefined);
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
   const { createQueryFunction } = useQueryFunction();
   const [isAddingEhr, setIsAddingEhr] = useState(false);
-  const { accessToken } = useAuth();
 
   async function createEHR() {
-    const create = createQueryFunction<ViewClinicRecordDto>({
-      path: API_PATHS.addClinicRecord,
+    const create = createQueryFunction<ViewClinicalRecordDto>({
+      path: API_PATHS.addClinicalRecord,
       method: 'POST',
       accessToken,
       payload: EHR,
@@ -265,7 +266,7 @@ function EhrInfo({
   onConfirm,
   onReset,
 }: {
-  ehr?: AddClinicRecordDto;
+  ehr?: AddClinicalRecordDto;
   encounterMeta: EncounterMeta;
   onReset: () => void;
   onConfirm: () => void;
@@ -287,22 +288,22 @@ function EhrInfo({
         )}
       </p>
       <p>
-        Doctor:
-        {user?.doctorProfile ? (
-          <span className="font-semibold ml-1">{` Dr. ${user.doctorProfile?.firstName} ${user.doctorProfile?.lastName}`}</span>
+        PractitionerRole:
+        {user?.practitionerRoleProfile ? (
+          <span className="font-semibold ml-1">{` ${user.practitionerRoleProfile?.firstName} ${user.practitionerRoleProfile?.lastName}`}</span>
         ) : (
           <span>~</span>
         )}
       </p>
       <p>
-        Hospital:
+        Organization:
         {encounterMeta.appointmentData ? (
           <span className="font-semibold ml-1">
-            {encounterMeta.appointmentData.hospitalName}
+            {encounterMeta.appointmentData.organizationName}
           </span>
         ) : (
           <span className="font-semibold ml-1">
-            {user?.doctorProfile?.hospitalName ?? '~'}
+            {user?.practitionerRoleProfile?.organizationName ?? '~'}
           </span>
         )}
       </p>
@@ -316,8 +317,8 @@ function EhrInfo({
       </p>
       <p>
         Notes:
-        {ehr?.doctorNotes ? (
-          <span className="font-semibold ml-1">{ehr.doctorNotes}</span>
+        {ehr?.practitionerNotes ? (
+          <span className="font-semibold ml-1">{ehr.practitionerNotes}</span>
         ) : (
           <span>~</span>
         )}

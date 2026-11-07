@@ -3,7 +3,7 @@
 import ViewAppointmentCard from '@/components/appointments/viewAppointmentCard';
 import { SecondaryButton } from '@/components/buttons';
 import PatientIdForm from '@/components/forms/patientIdForm';
-import AddUserForm from '@/components/hospital/addUserForm';
+import AddUserForm from '@/components/organization/addUserForm';
 import { IconIdentification, IconTrash } from '@/components/icons/icons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
@@ -130,7 +130,7 @@ function ReceivePatient({
       status: AppointmentStatusDto.Confirmed,
     };
     const load = createQueryFunction<ViewAppointmentDto[]>({
-      path: API_PATHS.viewHospitalAppointments,
+      path: API_PATHS.viewOrganizationAppointments,
       method: 'GET',
       accessToken,
       queryParams: appointmentFilter,
@@ -300,7 +300,7 @@ function OngoingSessions({
               >
                 <h2 className="text-title text-center text-green-primary pb-1 mb-2 border-b-2 border-border-primary border-dashed">{`${to12HourFormat(session.startTime)} - ${to12HourFormat(session.endTime)}`}</h2>
                 <p>
-                  Dr. {session.doctorName} ({session.doctorSpeciality})
+                  {session.practitionerName} ({session.practitionerSpecialty})
                 </p>
                 <p>Started at: {to12HourFormat(session.startedTime)}</p>
                 <p>Patients arrived: {session.encountersCount}</p>

@@ -1,6 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import {
-  CreateDoctorSessionDto,
+  CreatePractitionerScheduleDto,
   SessionOccurrenceDto,
   AppNotificationType,
 } from '@/types';
@@ -10,20 +10,21 @@ import AppIcon from '../icons/appIcon';
 import { IconBell, IconCalendarDays, IconTrash } from '../icons/icons';
 import { Form, TextInput, NumberInput, CheckBoxInput } from '../input';
 import TimeInput from '../input/timeInput';
-import DoctorSearch from '../search/doctorSearch';
+import PractitionerRoleSearch from '../search/practitionerRoleSearch';
 
-export default function CreateDoctorSessionForm({
+export default function CreatePractitionerScheduleForm({
   defaultData,
   onFormSubmit,
   onNotification,
 }: {
-  defaultData: CreateDoctorSessionDto;
-  onFormSubmit: (data: CreateDoctorSessionDto) => void;
+  defaultData: CreatePractitionerScheduleDto;
+  onFormSubmit: (data: CreatePractitionerScheduleDto) => void;
   onNotification: (notification: AppNotificationType | undefined) => void;
 }) {
-  const [doctorUnavailableError, setDoctorUnavailableError] = useState<
-    string | undefined
-  >(undefined);
+  const [
+    practitionerRoleUnavailableError,
+    setPractitionerRoleUnavailableError,
+  ] = useState<string | undefined>(undefined);
 
   const { Field, Subscribe, handleSubmit, reset, setFieldValue } = useForm({
     defaultValues: defaultData,
@@ -35,37 +36,37 @@ export default function CreateDoctorSessionForm({
 
   return (
     <div className="w-full space-y-6">
-      {!defaultData.doctorId && (
-        <DoctorSearch
-          onDoctorSelect={(dr) => {
-            // show error if selected doctor isn't available at the hospital
-            if (dr?.hospitalId !== defaultData.hospitalId) {
-              setFieldValue('doctorId', '');
-              setDoctorUnavailableError(
-                `Dr. ${dr?.firstName} ${dr?.lastName} isn't available at your hospital.`,
+      {!defaultData.practitionerRoleId && (
+        <PractitionerRoleSearch
+          onPractitionerRoleSelect={(dr) => {
+            // show error if selected practitionerRole isn't available at the organization
+            if (dr?.organizationId !== defaultData.organizationId) {
+              setFieldValue('practitionerRoleId', '');
+              setPractitionerRoleUnavailableError(
+                `${dr?.firstName} ${dr?.lastName} isn't available at your organization.`,
               );
             } else {
-              setDoctorUnavailableError(undefined);
-              setFieldValue('doctorId', dr?.id ?? '');
+              setPractitionerRoleUnavailableError(undefined);
+              setFieldValue('practitionerRoleId', dr?.id ?? '');
             }
           }}
           onError={(error) => onNotification(error)}
         />
       )}
 
-      {doctorUnavailableError && (
+      {practitionerRoleUnavailableError && (
         <p className="w-full text-red-primary/80 inline-flex gap-2 border-2 rounded-default p-6 bg-red-50 border-red-300">
           <AppIcon icon={IconBell} />
-          {doctorUnavailableError}
+          {practitionerRoleUnavailableError}
         </p>
       )}
 
-      <Form action={handleSubmit} title="Create Doctor Session">
+      <Form action={handleSubmit} title="Create Practitioner Session">
         <Field
-          name="doctorId"
+          name="practitionerRoleId"
           validators={{
             onChange: ({ value }) =>
-              !value ? 'Doctor ID is required!' : undefined,
+              !value ? 'Practitioner ID is required!' : undefined,
           }}
         >
           {(field) => (
@@ -75,12 +76,12 @@ export default function CreateDoctorSessionForm({
               onChange={field.handleChange}
               error={field.state.meta.errorMap.onChange ?? ''}
               required
-              disabled={defaultData.doctorId.length > 0}
+              disabled={defaultData.practitionerRoleId.length > 0}
             />
           )}
         </Field>
 
-        <Field name="hospitalId">
+        <Field name="organizationId">
           {(field) => (
             <TextInput
               name={field.name}

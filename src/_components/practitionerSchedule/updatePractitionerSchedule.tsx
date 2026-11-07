@@ -1,16 +1,16 @@
 import { useForm } from '@tanstack/react-form';
-import { SessionOccurrenceDto, UpdateDoctorSessionDto } from '@/types';
+import { SessionOccurrenceDto, UpdatePractitionerScheduleDto } from '@/types';
 import { SecondaryButton } from '../buttons';
 import { IconCalendarDays, IconTrash } from '../icons/icons';
 import { Form, NumberInput, CheckBoxInput } from '../input';
 import TimeInput from '../input/timeInput';
 
-export default function UpdateDoctorSessionForm({
+export default function UpdatePractitionerScheduleForm({
   defaultData,
   onFormSubmit,
 }: {
-  defaultData: UpdateDoctorSessionDto;
-  onFormSubmit: (data: UpdateDoctorSessionDto) => void;
+  defaultData: UpdatePractitionerScheduleDto;
+  onFormSubmit: (data: UpdatePractitionerScheduleDto) => void;
 }) {
   const { Field, Subscribe, handleSubmit, reset } = useForm({
     defaultValues: defaultData,
@@ -30,7 +30,7 @@ export default function UpdateDoctorSessionForm({
 
   return (
     <div className="w-full space-y-6">
-      <Form action={handleSubmit} title="Update Doctor Session">
+      <Form action={handleSubmit} title="Update Practitioner Session">
         <Field
           name="startTime"
           validators={{

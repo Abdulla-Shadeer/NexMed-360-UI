@@ -28,13 +28,13 @@ export default function ViewAppointmentsTable({
         cell: (info) => info.getValue(),
         header: 'Patient',
       }),
-      columnHelper.accessor('doctorName', {
+      columnHelper.accessor('practitionerName', {
         cell: (info) => info.getValue(),
-        header: 'Doctor',
+        header: 'PractitionerRole',
       }),
-      columnHelper.accessor('hospitalName', {
+      columnHelper.accessor('organizationName', {
         cell: (info) => info.getValue(),
-        header: 'Hospital',
+        header: 'Organization',
       }),
       columnHelper.accessor('appointmentDateTime', {
         cell: (info) => (

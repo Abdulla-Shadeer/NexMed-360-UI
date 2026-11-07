@@ -10,11 +10,11 @@ import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
 import { useAuth } from '_context';
 import { AppNotificationType as AppNotificationType } from '_types/common';
-import { UpdateHospitalDto, ViewHospitalDto } from '_types/dtos';
+import { UpdateOrganizationDto, ViewOrganizationDto } from '_types/dtos';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
-export default function EditHospital({
+export default function EditOrganization({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -22,8 +22,8 @@ export default function EditHospital({
   const { id } = use(params);
   const router = useRouter();
   const { accessToken } = useAuth();
-  const { data, error, isLoading } = useAppQuery<ViewHospitalDto>({
-    path: API_PATHS.getHospitalById(id),
+  const { data, error, isLoading } = useAppQuery<ViewOrganizationDto>({
+    path: API_PATHS.getOrganizationById(id),
     method: 'GET',
     accessToken,
   });
@@ -33,9 +33,9 @@ export default function EditHospital({
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
-  const [defaultData, setDefaultData] = useState<UpdateHospitalDto | undefined>(
-    data,
-  );
+  const [defaultData, setDefaultData] = useState<
+    UpdateOrganizationDto | undefined
+  >(data);
 
   useEffect(() => {
     if (data) {
@@ -43,9 +43,9 @@ export default function EditHospital({
     }
   }, [data]);
 
-  async function dispatchUpdate(data: UpdateHospitalDto) {
-    const request = createQueryFunction<ViewHospitalDto>({
-      path: API_PATHS.updateHospital,
+  async function dispatchUpdate(data: UpdateOrganizationDto) {
+    const request = createQueryFunction<ViewOrganizationDto>({
+      path: API_PATHS.updateOrganization,
       method: 'PUT',
       accessToken,
       payload: data,
@@ -63,6 +63,7 @@ export default function EditHospital({
         district: updateResponse.data?.district,
         phone: updateResponse.data?.phone,
         grade: updateResponse.data?.grade,
+        type: updateResponse.data?.type,
       };
       setDefaultData(newDefaultData);
       reset(newDefaultData);
@@ -81,9 +82,9 @@ export default function EditHospital({
     }
   }
 
-  function handleUpdate(value: UpdateHospitalDto) {
+  function handleUpdate(value: UpdateOrganizationDto) {
     if (defaultData !== value) {
-      const modifyDto: UpdateHospitalDto = {
+      const modifyDto: UpdateOrganizationDto = {
         id: value.id,
         name: defaultData?.name !== value.name ? value.name : undefined,
         street: defaultData?.street !== value.street ? value.street : undefined,
@@ -116,7 +117,7 @@ export default function EditHospital({
       </button>
 
       {data && (
-        <Form title="Update hospital" action={handleSubmit}>
+        <Form title="Update organization" action={handleSubmit}>
           <Field name="id">
             {(field) => (
               <TextInput
@@ -191,6 +192,18 @@ export default function EditHospital({
                 error={field.state.meta.errorMap.onChange ?? ''}
                 required
                 onChange={(value) => field.handleChange(value)}
+              />
+            )}
+          </Field>
+
+          <Field name="type">
+            {(field) => (
+              <TextInput
+                name={field.name}
+                description="For example, Hospital or Clinic"
+                value={field.state.value ?? ''}
+                onChange={field.handleChange}
+                error=""
               />
             )}
           </Field>

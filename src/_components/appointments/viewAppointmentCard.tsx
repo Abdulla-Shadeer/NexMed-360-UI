@@ -24,13 +24,16 @@ export default function ViewAppointmentCard({
       </div>
       <KeyValueData _key="Patient" value={appointment.patientName} />
       <KeyValueData
-        _key="Doctor"
-        value={`Dr. ${appointment.doctorName} (${appointment.doctorSpeciality})`}
+        _key="PractitionerRole"
+        value={`${appointment.practitionerName} (${appointment.practitionerSpecialty})`}
       />
       <KeyValueData _key="Booked By" value={appointment.createdByUserName} />
-      <KeyValueData _key="Hospital" value={appointment.hospitalName} />
-      <KeyValueData _key="Location" value={appointment.hospitalAddress} />
-      <KeyValueData _key="Hospital Contact" value={appointment.hospitalPhone} />
+      <KeyValueData _key="Organization" value={appointment.organizationName} />
+      <KeyValueData _key="Location" value={appointment.organizationAddress} />
+      <KeyValueData
+        _key="Organization Contact"
+        value={appointment.organizationPhone}
+      />
       <KeyValueData
         _key="Patient Contact"
         value={`${appointment.patientPhone}, ${appointment.patientEmail}`}

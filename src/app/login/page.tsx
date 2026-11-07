@@ -51,7 +51,7 @@ export default function Login() {
         <div className="lg:w-[50%] md:w-full sm:w-full object-fill flex flex-col gap-12 bg-background p-14 rounded-tr-large rounded-br-large border-r-default border-border-primary">
           <Image src={AppLogo} alt="Logo" className="w-full" priority />
           <p className="text-default text-left">
-            Securely log in to access your hospital&apos;s dashboard, manage
+            Securely log in to access your organization&apos;s dashboard, manage
             patients, appointments, staff, and medical records, all in one
             unified platform designed for seamless healthcare operations.
           </p>

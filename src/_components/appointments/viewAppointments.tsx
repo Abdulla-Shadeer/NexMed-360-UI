@@ -22,7 +22,7 @@ export default function ViewAppointments({
   type,
   title,
 }: {
-  type: 'own' | 'hospital';
+  type: 'own' | 'organization';
   title: string;
 }) {
   const { accessToken, user } = useAuth();
@@ -33,7 +33,7 @@ export default function ViewAppointments({
       path:
         type === 'own'
           ? API_PATHS.viewOwnAppointments
-          : API_PATHS.viewHospitalAppointments,
+          : API_PATHS.viewOrganizationAppointments,
       method: 'GET',
       queryParams: filter,
       accessToken,
@@ -65,7 +65,8 @@ export default function ViewAppointments({
   function AppointmentFilter() {
     return (
       <Form title="Filter Appointments" action={handleSubmit}>
-        {(type === 'hospital' || user?.roles.includes(USER_ROLES.doctor)) && (
+        {(type === 'organization' ||
+          user?.roles.includes(USER_ROLES.practitionerRole)) && (
           <Field name="patientId">
             {(field) => (
               <TextInput
@@ -79,8 +80,9 @@ export default function ViewAppointments({
           </Field>
         )}
 
-        {(type === 'hospital' || user?.roles.includes(USER_ROLES.patient)) && (
-          <Field name="doctorId">
+        {(type === 'organization' ||
+          user?.roles.includes(USER_ROLES.patient)) && (
+          <Field name="practitionerRoleId">
             {(field) => (
               <TextInput
                 name={field.name}
@@ -94,7 +96,7 @@ export default function ViewAppointments({
         )}
 
         {type === 'own' && (
-          <Field name="hospitalId">
+          <Field name="organizationId">
             {(field) => (
               <TextInput
                 name={field.name}

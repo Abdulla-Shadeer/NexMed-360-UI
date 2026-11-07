@@ -1,6 +1,6 @@
 'use client';
 import QuickActionButton from '@/components/buttons/quickActionButton';
-import UpdateDoctorSessionForm from '@/components/doctorSession/updateDoctorSession';
+import UpdatePractitionerScheduleForm from '@/components/practitionerSchedule/updatePractitionerSchedule';
 import AppIcon from '@/components/icons/appIcon';
 import {
   IconCheckCircle,
@@ -25,9 +25,9 @@ import useQueryFunction, {
 import {
   AppNotificationType,
   ConfirmationDialogContext,
-  FilterDoctorSessionDto,
-  UpdateDoctorSessionDto,
-  ViewDoctorSessionDto,
+  FilterPractitionerScheduleDto,
+  UpdatePractitionerScheduleDto,
+  ViewPractitionerScheduleDto,
 } from '@/types';
 import { to12HourFormat } from '_utils/dateUtils';
 import { toNumber } from 'lodash';
@@ -41,21 +41,21 @@ enum CurrentWindow {
 export default function ViewSessionsPage() {
   const { accessToken, user } = useAuth();
   const queryKey: ApiRequestOption = {
-    path: API_PATHS.getDoctorSessions,
+    path: API_PATHS.getPractitionerSchedules,
     method: 'GET',
     accessToken,
   };
-  if (user?.doctorProfile) {
+  if (user?.practitionerRoleProfile) {
     queryKey.queryParams = {
-      ...(queryKey.queryParams as FilterDoctorSessionDto),
-      doctorId: user.doctorProfile.id,
-    } as FilterDoctorSessionDto;
+      ...(queryKey.queryParams as FilterPractitionerScheduleDto),
+      practitionerRoleId: user.practitionerRoleProfile.id,
+    } as FilterPractitionerScheduleDto;
   }
 
   const { isLoading, error, data } =
-    useAppQuery<ViewDoctorSessionDto[]>(queryKey);
+    useAppQuery<ViewPractitionerScheduleDto[]>(queryKey);
   const [sessionToEdit, setSessionToEdit] = useState<
-    ViewDoctorSessionDto | undefined
+    ViewPractitionerScheduleDto | undefined
   >(undefined);
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
@@ -76,9 +76,9 @@ export default function ViewSessionsPage() {
     queryClient.invalidateQueries({ exact: true, queryKey: [queryKey] });
   }
 
-  async function updateSession(data: UpdateDoctorSessionDto) {
-    const update = createQueryFunction<ViewDoctorSessionDto>({
-      path: API_PATHS.updateDoctorSession(sessionToEdit!.id),
+  async function updateSession(data: UpdatePractitionerScheduleDto) {
+    const update = createQueryFunction<ViewPractitionerScheduleDto>({
+      path: API_PATHS.updatePractitionerSchedule(sessionToEdit!.id),
       method: 'PUT',
       accessToken,
       payload: data,
@@ -107,7 +107,7 @@ export default function ViewSessionsPage() {
 
   async function deleteSession(sessionId: string) {
     const deleteSession = createQueryFunction<string>({
-      path: API_PATHS.deleteDoctorSession(sessionId),
+      path: API_PATHS.deletePractitionerSchedule(sessionId),
       method: 'DELETE',
       accessToken,
     });
@@ -240,7 +240,7 @@ export default function ViewSessionsPage() {
                   />
                   {session.isActive ? 'Active' : 'Inactive'}
                 </p>
-                <p className="text-title-small">{session.hospitalName}</p>
+                <p className="text-title-small">{session.organizationName}</p>
                 <p className="text-black-primary inline-flex gap-2">
                   <AppIcon icon={IconClock} />
                   {`${to12HourFormat(session.startTime)} - ${to12HourFormat(session.endTime)}`}
@@ -258,7 +258,7 @@ export default function ViewSessionsPage() {
             ))
           : sessionToEdit && (
               <div className="w-full">
-                <UpdateDoctorSessionForm
+                <UpdatePractitionerScheduleForm
                   defaultData={
                     {
                       startTime: sessionToEdit.startTime,
@@ -268,7 +268,7 @@ export default function ViewSessionsPage() {
                       ),
                       occurrences: sessionToEdit.occurrences,
                       isActive: true,
-                    } as UpdateDoctorSessionDto
+                    } as UpdatePractitionerScheduleDto
                   }
                   onFormSubmit={(data) => updateSession(data)}
                 />

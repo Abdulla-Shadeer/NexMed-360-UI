@@ -16,7 +16,7 @@ import {
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import RefreshData from '@/components/misc/refresh';
-import DoctorSearch from '@/components/search/doctorSearch';
+import PractitionerRoleSearch from '@/components/search/practitionerRoleSearch';
 import { API_PATHS, USER_ROLES } from '@/constants';
 import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
@@ -24,11 +24,11 @@ import { useAuth } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import {
   CreateAppointmentDto,
-  FilterDoctorSessionDto,
+  FilterPractitionerScheduleDto,
   GetSessionSlotsDto,
   ViewAppointmentDto,
-  ViewDoctorDto,
-  ViewDoctorSessionDto,
+  ViewPractitionerRoleDto,
+  ViewPractitionerScheduleDto,
   ViewPatientDto,
   ViewSessionSlotDto,
   AppNotificationType,
@@ -37,14 +37,14 @@ import { to12HourFormat, toDisplayDateTimeFormat } from '_utils/dateUtils';
 import { useEffect, useState } from 'react';
 
 enum CreationSteps {
-  chooseDoctor = 'Choose Doctor',
+  choosePractitionerRole = 'Choose PractitionerRole',
   chooseSession = 'Choose Session',
   chooseSlot = 'Choose Slot',
 }
 
 interface CreationMeta {
-  doctor?: ViewDoctorDto;
-  session?: ViewDoctorSessionDto;
+  practitionerRole?: ViewPractitionerRoleDto;
+  session?: ViewPractitionerScheduleDto;
   date?: string;
   slot?: ViewSessionSlotDto;
   patient?: ViewPatientDto;
@@ -58,7 +58,9 @@ export default function CreateAppointmentPage() {
   const [appointmentType, setappointmentType] = useState<'mySelf' | 'patient'>(
     !user?.roles.includes(USER_ROLES.patient) ? 'patient' : 'mySelf',
   );
-  const [step, setStep] = useState<CreationSteps>(CreationSteps.chooseDoctor);
+  const [step, setStep] = useState<CreationSteps>(
+    CreationSteps.choosePractitionerRole,
+  );
   const [creationMeta, setCreationMeta] = useState<CreationMeta>({
     patient:
       appointmentType === 'mySelf'
@@ -110,7 +112,7 @@ export default function CreateAppointmentPage() {
       setNotification(undefined);
       const appointment = await createAppointment();
       setCreationMeta({ patient: user?.patientProfile });
-      setStep(CreationSteps.chooseDoctor);
+      setStep(CreationSteps.choosePractitionerRole);
       setNotification({
         type: 'success',
         title: 'Appointment Booked Successfully!',
@@ -215,16 +217,16 @@ export default function CreateAppointmentPage() {
             setCreationMeta({
               patient: user?.patientProfile,
             });
-            setStep(CreationSteps.chooseDoctor);
+            setStep(CreationSteps.choosePractitionerRole);
           }}
         />
         <div className="lg:w-[74%] md:w-full sm:w-full p-6 border-default border-border-primary rounded-default bg-background drop-shadow-default flex flex-col gap-6">
           {/* Steps indicator */}
           <div className="flex flex-row items-center gap-1">
             <div
-              className={`${stepButtonStyle} ${step === CreationSteps.chooseDoctor ? 'bg-panel-light text-blue-secondary' : 'bg-disabled text-on-disabled'}`}
+              className={`${stepButtonStyle} ${step === CreationSteps.choosePractitionerRole ? 'bg-panel-light text-blue-secondary' : 'bg-disabled text-on-disabled'}`}
             >
-              01. Select a Doctor
+              01. Select a PractitionerRole
             </div>
             <div
               className={`${stepButtonStyle} ${step === CreationSteps.chooseSession ? 'bg-panel-light text-blue-secondary' : 'bg-disabled text-on-disabled'}`}
@@ -239,13 +241,13 @@ export default function CreateAppointmentPage() {
           </div>
 
           {/* Creation steps */}
-          {step === CreationSteps.chooseDoctor ? (
+          {step === CreationSteps.choosePractitionerRole ? (
             <div className="w-full space-y-6">
-              <DoctorSearch
-                onDoctorSelect={(doctor) =>
+              <PractitionerRoleSearch
+                onPractitionerRoleSelect={(practitionerRole) =>
                   setCreationMeta((prev) => ({
                     ...prev,
-                    doctor,
+                    practitionerRole,
                   }))
                 }
                 onError={(error) => setNotification(error)}
@@ -257,7 +259,7 @@ export default function CreateAppointmentPage() {
                   setStep(CreationSteps.chooseSession);
                   setNotification(undefined);
                 }}
-                disabled={creationMeta.doctor === undefined}
+                disabled={creationMeta.practitionerRole === undefined}
                 withIcon
                 icon={IconArrowRight}
               />
@@ -265,7 +267,7 @@ export default function CreateAppointmentPage() {
           ) : step === CreationSteps.chooseSession ? (
             <div className="w-full space-y-6">
               <SessionSelector
-                doctorId={creationMeta.doctor?.id ?? ''}
+                practitionerRoleId={creationMeta.practitionerRole?.id ?? ''}
                 onSessionSelect={(session) =>
                   setCreationMeta((prev) => ({
                     ...prev,
@@ -347,17 +349,17 @@ function AppointmentDetails({
         )}
       </p>
       <p>
-        Doctor:
-        {creationMeta.doctor ? (
-          <span className="font-semibold">{` Dr. ${creationMeta.doctor?.firstName} ${creationMeta.doctor?.lastName}`}</span>
+        PractitionerRole:
+        {creationMeta.practitionerRole ? (
+          <span className="font-semibold">{` ${creationMeta.practitionerRole?.firstName} ${creationMeta.practitionerRole?.lastName}`}</span>
         ) : (
           <span>~</span>
         )}
       </p>
       <p>
-        Hospital:
-        {creationMeta.doctor ? (
-          <span className="font-semibold">{` ${creationMeta.doctor.hospitalName}`}</span>
+        Organization:
+        {creationMeta.practitionerRole ? (
+          <span className="font-semibold">{` ${creationMeta.practitionerRole.organizationName}`}</span>
         ) : (
           <span>~</span>
         )}
@@ -398,7 +400,7 @@ function AppointmentDetails({
           tw="w-full"
           disabled={
             !(
-              creationMeta.doctor &&
+              creationMeta.practitionerRole &&
               creationMeta.session &&
               creationMeta.date &&
               creationMeta.slot
@@ -419,26 +421,26 @@ function AppointmentDetails({
 }
 
 function SessionSelector({
-  doctorId,
+  practitionerRoleId,
   onSessionSelect,
   onError,
 }: {
-  doctorId: string;
-  onSessionSelect: (session: ViewDoctorSessionDto) => void;
+  practitionerRoleId: string;
+  onSessionSelect: (session: ViewPractitionerScheduleDto) => void;
   onError: (error: AppNotificationType) => void;
 }) {
   const { accessToken } = useAuth();
   const requestOption: ApiRequestOption = {
-    path: API_PATHS.getDoctorSessions,
+    path: API_PATHS.getPractitionerSchedules,
     method: 'GET',
     accessToken,
     queryParams: {
-      doctorId,
+      practitionerRoleId,
       isActive: true,
-    } as FilterDoctorSessionDto,
+    } as FilterPractitionerScheduleDto,
   };
   const { data, error, isLoading } =
-    useAppQuery<ViewDoctorSessionDto[]>(requestOption);
+    useAppQuery<ViewPractitionerScheduleDto[]>(requestOption);
   const [selectedSessionId, setSelectedSessionId] = useState('');
 
   useEffect(() => {
@@ -454,7 +456,7 @@ function SessionSelector({
       <div className="w-full flex flex-row flex-wrap gap-6 max-h-[430px] overflow-auto">
         {isLoading && <AppLoader />}
         {data && data.length === 0 && (
-          <p>No Sessions Found For the Selected Doctor!</p>
+          <p>No Sessions Found For the Selected PractitionerRole!</p>
         )}
         {data &&
           data.map((session) => (
@@ -462,7 +464,7 @@ function SessionSelector({
               key={session.id}
               className={`w-fit bg-background ${selectedSessionId === session.id ? 'border-green-primary border-2' : 'border-border-primary border-default'} rounded-default flex flex-col gap-2 p-6 justify-between`}
             >
-              <p className="text-title-small">{session.hospitalName}</p>
+              <p className="text-title-small">{session.organizationName}</p>
               <p className="text-black-primary inline-flex gap-2">
                 <AppIcon icon={IconClock} />
                 {`${to12HourFormat(session.startTime)} - ${to12HourFormat(session.endTime)}`}

@@ -1,13 +1,13 @@
 import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { KeyValuePair } from '_types/common';
-import { ViewHospitalDto } from '_types/dtos';
+import { ViewOrganizationDto } from '_types/dtos';
 import { SelectInput } from '../input';
 import { AppNotification } from '../misc';
 import AppLoader from '../misc/loader';
 import { useAuth } from '_context';
 
-export default function HospitalSelecter({
+export default function OrganizationSelecter({
   selected,
   onChange,
   fieldError,
@@ -17,8 +17,8 @@ export default function HospitalSelecter({
   fieldError: string;
 }) {
   const { accessToken } = useAuth();
-  const { data, error, isLoading } = useAppQuery<ViewHospitalDto[]>({
-    path: API_PATHS.getAllHospitals,
+  const { data, error, isLoading } = useAppQuery<ViewOrganizationDto[]>({
+    path: API_PATHS.getAllOrganizations,
     method: 'GET',
     accessToken,
   });
@@ -29,7 +29,7 @@ export default function HospitalSelecter({
       {isLoading && <AppLoader />}
       {data && (
         <SelectInput
-          name="Select Hospital"
+          name="Select Organization"
           required
           options={data.map((hs) => {
             const option: KeyValuePair<string, string> = {

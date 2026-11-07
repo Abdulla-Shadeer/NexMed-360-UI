@@ -12,12 +12,12 @@ import AppLoader from './loader';
 import { unknownObjectRenderer } from './unknownObjectRenderer';
 
 interface EntitySearchDto {
-  entity: 'patient' | 'doctor' | 'hospital';
+  entity: 'patient' | 'practitionerRole' | 'organization';
   inputType: 'name' | 'email';
   input: string;
 }
 const defaultDto: EntitySearchDto = {
-  entity: 'hospital',
+  entity: 'organization',
   inputType: 'name',
   input: '',
 };
@@ -35,7 +35,7 @@ export default function EntitySearch({ open = true }: { open?: boolean }) {
   );
 
   const handleEntityChange = (value: string) => {
-    const entity = value as 'patient' | 'doctor' | 'hospital';
+    const entity = value as 'patient' | 'practitionerRole' | 'organization';
     setSearchDto({
       entity,
       inputType: 'name',
@@ -110,7 +110,7 @@ export default function EntitySearch({ open = true }: { open?: boolean }) {
             <div className="w-full flex flex-row flex-wrap gap-8 items-center p-4 bg-background border-2 border-dashed border-border-primary rounded-default mt-3 drop-shadow-default">
               <SelectInput
                 name="Serach Entity"
-                options={['patient', 'doctor', 'hospital']}
+                options={['patient', 'practitionerRole', 'organization']}
                 required
                 error=""
                 onSelect={handleEntityChange}
@@ -121,7 +121,9 @@ export default function EntitySearch({ open = true }: { open?: boolean }) {
               <SelectInput
                 name="Input Type"
                 options={
-                  searchDto.entity === 'hospital' ? ['name'] : ['name', 'email']
+                  searchDto.entity === 'organization'
+                    ? ['name']
+                    : ['name', 'email']
                 }
                 required
                 error=""

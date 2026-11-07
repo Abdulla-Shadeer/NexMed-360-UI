@@ -2,7 +2,7 @@
 import { API_PATHS, USER_ROLES } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
-import { ViewHospitalDto } from '_types/dtos';
+import { ViewOrganizationDto } from '_types/dtos';
 import Link from 'next/link';
 import AppIcon from '../icons/appIcon';
 import { IconArrowLeft, IconEdit } from '../icons/icons';
@@ -14,14 +14,14 @@ import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import QuickActionButton from '../buttons/quickActionButton';
 import RefreshData from '../misc/refresh';
 
-export function ViewHospitalById({ id }: { id: string }) {
+export function ViewOrganizationById({ id }: { id: string }) {
   const { accessToken, user } = useAuth();
   const queryKey: ApiRequestOption = {
-    path: API_PATHS.getHospitalById(id),
+    path: API_PATHS.getOrganizationById(id),
     method: 'GET',
     accessToken,
   };
-  const { data, error, isLoading } = useAppQuery<ViewHospitalDto>(queryKey);
+  const { data, error, isLoading } = useAppQuery<ViewOrganizationDto>(queryKey);
   const router = useRouter();
 
   return (
@@ -38,11 +38,11 @@ export function ViewHospitalById({ id }: { id: string }) {
         {data &&
           user?.roles.some(
             (role) =>
-              role === USER_ROLES.superUser ||
-              role === USER_ROLES.hospitalAdmin,
+              role === USER_ROLES.platformAdmin ||
+              role === USER_ROLES.organizationManager,
           ) && (
             <Link
-              href={`/hospital/edit/${id}`}
+              href={`/organization/edit/${id}`}
               className="text-blue-secondary hover:text-blue-primary py-1 px-2 bg-panel-light rounded-default w-fit flex flex-row items-center gap-2 border-default border-border-primary"
             >
               <AppIcon icon={IconEdit} />
@@ -50,7 +50,7 @@ export function ViewHospitalById({ id }: { id: string }) {
             </Link>
           )}
       </div>
-      {data && unknownObjectRenderer(data, 'Hospital Details')}
+      {data && unknownObjectRenderer(data, 'Organization Details')}
     </div>
   );
 }

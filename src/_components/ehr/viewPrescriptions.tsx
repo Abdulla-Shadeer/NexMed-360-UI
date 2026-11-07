@@ -34,8 +34,8 @@ export default function ViewPrescriptions({
           <KeyValueData _key="Duration" value={item.duration} />
           <KeyValueData _key="Is Chronic Use" value={`${item.isLongTermUse}`} />
           <KeyValueData _key="Note" value={item.notes} />
-          <KeyValueData _key="Issued At" value={item.issuedAtHospital} />
-          <KeyValueData _key="Issued By" value={item.issuedByDoctor} />
+          <KeyValueData _key="Issued At" value={item.issuedAtOrganization} />
+          <KeyValueData _key="Issued By" value={item.issuedByPractitioner} />
           <KeyValueData
             _key="Issued On"
             value={toDisplayDateTimeFormat(new Date(item.issuedOn))}

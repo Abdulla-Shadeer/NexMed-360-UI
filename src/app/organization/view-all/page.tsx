@@ -11,7 +11,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useAuth } from '_context';
-import { ViewHospitalDto } from '@/types';
+import { ViewOrganizationDto } from '@/types';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import AppIcon from '@/components/icons/appIcon';
@@ -19,35 +19,40 @@ import { IconMoreVertical } from '@/components/icons/icons';
 import RefreshData from '@/components/misc/refresh';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 
-export default function ViewAllHospitals() {
+export default function ViewAllOrganizations() {
   const { accessToken } = useAuth();
   const queryKey: ApiRequestOption = {
-    path: API_PATHS.getAllHospitals,
+    path: API_PATHS.getAllOrganizations,
     method: 'GET',
     accessToken,
   };
-  const { data, error, isLoading } = useAppQuery<ViewHospitalDto[]>(queryKey);
+  const { data, error, isLoading } =
+    useAppQuery<ViewOrganizationDto[]>(queryKey);
   return (
     <div className="w-full flex flex-col gap-6">
       {isLoading && <AppLoader />}
       {error && <AppNotification notification={error} />}
       {data && <RefreshData queryKey={queryKey} />}
-      {data && <HospitalTable hospitals={data} />}
+      {data && <OrganizationTable organizations={data} />}
     </div>
   );
 }
 
-function HospitalTable({ hospitals }: { hospitals: ViewHospitalDto[] }) {
-  const columnHelper = createColumnHelper<ViewHospitalDto>();
+function OrganizationTable({
+  organizations,
+}: {
+  organizations: ViewOrganizationDto[];
+}) {
+  const columnHelper = createColumnHelper<ViewOrganizationDto>();
   const { user } = useAuth();
   const [showClipboardNote, setShowClipboardNote] = useState(false);
 
-  function renderHospitalRowActions(row: Row<ViewHospitalDto>) {
+  function renderOrganizationRowActions(row: Row<ViewOrganizationDto>) {
     return (
       <TableRowActions>
         <>
           <Link
-            href={`/hospital/view/${row.original.id}`}
+            href={`/organization/view/${row.original.id}`}
             className="text-default text-blue-secondary hover:text-blue-primary"
           >
             View
@@ -55,20 +60,20 @@ function HospitalTable({ hospitals }: { hospitals: ViewHospitalDto[] }) {
 
           {user?.roles.some(
             (role) =>
-              role === USER_ROLES.superUser ||
-              role === USER_ROLES.hospitalAdmin,
+              role === USER_ROLES.platformAdmin ||
+              role === USER_ROLES.organizationManager,
           ) && (
             <Link
-              href={`/hospital/edit/${row.original.id}`}
+              href={`/organization/edit/${row.original.id}`}
               className="text-default text-blue-secondary hover:text-blue-primary"
             >
               Edit
             </Link>
           )}
 
-          {user?.roles.some((role) => role === USER_ROLES.superUser) && (
+          {user?.roles.some((role) => role === USER_ROLES.platformAdmin) && (
             <Link
-              href={`/hospital/assign-admin?id=${row.original.id}`}
+              href={`/organization/assign-admin?id=${row.original.id}`}
               className="text-default text-blue-secondary hover:text-blue-primary"
             >
               Assign Admin
@@ -115,7 +120,7 @@ function HospitalTable({ hospitals }: { hospitals: ViewHospitalDto[] }) {
       }),
       columnHelper.display({
         header: 'Actions',
-        cell: (info) => renderHospitalRowActions(info.row),
+        cell: (info) => renderOrganizationRowActions(info.row),
       }),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -124,7 +129,7 @@ function HospitalTable({ hospitals }: { hospitals: ViewHospitalDto[] }) {
 
   const table = useReactTable({
     columns,
-    data: hospitals,
+    data: organizations,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -135,7 +140,7 @@ function HospitalTable({ hospitals }: { hospitals: ViewHospitalDto[] }) {
           Copied to clipboard!
         </p>
       )}
-      <CustomTable tableData={table} title="Hospitals" />
+      <CustomTable tableData={table} title="Organizations" />
     </div>
   );
 }

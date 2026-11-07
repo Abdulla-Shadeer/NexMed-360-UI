@@ -11,8 +11,8 @@ import AppLoader from '@/components/misc/loader';
 import DateWiseStats from '@/components/overview/dateWiseStats';
 import SingleStatView from '@/components/overview/singleStatView';
 import {
-  DoctorOverviewDto,
-  HospitalOverviewDto,
+  PractitionerRoleOverviewDto,
+  OrganizationOverviewDto,
   OverviewDto,
   PatientOverviewDto,
   SystemOverviewDto,
@@ -46,11 +46,12 @@ export default function Home() {
         data &&
         data.map((overview) => {
           switch (overview.name) {
-            case 'Doctor':
-              const doctorOverview = overview as DoctorOverviewDto;
+            case 'PractitionerRole':
+              const practitionerRoleOverview =
+                overview as PractitionerRoleOverviewDto;
               return (
-                <DoctorOverview
-                  overview={doctorOverview}
+                <PractitionerRoleOverview
+                  overview={practitionerRoleOverview}
                   key={overview.name}
                   onError={(err) => setTableError(err)}
                 />
@@ -69,11 +70,11 @@ export default function Home() {
               return (
                 <SystemOverview overview={systemOverview} key={overview.name} />
               );
-            case 'Hospital':
-              const hospitalOverview = overview as HospitalOverviewDto;
+            case 'Organization':
+              const organizationOverview = overview as OrganizationOverviewDto;
               return (
-                <HospitalOverview
-                  overview={hospitalOverview}
+                <OrganizationOverview
+                  overview={organizationOverview}
                   key={overview.name}
                   onError={(err) => setTableError(err)}
                 />
@@ -134,15 +135,15 @@ function PatientOverview({
   );
 }
 
-function DoctorOverview({
+function PractitionerRoleOverview({
   overview,
   onError,
 }: {
-  overview: DoctorOverviewDto;
+  overview: PractitionerRoleOverviewDto;
   onError: (error: AppNotificationType) => void;
 }) {
   return (
-    <OverviewFrame title="Doctor Overview">
+    <OverviewFrame title="Practitioner Overview">
       <DateWiseStats
         stats={overview.totalPatientsTreated}
         name="Total Patients Treated"
@@ -177,8 +178,8 @@ function SystemOverview({ overview }: { overview: SystemOverviewDto }) {
         icon={IconDocumentText}
       />
       <SingleStatView
-        data={overview.totalHospitals}
-        name="Total Hospitals"
+        data={overview.totalOrganizations}
+        name="Total Organizations"
         icon={IconBuildingOffice}
       />
       <SingleStatView
@@ -200,15 +201,15 @@ function SystemOverview({ overview }: { overview: SystemOverviewDto }) {
   );
 }
 
-function HospitalOverview({
+function OrganizationOverview({
   overview,
   onError,
 }: {
-  overview: HospitalOverviewDto;
+  overview: OrganizationOverviewDto;
   onError: (error: AppNotificationType) => void;
 }) {
   return (
-    <OverviewFrame title="Hospital Overview">
+    <OverviewFrame title="Organization Overview">
       <DateWiseStats stats={overview.totalPatients} name="Total Patients" />
       <SingleStatView
         data={`${overview.availableBeds.availableCapacity}/${overview.availableBeds.totalCapacity}`}

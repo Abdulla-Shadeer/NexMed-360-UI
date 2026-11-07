@@ -1,14 +1,14 @@
 'use client';
 import { RadioInput } from '@/components/input';
-import AddUserForm from '@/components/hospital/addUserForm';
+import AddUserForm from '@/components/organization/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import {
   AppNotificationType,
-  CreateDoctorDto,
-  CreateReceptionistDto,
+  CreatePractitionerRoleDto,
+  CreateOrganizationMemberDto,
   ViewUserDto,
 } from '@/types';
 import { useAuth } from '_context';
@@ -16,22 +16,22 @@ import { useState } from 'react';
 
 export default function AddMembersPage() {
   const { accessToken, user } = useAuth();
-  const [memberType, setMemberType] = useState<'doctor' | 'receptionist'>(
-    'doctor',
-  );
+  const [memberType, setMemberType] = useState<
+    'practitionerRole' | 'organizationMember'
+  >('practitionerRole');
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
 
   async function dispatchRequest(
-    data: CreateDoctorDto | CreateReceptionistDto,
+    data: CreatePractitionerRoleDto | CreateOrganizationMemberDto,
   ) {
     const request = createQueryFunction<ViewUserDto>({
       path:
-        memberType === 'doctor'
-          ? API_PATHS.addDoctor
-          : API_PATHS.addReceptionist,
+        memberType === 'practitionerRole'
+          ? API_PATHS.addPractitionerRole
+          : API_PATHS.addOrganizationMember,
       method: 'POST',
       accessToken,
       payload: data,
@@ -60,29 +60,33 @@ export default function AddMembersPage() {
       {isLoading && <AppLoader />}
       {notification && <AppNotification notification={notification} />}
       <h2 className="text-title px-1 py-2 bg-panel-light">
-        Add Members to Your Hospital
+        Add Members to Your Organization
       </h2>
       <RadioInput
         name="member type"
-        selectItems={['doctor', 'receptionist']}
+        selectItems={['practitionerRole', 'organizationMember']}
         selectedItem={memberType}
-        onChange={(value) => setMemberType(value as 'doctor' | 'receptionist')}
+        onChange={(value) =>
+          setMemberType(value as 'practitionerRole' | 'organizationMember')
+        }
         error=""
       />
-      {memberType === 'doctor' && (
+      {memberType === 'practitionerRole' && (
         <AddUserForm
-          userType="doctor"
-          onFormSubmit={(data) => dispatchRequest(data as CreateDoctorDto)}
-          hospitalId={user?.hospitalAdminProfile?.hospitalId}
+          userType="practitionerRole"
+          onFormSubmit={(data) =>
+            dispatchRequest(data as CreatePractitionerRoleDto)
+          }
+          organizationId={user?.organizationManagerProfile?.organizationId}
         />
       )}
-      {memberType === 'receptionist' && (
+      {memberType === 'organizationMember' && (
         <AddUserForm
-          userType="receptionist"
+          userType="organizationMember"
           onFormSubmit={(data) =>
-            dispatchRequest(data as CreateReceptionistDto)
+            dispatchRequest(data as CreateOrganizationMemberDto)
           }
-          hospitalId={user?.hospitalAdminProfile?.hospitalId}
+          organizationId={user?.organizationManagerProfile?.organizationId}
         />
       )}
     </div>

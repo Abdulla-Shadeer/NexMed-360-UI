@@ -4,7 +4,7 @@ import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import {
   AppNotificationType,
-  ViewClinicRecordDto,
+  ViewClinicalRecordDto,
   ViewPatientDto,
 } from '@/types';
 import { useAuth } from '_context';
@@ -27,16 +27,16 @@ export default function PatientEHRs({
 }) {
   const { accessToken } = useAuth();
   const queryKey = {
-    path: API_PATHS.getClinicRecords(patient.id),
+    path: API_PATHS.getClinicalRecords(patient.id),
     method: 'GET',
     accessToken,
   };
 
-  const { data, isLoading, error } = useAppQuery<ViewClinicRecordDto[]>(
+  const { data, isLoading, error } = useAppQuery<ViewClinicalRecordDto[]>(
     queryKey as ApiRequestOption,
   );
   const [currentPageData, setCurrentPageData] = useState<
-    ViewClinicRecordDto[] | undefined
+    ViewClinicalRecordDto[] | undefined
   >(undefined);
   const router = useRouter();
 
@@ -67,9 +67,15 @@ export default function PatientEHRs({
                 _key="Patient"
                 value={`${patient.gender === 'Male' ? 'Mr. ' : 'Ms. '}${patient.firstName} ${patient.lastName}`}
               />
-              <KeyValueData _key="Doctor" value={`Dr. ${ehr.doctorName}`} />
+              <KeyValueData
+                _key="PractitionerRole"
+                value={`${ehr.practitionerName}`}
+              />
               <KeyValueData _key="Diagnosis" value={ehr.diagnosis} />
-              <KeyValueData _key="Doctor Note" value={ehr.doctorNotes ?? '~'} />
+              <KeyValueData
+                _key="Practitioner Note"
+                value={ehr.practitionerNotes ?? '~'}
+              />
               <KeyValueData
                 _key="Visited"
                 value={toDisplayDateTimeFormat(new Date(ehr.visitDate))}
@@ -107,7 +113,7 @@ export default function PatientEHRs({
         <Paginator
           data={data}
           onPagination={(pageData) =>
-            setCurrentPageData(pageData as ViewClinicRecordDto[])
+            setCurrentPageData(pageData as ViewClinicalRecordDto[])
           }
           itemsPerPage={6}
         />

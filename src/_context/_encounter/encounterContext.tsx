@@ -5,7 +5,7 @@ import {
   AppointmentStatusDto,
   UpdateSessionHistoryDto,
   ViewAppointmentDto,
-  ViewClinicRecordDto,
+  ViewClinicalRecordDto,
   ViewPatientDto,
   ViewPrescriptionDto,
   ViewSessionHistoryDto,
@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import { createContext, useContext, useState } from 'react';
 
 interface PatientData {
-  ehrs?: ViewClinicRecordDto[];
+  ehrs?: ViewClinicalRecordDto[];
   prescriptions?: ViewPrescriptionDto[];
   demographics?: ViewPatientDto;
 }
@@ -29,9 +29,9 @@ export interface EncounterMeta {
 interface EncounterContext {
   isActive: boolean;
   meta: EncounterMeta;
-  startEncounter: (doctorSessionId: string, patientId: string) => void;
+  startEncounter: (practitionerScheduleId: string, patientId: string) => void;
   tryContinueEncounter: (
-    doctorSessionId: string,
+    practitionerScheduleId: string,
     lastKnownApptId: string,
   ) => void;
   endEncounter: () => void;
@@ -73,7 +73,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
   async function loadPatientDataAndStart(
     patientId: string,
     appointment: ViewAppointmentDto,
-    doctorSessionId: string,
+    practitionerScheduleId: string,
   ) {
     const getDemographics = createQueryFunction<ViewPatientDto>({
       path: API_PATHS.getPatient(patientId),
@@ -81,8 +81,8 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
       accessToken,
     });
 
-    const getEhrs = createQueryFunction<ViewClinicRecordDto[]>({
-      path: API_PATHS.getClinicRecords(patientId),
+    const getEhrs = createQueryFunction<ViewClinicalRecordDto[]>({
+      path: API_PATHS.getClinicalRecords(patientId),
       method: 'GET',
       accessToken,
     });
@@ -110,12 +110,12 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
     });
 
     const update: UpdateSessionHistoryDto = {
-      sessionId: doctorSessionId,
+      sessionId: practitionerScheduleId,
       date: toDefaultDateFormat(new Date()),
       lastKnownAppointmentId: appointment.bookingReference,
     };
     const updateSessionHistory = createQueryFunction<ViewSessionHistoryDto>({
-      path: API_PATHS.updateDoctorSessionHistory,
+      path: API_PATHS.updatePractitionerScheduleHistory,
       method: 'POST',
       accessToken,
       payload: update,
@@ -140,14 +140,14 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
         fromDate: toDefaultDateFormat(today),
         toDate: toDefaultDateFormat(today),
         patientId,
-        doctorId: user?.doctorProfile?.id,
-        hospitalId: user?.doctorProfile?.hospitalId, // Might be removed in future to allow multiple hospital IDs per doctor
+        practitionerRoleId: user?.practitionerRoleProfile?.id,
+        organizationId: user?.practitionerRoleProfile?.organizationId, // Might be removed in future to allow multiple organization IDs per practitionerRole
         status: AppointmentStatusDto.Arrived,
       };
     };
 
     const getAppointments = createQueryFunction<ViewAppointmentDto[]>({
-      path: API_PATHS.viewOwnAppointments, // doctor's own appointment with given patient id
+      path: API_PATHS.viewOwnAppointments, // practitionerRole's own appointment with given patient id
       method: 'GET',
       accessToken,
       queryParams: loadAppointmentFilters(),
@@ -182,7 +182,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function tryContinueEncounter(
-    doctorSessionId: string,
+    practitionerScheduleId: string,
     lastKnownApptId: string,
   ) {
     setNotification(undefined);
@@ -202,7 +202,7 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
         loadPatientDataAndStart(
           appointment.patientId,
           appointment,
-          doctorSessionId,
+          practitionerScheduleId,
         );
       }
     } catch (error) {

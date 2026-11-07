@@ -70,11 +70,11 @@ export default function ViewPatientPage() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       roles,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      doctorProfile,
+      practitionerRoleProfile,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      hospitalAdminProfile,
+      organizationManagerProfile,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      receptionistProfile,
+      organizationMemberProfile,
       ...rest
     } = data;
     return rest;

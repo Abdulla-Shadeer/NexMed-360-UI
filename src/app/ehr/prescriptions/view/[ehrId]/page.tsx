@@ -11,7 +11,7 @@ import { useAppQuery } from '@/hooks';
 import { useAuth } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import { AppNotificationType as AppNotificationType } from '_types/common';
-import { ViewClinicRecordDto } from '_types/dtos';
+import { ViewClinicalRecordDto } from '_types/dtos';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
@@ -23,12 +23,12 @@ export default function ViewPrescriptionsPage({
   const { ehrId } = use(params);
   const { accessToken } = useAuth();
   const requestOption: ApiRequestOption = {
-    path: API_PATHS.getClinicRecord(ehrId),
+    path: API_PATHS.getClinicalRecord(ehrId),
     method: 'GET',
     accessToken,
   };
   const { data, isLoading, error } =
-    useAppQuery<ViewClinicRecordDto>(requestOption);
+    useAppQuery<ViewClinicalRecordDto>(requestOption);
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
