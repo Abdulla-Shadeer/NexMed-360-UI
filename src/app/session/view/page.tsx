@@ -44,10 +44,14 @@ export default function ViewSessionsPage() {
     path: API_PATHS.getDoctorSessions,
     method: 'GET',
     accessToken,
-    queryParams: {
-      doctorId: user?.doctorProfile?.id,
-    } as FilterDoctorSessionDto,
   };
+  if (user?.doctorProfile) {
+    queryKey.queryParams = {
+      ...(queryKey.queryParams as FilterDoctorSessionDto),
+      doctorId: user.doctorProfile.id,
+    } as FilterDoctorSessionDto;
+  }
+
   const { isLoading, error, data } =
     useAppQuery<ViewDoctorSessionDto[]>(queryKey);
   const [sessionToEdit, setSessionToEdit] = useState<

@@ -98,7 +98,7 @@ const navPaths: NavPath[] = [
         name: 'Your Sessions',
         path: '/session/view',
         icon: IconCalendarDays,
-        roles: [doctor],
+        roles: [doctor, hospitalAdmin],
       },
     ],
   },
