@@ -5,19 +5,19 @@ import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
-import { AppNotificationType, CreatePatientDto, ViewUserDto } from '@/types';
-import { useAuth } from '_context';
+import { AppNotificationType, CreatePatientDto, ViewPatientDto } from '@/types';
+import { useUser } from '_context';
 import { useState } from 'react';
 
 export default function AddPatientPage() {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
 
   async function handleFormSubmit(data: CreatePatientDto) {
-    const request = createQueryFunction<ViewUserDto>({
+    const request = createQueryFunction<ViewPatientDto>({
       path: API_PATHS.addPatient,
       method: 'POST',
       accessToken,

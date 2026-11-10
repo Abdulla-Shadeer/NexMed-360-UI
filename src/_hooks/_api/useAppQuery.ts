@@ -1,41 +1,29 @@
+import { useWorkspace } from '_context/_workspace/workspaceContext';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
 import useQueryFunction, { ApiRequestOption } from './useQueryFunction';
 import { AppNotificationType } from '_types/common';
 
-export default function useAppQuery<T>(requestOptions: ApiRequestOption) {
-  const { createQueryFunction, isLoading } = useQueryFunction();
-  const [error, setError] = useState<AppNotificationType | undefined>(
-    undefined,
-  );
-  const [data, setData] = useState<T | undefined>(undefined);
-
-  const queryResult = useQuery({
-    queryKey: [requestOptions],
+export default function useAppQuery<T>(
+  requestOptions: ApiRequestOption,
+  enabled = true,
+) {
+  const { workspace } = useWorkspace();
+  const { createQueryFunction } = useQueryFunction();
+  const result = useQuery({
+    queryKey: [requestOptions, workspace?.key],
     queryFn: createQueryFunction<T>(requestOptions),
+    enabled,
     refetchInterval: 5 * 1000 * 60,
     staleTime: 5 * 1000 * 60,
     refetchOnMount: true,
-    retry: 2,
+    retry: false,
   });
-
-  useEffect(() => {
-    if (queryResult.isError) {
-      setError({
+  const error: AppNotificationType | undefined = result.isError
+    ? {
         type: 'error',
-        title: 'Something went wrong!',
-        description: queryResult.error.message,
-        cause: queryResult.error.cause
-          ? (queryResult.error.cause as string)
-          : '',
-      });
-    } else {
-      if (queryResult.data && queryResult.data.data) {
-        setData(queryResult.data.data);
+        title: 'Could not load the data',
+        description: result.error.message,
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryResult.data, queryResult.error]);
-
-  return { isLoading, error, data };
+    : undefined;
+  return { isLoading: result.isFetching, error, data: result.data?.data };
 }

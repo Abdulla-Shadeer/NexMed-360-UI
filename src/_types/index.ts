@@ -43,8 +43,6 @@ export type {
   CreatePatientDto,
   ViewClinicalRecordDto,
   ViewPrescriptionDto,
-  ViewOrganizationManagerDto,
-  ViewOrganizationMemberDto,
   AddClinicalRecordDto,
   AddPrescriptionDto,
   SearchPractitionerRoleDto,

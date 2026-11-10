@@ -10,7 +10,7 @@ import {
   ViewPrescriptionDto,
   ViewSessionHistoryDto,
 } from '@/types';
-import { useAuth } from '_context/_auth/authContext';
+import { useUser, useWorkspace } from '_context';
 import { toDefaultDateFormat } from '_utils/dateUtils';
 import { useRouter } from 'next/navigation';
 import { createContext, useContext, useState } from 'react';
@@ -57,7 +57,8 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
   const [encounterMeta, setEncounterMeta] = useState<EncounterMeta>(
     defaultEncounterContext.meta,
   );
-  const { accessToken, user } = useAuth();
+  const { accessToken } = useUser();
+  const { hasPermission, workspace } = useWorkspace();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
@@ -87,16 +88,20 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
       accessToken,
     });
     const [demographics, ehrs] = await Promise.all([
-      getDemographics(),
-      getEhrs(),
+      hasPermission('patients.read')
+        ? getDemographics()
+        : Promise.resolve(undefined),
+      hasPermission('clinical-records.read')
+        ? getEhrs()
+        : Promise.resolve(undefined),
     ]);
 
     const meta: EncounterMeta = {
       appointmentData: appointment,
       patientData: {
-        ehrs: ehrs.data ?? [],
-        prescriptions: ehrs.data?.flatMap((ehr) => ehr.prescriptions ?? []),
-        demographics: demographics.data,
+        ehrs: ehrs?.data ?? [],
+        prescriptions: ehrs?.data?.flatMap((ehr) => ehr.prescriptions ?? []),
+        demographics: demographics?.data,
       },
     };
 
@@ -140,8 +145,8 @@ function EncounterProvider({ children }: { children: React.ReactNode }) {
         fromDate: toDefaultDateFormat(today),
         toDate: toDefaultDateFormat(today),
         patientId,
-        practitionerRoleId: user?.practitionerRoleProfile?.id,
-        organizationId: user?.practitionerRoleProfile?.organizationId, // Might be removed in future to allow multiple organization IDs per practitionerRole
+        practitionerRoleId: workspace?.practitionerRoleId,
+        organizationId: workspace?.organizationId,
         status: AppointmentStatusDto.Arrived,
       };
     };

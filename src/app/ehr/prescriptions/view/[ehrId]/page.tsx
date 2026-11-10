@@ -8,7 +8,7 @@ import AppLoader from '@/components/misc/loader';
 import RefreshData from '@/components/misc/refresh';
 import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import { AppNotificationType as AppNotificationType } from '_types/common';
 import { ViewClinicalRecordDto } from '_types/dtos';
@@ -21,7 +21,7 @@ export default function ViewPrescriptionsPage({
   params: Promise<{ ehrId: string }>;
 }) {
   const { ehrId } = use(params);
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const requestOption: ApiRequestOption = {
     path: API_PATHS.getClinicalRecord(ehrId),
     method: 'GET',

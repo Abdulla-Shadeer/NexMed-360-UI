@@ -5,7 +5,7 @@ import { ViewOrganizationDto } from '_types/dtos';
 import { SelectInput } from '../input';
 import { AppNotification } from '../misc';
 import AppLoader from '../misc/loader';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 
 export default function OrganizationSelecter({
   selected,
@@ -16,7 +16,7 @@ export default function OrganizationSelecter({
   onChange: (value: string) => void;
   fieldError: string;
 }) {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { data, error, isLoading } = useAppQuery<ViewOrganizationDto[]>({
     path: API_PATHS.getAllOrganizations,
     method: 'GET',

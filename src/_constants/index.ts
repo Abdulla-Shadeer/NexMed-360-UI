@@ -23,6 +23,11 @@ const API_PATHS = {
   addOrganization: '/Organization/Add',
   updateOrganization: '/Organization/Update',
   assignOrganizationManager: '/Organization/AssignAdmin',
+  organizationAdministrators: (id: string) =>
+    `/OrganizationAdministration/${id}/Administrators`,
+  organizationAdministrator: (organizationId: string, membershipId: string) =>
+    `/OrganizationAdministration/${organizationId}/Administrators/${membershipId}`,
+  deleteOrganization: (id: string) => `/OrganizationAdministration/${id}`,
   getOrganizationMembers: (organizationId: string) =>
     `/Organization/GetMembers/${organizationId}`,
   addPractitionerRole: '/Organization/AddPractitionerRole',
@@ -58,3 +63,5 @@ const USER_ROLES = {
 };
 
 export { API_ENDPOINT, API_PATHS, USER_ROLES };
+
+export { WorkspaceModes } from './workspaceModes';

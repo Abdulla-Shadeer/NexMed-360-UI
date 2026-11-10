@@ -5,7 +5,7 @@ import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { AppNotificationType as AppNotificationType } from '_types/common';
 import { ViewPatientDto } from '_types/dtos';
 import { useState } from 'react';
@@ -17,7 +17,7 @@ export default function FindEhrPage() {
     AppNotificationType | undefined
   >(undefined);
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
 
   async function fetchPatientData(id: string) {
     const getPatient = createQueryFunction<ViewPatientDto>({

@@ -7,7 +7,7 @@ import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import {
   CreateOrganizationManagerDto,
   CreateOrganizationDto,
@@ -27,7 +27,7 @@ export default function AddOrganization() {
     CreateOrganizationDto | undefined
   >(undefined);
 
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [notification, setNotification] = useState<
     AppNotificationType | undefined

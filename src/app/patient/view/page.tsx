@@ -1,8 +1,8 @@
 'use client';
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
-import { useAuth } from '_context';
-import { AppNotificationType, ViewUserDto } from '@/types';
+import { useUser } from '_context';
+import { AppNotificationType, ViewPatientDto } from '@/types';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import AppLoader from '@/components/misc/loader';
@@ -21,18 +21,18 @@ export default function ViewPatientPage() {
   const searchParams = useSearchParams();
   const [patientId] = useState(searchParams.get('id'));
   const [defaultData] = useState<PatientIdForm>({ patientId: patientId ?? '' });
-  const [patientData, setPatientData] = useState<ViewUserDto | undefined>(
+  const [patientData, setPatientData] = useState<ViewPatientDto | undefined>(
     undefined,
   );
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
 
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { createQueryFunction, isLoading } = useQueryFunction();
 
   async function fetchPatient(id: string) {
-    const request = createQueryFunction<ViewUserDto>({
+    const request = createQueryFunction<ViewPatientDto>({
       path: API_PATHS.getPatient(id),
       method: 'GET',
       accessToken,
@@ -64,21 +64,6 @@ export default function ViewPatientPage() {
     defaultValues: defaultData,
     onSubmit: ({ value }) => fetchPatient(value.patientId),
   });
-
-  function getPatientInfo(data: ViewUserDto) {
-    const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      roles,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      practitionerRoleProfile,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      organizationManagerProfile,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      organizationMemberProfile,
-      ...rest
-    } = data;
-    return rest;
-  }
 
   return (
     <div>
@@ -125,8 +110,7 @@ export default function ViewPatientPage() {
           />
         </Subscribe>
       </Form>
-      {patientData &&
-        unknownObjectRenderer(getPatientInfo(patientData), 'Patient Info')}
+      {patientData && unknownObjectRenderer(patientData, 'Patient Info')}
     </div>
   );
 }

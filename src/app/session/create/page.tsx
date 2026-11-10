@@ -1,7 +1,8 @@
 'use client';
+import { useWorkspace } from '_context/_workspace/workspaceContext';
 
 import { useQueryFunction } from '@/hooks';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import {
   AppNotificationType,
   CreatePractitionerScheduleDto,
@@ -14,21 +15,19 @@ import { API_PATHS } from '@/constants';
 import CreatePractitionerScheduleForm from '@/components/practitionerSchedule/createPractitionerSchedule';
 
 export default function CreateSessionPage() {
-  const { accessToken, user } = useAuth();
+  const { accessToken } = useUser();
+  const { workspace } = useWorkspace();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const defaultData = useMemo<CreatePractitionerScheduleDto>(() => {
     return {
-      practitionerRoleId: user?.practitionerRoleProfile?.id ?? '',
-      organizationId:
-        user?.practitionerRoleProfile?.organizationId ??
-        user?.organizationManagerProfile?.organizationId ??
-        '',
+      practitionerRoleId: workspace?.practitionerRoleId ?? '',
+      organizationId: workspace?.organizationId ?? '',
       startTime: '',
       endTime: '',
       slotDurationMinutes: 30,
       occurrences: [],
     };
-  }, [user]);
+  }, [workspace]);
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);

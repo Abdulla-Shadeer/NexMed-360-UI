@@ -8,7 +8,7 @@ import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { AppNotificationType as AppNotificationType } from '_types/common';
 import { UpdateOrganizationDto, ViewOrganizationDto } from '_types/dtos';
 import { useRouter } from 'next/navigation';
@@ -21,7 +21,7 @@ export default function EditOrganization({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { data, error, isLoading } = useAppQuery<ViewOrganizationDto>({
     path: API_PATHS.getOrganizationById(id),
     method: 'GET',

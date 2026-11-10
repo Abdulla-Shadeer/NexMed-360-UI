@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useQueryFunction } from '@/hooks';
 import { AppNotificationType } from '_types/common';
 import { API_PATHS } from '@/constants';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import AppLoader from '../misc/loader';
 
 /**
@@ -27,7 +27,7 @@ export default function CreateEhrForm({
   const [saveWithoutPrescriptions, setSaveWithoutPrescriptions] =
     useState(false);
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
 
   async function save(data: AddClinicalRecordDto) {
     const save = createQueryFunction<ViewClinicalRecordDto>({

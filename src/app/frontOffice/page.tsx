@@ -10,7 +10,7 @@ import AppLoader from '@/components/misc/loader';
 import RefreshData from '@/components/misc/refresh';
 import { API_PATHS } from '@/constants';
 import { useAppQuery, useQueryFunction } from '@/hooks';
-import { useAuth } from '_context';
+import { useUser, useWorkspace } from '_context';
 import { useFrontOffice } from '_context/frontOffice/frontOfficeContext';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import { AppNotificationType } from '_types/common';
@@ -20,13 +20,13 @@ import {
   ViewAppointmentDto,
   ViewAppointmentsFilterDto,
   ViewSessionHistoryDto,
-  ViewUserDto,
+  ViewPatientDto,
 } from '_types/dtos';
 import { to12HourFormat, toDefaultDateFormat } from '_utils/dateUtils';
 import { useEffect, useState } from 'react';
 
 const tabButton =
-  'hover:cursor-pointer px-6 py-2 border-default border-border-primary rounded-t-default';
+  'hover:cursor-pointer px-6 py-2 border-default border-border-primary rounded-t-default disabled:cursor-not-allowed disabled:bg-disabled disabled:text-on-disabled';
 const tabButtonNormal = `${tabButton} bg-panel-light text-blue-secondary hover:text-blue-primary`;
 const tabButtonActive = `${tabButton} bg-blue-secondary text-text-light hover:bg-blue-primary`;
 
@@ -35,17 +35,18 @@ const tabButtonActive = `${tabButton} bg-blue-secondary text-text-light hover:bg
  * be performed here
  */
 export default function FrontOfficePage() {
+  const { accessToken } = useUser();
+  const { hasPermission } = useWorkspace();
   const [activeTab, setActiveTab] = useState<
     'receivePatient' | 'registerPatient' | 'ongoingSessions'
-  >('receivePatient');
+  >(hasPermission('patients.read') ? 'receivePatient' : 'ongoingSessions');
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const { accessToken } = useAuth();
 
   async function addPatient(data: CreatePatientDto) {
-    const request = createQueryFunction<ViewUserDto>({
+    const request = createQueryFunction<ViewPatientDto>({
       path: API_PATHS.addPatient,
       method: 'POST',
       accessToken,
@@ -78,12 +79,24 @@ export default function FrontOfficePage() {
       <div className="w-full inline-flex gap-1 border-b-default border-border-primary">
         <button
           className={`${activeTab === 'receivePatient' ? tabButtonActive : tabButtonNormal}`}
+          disabled={!hasPermission('patients.read')}
+          title={
+            !hasPermission('patients.read')
+              ? 'You need permission to view patients.'
+              : undefined
+          }
           onClick={() => setActiveTab('receivePatient')}
         >
           Receive Patient
         </button>
         <button
           className={`${activeTab === 'registerPatient' ? tabButtonActive : tabButtonNormal}`}
+          disabled={!hasPermission('patients.register')}
+          title={
+            !hasPermission('patients.register')
+              ? 'You need permission to register patients.'
+              : undefined
+          }
           onClick={() => setActiveTab('registerPatient')}
         >
           Register Patient
@@ -95,6 +108,17 @@ export default function FrontOfficePage() {
           Ongoing Sessions
         </button>
       </div>
+      {!hasPermission('patients.register') && (
+        <p>
+          Patient registration is disabled. You need permission to register
+          patients.
+        </p>
+      )}
+      {!hasPermission('patients.read') && (
+        <p>
+          Receive Patient is disabled. You need permission to view patients.
+        </p>
+      )}
 
       {activeTab === 'receivePatient' && (
         <ReceivePatient onNotification={(value) => setNotification(value)} />
@@ -118,7 +142,7 @@ function ReceivePatient({
   onNotification: (value?: AppNotificationType) => void;
 }) {
   const { createQueryFunction, isLoading } = useQueryFunction();
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { patientMeta, setPatientMeta } = useFrontOffice();
 
   async function loadPatientAppointments(patientId: string) {
@@ -269,7 +293,7 @@ function OngoingSessions({
 }: {
   onNotification: (notification: AppNotificationType) => void;
 }) {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const queryKey: ApiRequestOption = {
     path: API_PATHS.getOngoingSessions,
     method: 'GET',

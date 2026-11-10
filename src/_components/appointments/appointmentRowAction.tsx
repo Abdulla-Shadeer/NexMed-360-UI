@@ -1,5 +1,6 @@
+import { WorkspaceModes } from '_constants/workspaceModes';
 import { Row } from '@tanstack/react-table';
-import { useAuth } from '_context';
+import { useUser, useWorkspace } from '_context';
 import {
   AppointmentStatusDto,
   CancellationRequestDto,
@@ -24,7 +25,8 @@ export default function AppointmentRowActions({
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
+  const { workspace, hasPermission } = useWorkspace();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [confirmationContext, setConfirmationContext] = useState<
     ConfirmationDialogContext | undefined
@@ -147,7 +149,8 @@ export default function AppointmentRowActions({
             row.original.status === AppointmentStatusDto.InProgress
           ) && (
             <>
-              <a
+              <button
+                type="button"
                 className="hover:cursor-pointer hover:text-blue-secondary"
                 onClick={(e) => {
                   e.preventDefault();
@@ -160,11 +163,17 @@ export default function AppointmentRowActions({
                     onClose: () => setConfirmationContext(undefined),
                   });
                 }}
+                disabled={
+                  workspace?.mode !== WorkspaceModes.Work ||
+                  !hasPermission('appointments.manage')
+                }
+                title="Confirming appointments needs appointment management permission in work mode."
               >
                 Confirm
-              </a>
+              </button>
 
-              <a
+              <button
+                type="button"
                 className="hover:cursor-pointer hover:text-blue-secondary"
                 onClick={(e) => {
                   e.preventDefault();
@@ -185,9 +194,14 @@ export default function AppointmentRowActions({
                     noText: 'Close',
                   });
                 }}
+                disabled={
+                  workspace?.mode !== WorkspaceModes.Patient &&
+                  !hasPermission('appointments.manage')
+                }
+                title="Cancel your own appointment in patient mode, or use appointment management permission in work mode."
               >
                 Cancel
-              </a>
+              </button>
             </>
           )}
         </div>

@@ -7,7 +7,7 @@ import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { ViewAppointmentDto } from '@/types';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
 export default function ViewAppointment({
@@ -16,7 +16,7 @@ export default function ViewAppointment({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { data, error, isLoading } = useAppQuery<ViewAppointmentDto>({
     path: API_PATHS.viewAppointmentById(id),
     method: 'GET',

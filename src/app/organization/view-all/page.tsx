@@ -1,8 +1,10 @@
 'use client';
+import { WorkspaceModes } from '_constants/workspaceModes';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import CustomTable from '@/components/table';
-import { API_PATHS, USER_ROLES } from '@/constants';
+import DeleteOrganizationButton from '@/components/organization/deleteOrganizationButton';
+import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import {
   createColumnHelper,
@@ -10,7 +12,7 @@ import {
   Row,
   useReactTable,
 } from '@tanstack/react-table';
-import { useAuth } from '_context';
+import { useUser, useWorkspace } from '_context';
 import { ViewOrganizationDto } from '@/types';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -20,7 +22,7 @@ import RefreshData from '@/components/misc/refresh';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 
 export default function ViewAllOrganizations() {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const queryKey: ApiRequestOption = {
     path: API_PATHS.getAllOrganizations,
     method: 'GET',
@@ -44,7 +46,8 @@ function OrganizationTable({
   organizations: ViewOrganizationDto[];
 }) {
   const columnHelper = createColumnHelper<ViewOrganizationDto>();
-  const { user } = useAuth();
+
+  const { workspace } = useWorkspace();
   const [showClipboardNote, setShowClipboardNote] = useState(false);
 
   function renderOrganizationRowActions(row: Row<ViewOrganizationDto>) {
@@ -58,11 +61,7 @@ function OrganizationTable({
             View
           </Link>
 
-          {user?.roles.some(
-            (role) =>
-              role === USER_ROLES.platformAdmin ||
-              role === USER_ROLES.organizationManager,
-          ) && (
+          {workspace?.mode === WorkspaceModes.Platform && (
             <Link
               href={`/organization/edit/${row.original.id}`}
               className="text-default text-blue-secondary hover:text-blue-primary"
@@ -71,13 +70,28 @@ function OrganizationTable({
             </Link>
           )}
 
-          {user?.roles.some((role) => role === USER_ROLES.platformAdmin) && (
+          {workspace?.mode === WorkspaceModes.Platform && (
             <Link
               href={`/organization/assign-admin?id=${row.original.id}`}
               className="text-default text-blue-secondary hover:text-blue-primary"
             >
               Assign Admin
             </Link>
+          )}
+
+          {workspace?.mode === WorkspaceModes.Platform && (
+            <>
+              <Link
+                href={`/organization/admins?id=${row.original.id}`}
+                className="text-default text-blue-secondary hover:text-blue-primary"
+              >
+                Manage Administrators
+              </Link>
+              <DeleteOrganizationButton
+                organizationId={row.original.id}
+                organizationName={row.original.name}
+              />
+            </>
           )}
 
           <button
@@ -151,6 +165,12 @@ function TableRowActions({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     function handleMousedownEvent(event: MouseEvent) {
+      // Keep the action mounted while its confirmation dialog is open.
+      if (
+        event.target instanceof Element &&
+        event.target.closest('[role="dialog"]')
+      )
+        return;
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
       }

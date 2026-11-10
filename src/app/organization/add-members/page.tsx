@@ -11,11 +11,12 @@ import {
   CreateOrganizationMemberDto,
   ViewUserDto,
 } from '@/types';
-import { useAuth } from '_context';
+import { useUser, useWorkspace } from '_context';
 import { useState } from 'react';
 
 export default function AddMembersPage() {
-  const { accessToken, user } = useAuth();
+  const { accessToken } = useUser();
+  const { workspace, hasPermission } = useWorkspace();
   const [memberType, setMemberType] = useState<
     'practitionerRole' | 'organizationMember'
   >('practitionerRole');
@@ -23,6 +24,9 @@ export default function AddMembersPage() {
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
   >(undefined);
+
+  const canAdd =
+    !workspace?.isLocationRestricted && hasPermission('members.manage');
 
   async function dispatchRequest(
     data: CreatePractitionerRoleDto | CreateOrganizationMemberDto,
@@ -42,13 +46,16 @@ export default function AddMembersPage() {
       await request();
       setNotification({
         type: 'success',
-        title: `${memberType} Added Successfully!`,
+        title:
+          memberType === 'practitionerRole'
+            ? 'Practitioner assignment added'
+            : 'Staff member added',
       });
     } catch (error) {
       const err = error as Error;
       setNotification({
         type: 'error',
-        title: `Failed to add ${memberType}!`,
+        title: 'Could not add staff',
         description: err.message,
         cause: err.cause ? (err.cause as string) : '',
       });
@@ -59,36 +66,50 @@ export default function AddMembersPage() {
     <div className="w-full flex flex-col gap-6">
       {isLoading && <AppLoader />}
       {notification && <AppNotification notification={notification} />}
-      <h2 className="text-title px-1 py-2 bg-panel-light">
-        Add Members to Your Organization
-      </h2>
+      <h2 className="text-title px-1 py-2 bg-panel-light">Add Staff</h2>
       <RadioInput
-        name="member type"
-        selectItems={['practitionerRole', 'organizationMember']}
-        selectedItem={memberType}
+        name="Staff type"
+        selectItems={['Practitioner assignment', 'Organization staff']}
+        selectedItem={
+          memberType === 'practitionerRole'
+            ? 'Practitioner assignment'
+            : 'Organization staff'
+        }
         onChange={(value) =>
-          setMemberType(value as 'practitionerRole' | 'organizationMember')
+          setMemberType(
+            value === 'Practitioner assignment'
+              ? 'practitionerRole'
+              : 'organizationMember',
+          )
         }
         error=""
       />
-      {memberType === 'practitionerRole' && (
-        <AddUserForm
-          userType="practitionerRole"
-          onFormSubmit={(data) =>
-            dispatchRequest(data as CreatePractitionerRoleDto)
-          }
-          organizationId={user?.organizationManagerProfile?.organizationId}
-        />
+      {!canAdd && (
+        <p>
+          Choose your organization workspace to add staff. You need staff
+          management permission, not clinical permissions.
+        </p>
       )}
-      {memberType === 'organizationMember' && (
-        <AddUserForm
-          userType="organizationMember"
-          onFormSubmit={(data) =>
-            dispatchRequest(data as CreateOrganizationMemberDto)
-          }
-          organizationId={user?.organizationManagerProfile?.organizationId}
-        />
-      )}
+      <fieldset disabled={!canAdd} className={!canAdd ? 'opacity-50' : ''}>
+        {memberType === 'practitionerRole' && (
+          <AddUserForm
+            userType="practitionerRole"
+            onFormSubmit={(data) =>
+              dispatchRequest(data as CreatePractitionerRoleDto)
+            }
+            organizationId={workspace?.organizationId}
+          />
+        )}
+        {memberType === 'organizationMember' && (
+          <AddUserForm
+            userType="organizationMember"
+            onFormSubmit={(data) =>
+              dispatchRequest(data as CreateOrganizationMemberDto)
+            }
+            organizationId={workspace?.organizationId}
+          />
+        )}
+      </fieldset>
     </div>
   );
 }

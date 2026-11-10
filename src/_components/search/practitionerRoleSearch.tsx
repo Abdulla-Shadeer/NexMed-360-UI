@@ -1,7 +1,7 @@
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import {
   ViewPractitionerRoleDto,
   SearchPractitionerRoleDto,
@@ -32,7 +32,7 @@ export default function PractitionerRoleSearch({
     ViewPractitionerRoleDto[] | undefined
   >(undefined);
   const [inputError, setInputError] = useState<string | undefined>(undefined);
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const [selectedPractitionerRoleId, setSelectedPractitionerRoleId] =
     useState('');
 

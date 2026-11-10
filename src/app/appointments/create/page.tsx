@@ -1,8 +1,10 @@
 'use client';
+import { WorkspaceModes } from '_constants/workspaceModes';
+import useOwnPatient from '_hooks/_api/useOwnPatient';
 
 import { SecondaryButton } from '@/components/buttons';
 import QuickActionButton from '@/components/buttons/quickActionButton';
-import { DateInput, Form, RadioInput, TextInput } from '@/components/input';
+import { DateInput, Form, TextInput } from '@/components/input';
 import AppIcon from '@/components/icons/appIcon';
 import {
   IconArrowRight,
@@ -17,10 +19,10 @@ import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import RefreshData from '@/components/misc/refresh';
 import PractitionerRoleSearch from '@/components/search/practitionerRoleSearch';
-import { API_PATHS, USER_ROLES } from '@/constants';
+import { API_PATHS } from '@/constants';
 import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
-import { useAuth } from '_context';
+import { useUser, useWorkspace } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import {
   CreateAppointmentDto,
@@ -54,18 +56,22 @@ const stepButtonStyle =
   'text-default text-left py-1 px-2 border-border-primary border-default cursor-pointer';
 
 export default function CreateAppointmentPage() {
-  const { user, accessToken } = useAuth();
-  const [appointmentType, setappointmentType] = useState<'mySelf' | 'patient'>(
-    !user?.roles.includes(USER_ROLES.patient) ? 'patient' : 'mySelf',
+  const { accessToken } = useUser();
+  const {
+    data: ownPatient,
+    error: patientError,
+    isLoading: patientLoading,
+  } = useOwnPatient();
+  const { workspace } = useWorkspace();
+  const [appointmentType] = useState<'mySelf' | 'patient'>(
+    workspace?.mode === WorkspaceModes.Patient ? 'mySelf' : 'patient',
   );
   const [step, setStep] = useState<CreationSteps>(
     CreationSteps.choosePractitionerRole,
   );
   const [creationMeta, setCreationMeta] = useState<CreationMeta>({
     patient:
-      appointmentType === 'mySelf'
-        ? (user?.patientProfile ?? undefined)
-        : undefined,
+      appointmentType === 'mySelf' ? (ownPatient ?? undefined) : undefined,
   });
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
@@ -111,7 +117,7 @@ export default function CreateAppointmentPage() {
     try {
       setNotification(undefined);
       const appointment = await createAppointment();
-      setCreationMeta({ patient: user?.patientProfile });
+      setCreationMeta({ patient: ownPatient });
       setStep(CreationSteps.choosePractitionerRole);
       setNotification({
         type: 'success',
@@ -139,42 +145,20 @@ export default function CreateAppointmentPage() {
     if (appointmentType === 'mySelf' && !creationMeta.patient) {
       setCreationMeta((prev) => ({
         ...prev,
-        patient: user?.patientProfile ?? undefined,
+        patient: ownPatient ?? undefined,
       }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appointmentType]);
+  }, [appointmentType, ownPatient]);
 
   return (
     <>
-      {isLoading && <AppLoader />}
+      {(isLoading || patientLoading) && <AppLoader />}
+      {patientError && <AppNotification notification={patientError} />}
       {notification && <AppNotification notification={notification} />}
 
       {/* Patient Data */}
       <div className="w-full flex flex-row flex-wrap items-center gap-6 my-6">
-        {user?.roles.length && user.roles.length > 1 && (
-          <>
-            <h2 className="w-full text-title pb-1 border-b-default border-border-primary">
-              Book Appointment
-            </h2>
-            <RadioInput
-              name="Who is this appointment for?"
-              selectItems={['mySelf', 'patient']}
-              selectedItem={appointmentType}
-              onChange={(value) => {
-                setappointmentType(value as 'mySelf' | 'patient');
-                if (value === 'patient') {
-                  setCreationMeta((prev) => ({
-                    ...prev,
-                    patient: undefined,
-                  }));
-                }
-              }}
-              error=""
-            />
-          </>
-        )}
-
         {appointmentType === 'patient' && (
           <Form action={handleSubmit}>
             <Field
@@ -215,7 +199,7 @@ export default function CreateAppointmentPage() {
           onConfirm={() => bookAppointment()}
           onReset={() => {
             setCreationMeta({
-              patient: user?.patientProfile,
+              patient: ownPatient,
             });
             setStep(CreationSteps.choosePractitionerRole);
           }}
@@ -429,7 +413,7 @@ function SessionSelector({
   onSessionSelect: (session: ViewPractitionerScheduleDto) => void;
   onError: (error: AppNotificationType) => void;
 }) {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const requestOption: ApiRequestOption = {
     path: API_PATHS.getPractitionerSchedules,
     method: 'GET',
@@ -512,7 +496,7 @@ function SlotSelector({
   onSlotSelect: (slot: ViewSessionSlotDto) => void;
   onError: (error: AppNotificationType) => void;
 }) {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const requestOption: ApiRequestOption = {
     path: API_PATHS.getSessionSlots,
     method: 'GET',

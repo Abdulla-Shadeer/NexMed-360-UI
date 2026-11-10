@@ -21,13 +21,13 @@ import {
 import React, { useState } from 'react';
 import useAppQuery from '_hooks/_api/useAppQuery';
 import { API_PATHS } from '@/constants';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { LineChart } from '@/components/misc';
 import AppNotification from '@/components/misc/appNotification';
 import { AppointmentsTable } from '@/components/appointments';
 
 export default function Home() {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { data, error, isLoading } = useAppQuery<OverviewDto[]>({
     path: API_PATHS.getOverview,
     method: 'GET',

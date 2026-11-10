@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useForm } from '@tanstack/react-form';
 import ButtonSecondary from '@/components/buttons/buttonSecondary';
 import { IconLogin } from '@/components/icons/icons';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { LoginUserDto } from '@/types';
 import { useEffect } from 'react';
 import AppLoader from '@/components/misc/loader';
@@ -19,7 +19,7 @@ const defaultUser: LoginUserDto = {
 };
 
 export default function Login() {
-  const { loginUser, isLoggedIn, error, isLoading } = useAuth();
+  const { loginUser, isLoggedIn, error, isLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {

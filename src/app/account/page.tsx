@@ -3,13 +3,13 @@ import AppIcon from '@/components/icons/appIcon';
 import { IconEdit, IconLogout } from '@/components/icons/icons';
 import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
 import ConfirmationDialog from '@/components/popup/confirmationDialog';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { ConfirmationDialogContext } from '_types/common';
 import Link from 'next/link';
 import { useState } from 'react';
 
 export default function Account() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useUser();
   const [confirmationContext, setConfirmationContext] = useState<
     ConfirmationDialogContext | undefined
   >(undefined);

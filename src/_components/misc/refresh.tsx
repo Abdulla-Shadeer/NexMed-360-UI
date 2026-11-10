@@ -12,7 +12,7 @@ export default function RefreshData({
   const queryClient = useQueryClient();
   function invalidate() {
     queryClient.invalidateQueries({
-      exact: true,
+      exact: false,
       queryKey: [queryKey],
     });
   }

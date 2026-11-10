@@ -8,7 +8,7 @@ import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useQueryFunction } from '@/hooks';
 import { useForm } from '@tanstack/react-form';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { AppNotificationType as AppNotificationType } from '_types/common';
 import { ViewUserDto } from '_types/dtos';
 import Link from 'next/link';
@@ -23,7 +23,7 @@ interface UpdateUserDto {
 }
 
 export default function EditAppointment() {
-  const { accessToken, user, refetchUser } = useAuth();
+  const { accessToken, user, refetchUser } = useUser();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [defaultData] = useState<UpdateUserDto>({
     id: user?.id ?? '',

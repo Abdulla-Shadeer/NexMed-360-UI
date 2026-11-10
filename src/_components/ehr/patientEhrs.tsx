@@ -1,4 +1,5 @@
 'use client';
+import { WorkspaceModes } from '_constants/workspaceModes';
 
 import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
@@ -7,7 +8,7 @@ import {
   ViewClinicalRecordDto,
   ViewPatientDto,
 } from '@/types';
-import { useAuth } from '_context';
+import { useUser, useWorkspace } from '_context';
 import { useEffect, useState } from 'react';
 import Paginator from '../misc/paginator';
 import AppLoader from '../misc/loader';
@@ -25,9 +26,13 @@ export default function PatientEHRs({
   patient: ViewPatientDto;
   onNotification: (notification: AppNotificationType) => void;
 }) {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
+  const { workspace } = useWorkspace();
   const queryKey = {
-    path: API_PATHS.getClinicalRecords(patient.id),
+    path:
+      workspace?.mode === WorkspaceModes.Patient
+        ? '/Patient/MyClinicalRecords'
+        : API_PATHS.getClinicalRecords(patient.id),
     method: 'GET',
     accessToken,
   };

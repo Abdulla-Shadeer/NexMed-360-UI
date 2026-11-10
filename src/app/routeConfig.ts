@@ -1,5 +1,6 @@
+import { WorkspaceModes } from '_constants/workspaceModes';
 import { NavPath } from '@/types';
-import { USER_ROLES } from '@/constants';
+import { WorkspaceDto } from '_types/access';
 import {
   IconBuildingOffice,
   IconCalendarDays,
@@ -13,188 +14,256 @@ import {
   IconList,
   IconPlayCircle,
   IconPlusCircle,
-  IconSettings,
   IconShieldCheck,
   IconUserPlus,
   IconUsers,
 } from '@/components/icons/icons';
-
-const {
-  platformAdmin,
-  organizationManager,
-  organizationMember,
-  practitionerRole,
-  patient,
-} = USER_ROLES;
 
 const navPaths: NavPath[] = [
   {
     name: 'Overview',
     path: '/',
     icon: IconHome,
-    roles: [
-      platformAdmin,
-      organizationManager,
-      organizationMember,
-      practitionerRole,
-      patient,
+    modes: [
+      WorkspaceModes.Patient,
+      WorkspaceModes.Work,
+      WorkspaceModes.Platform,
     ],
   },
   {
     name: 'Front Office',
     path: '/frontOffice',
     icon: IconComputerDesktop,
-    roles: [organizationMember],
+    modes: [WorkspaceModes.Work],
+    permission: 'appointments.manage',
   },
   {
     name: 'Encounter',
     path: '/encounter',
     icon: IconPlayCircle,
-    roles: [practitionerRole],
+    modes: [WorkspaceModes.Work],
+    permission: 'encounters.start',
+    assignment: true,
   },
   {
     name: 'Organization',
     icon: IconBuildingOffice,
+    modes: [
+      WorkspaceModes.Work,
+      WorkspaceModes.Patient,
+      WorkspaceModes.Platform,
+    ],
     children: [
       {
         name: 'Your Organization',
         path: '/organization/your-organization',
         icon: IconHeart,
-        roles: [organizationManager, organizationMember],
+        modes: [WorkspaceModes.Work],
+      },
+      {
+        name: 'Manage Organization Admins',
+        path: '/organization/admins',
+        icon: IconShieldCheck,
+        modes: [WorkspaceModes.Platform],
       },
       {
         name: 'View All',
         path: '/organization/view-all',
         icon: IconList,
-        roles: [platformAdmin, patient],
+        modes: [WorkspaceModes.Platform, WorkspaceModes.Patient],
       },
       {
         name: 'Add Organization',
         path: '/organization/add',
         icon: IconPlusCircle,
-        roles: [platformAdmin],
+        modes: [WorkspaceModes.Platform],
       },
       {
         name: 'Assign Admin',
         path: '/organization/assign-admin',
         icon: IconShieldCheck,
-        roles: [platformAdmin],
+        modes: [WorkspaceModes.Platform],
       },
       {
-        name: 'View Members',
+        name: 'Manage Staff',
         path: '/organization/view-members',
         icon: IconUsers,
-        roles: [organizationManager],
+        modes: [WorkspaceModes.Work],
+        permission: 'members.manage',
       },
       {
-        name: 'Add Members',
+        name: 'Add Staff',
         path: '/organization/add-members',
         icon: IconUserPlus,
-        roles: [organizationManager],
+        modes: [WorkspaceModes.Work],
+        permission: 'members.manage',
+      },
+      {
+        name: 'Access Roles',
+        path: '/organization/access-roles',
+        icon: IconShieldCheck,
+        modes: [WorkspaceModes.Work],
+        permission: 'roles.manage',
       },
     ],
-    roles: [platformAdmin, organizationManager],
   },
   {
     name: 'Sessions',
     icon: IconCalendarDays,
-    roles: [organizationManager, practitionerRole],
+    modes: [WorkspaceModes.Work],
     children: [
       {
         name: 'Create',
         path: '/session/create',
         icon: IconPlusCircle,
-        roles: [practitionerRole, organizationManager],
+        modes: [WorkspaceModes.Work],
+        permission: 'schedules.manage',
       },
       {
         name: 'Your Sessions',
         path: '/session/view',
         icon: IconCalendarDays,
-        roles: [practitionerRole, organizationManager],
+        modes: [WorkspaceModes.Work],
+        permission: 'schedules.manage',
       },
     ],
   },
   {
     name: 'Appointments',
     icon: IconClock,
+    modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
     children: [
       {
         name: 'Your Appointments',
-        icon: IconDocumentList,
         path: '/appointments/your-appointments',
-        roles: [patient, practitionerRole],
+        icon: IconDocumentList,
+        modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
+        permission: 'appointments.manage',
       },
       {
         name: 'Organization Appointments',
-        icon: IconList,
         path: '/appointments/organization-appointments',
-        roles: [organizationMember],
+        icon: IconList,
+        modes: [WorkspaceModes.Work],
+        permission: 'appointments.manage',
       },
       {
         name: 'Create Appointment',
-        icon: IconPlusCircle,
         path: '/appointments/create',
-        roles: [patient, organizationMember],
+        icon: IconPlusCircle,
+        modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
+        permission: 'appointments.manage',
       },
     ],
-    roles: [patient, organizationMember, practitionerRole],
   },
   {
     name: 'Patient',
     icon: IconFace,
+    modes: [WorkspaceModes.Work],
     children: [
       {
         name: 'Add New',
-        icon: IconUserPlus,
         path: '/patient/add',
-        roles: [organizationMember],
+        icon: IconUserPlus,
+        modes: [WorkspaceModes.Work],
+        permission: 'patients.register',
       },
       {
-        name: 'View patient',
-        icon: IconList,
+        name: 'View Patient',
         path: '/patient/view',
-        roles: [practitionerRole, organizationMember],
+        icon: IconList,
+        modes: [WorkspaceModes.Work],
+        permission: 'patients.read',
       },
     ],
-    roles: [organizationMember, practitionerRole],
   },
   {
-    name: 'EHR',
+    name: 'Medical Records',
     icon: IconDocumentText,
+    modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
     children: [
       {
-        name: 'Your EHRs',
-        icon: IconDocumentList,
+        name: 'Your Records',
         path: '/ehr/your-ehrs',
-        roles: [patient],
-      },
-      {
-        name: 'Patient EHRs',
         icon: IconDocumentList,
-        path: '/ehr/patient-ehrs',
-        roles: [practitionerRole],
+        modes: [WorkspaceModes.Patient],
       },
       {
-        name: 'Create EHR',
-        icon: IconPlusCircle,
+        name: 'Patient Records',
+        path: '/ehr/patient-ehrs',
+        icon: IconDocumentList,
+        modes: [WorkspaceModes.Work],
+        permission: 'clinical-records.read',
+      },
+      {
+        name: 'Create Record',
         path: '/ehr/create',
-        roles: [practitionerRole],
+        icon: IconPlusCircle,
+        modes: [WorkspaceModes.Work],
+        permission: 'clinical-records.write',
+        assignment: true,
       },
     ],
-    roles: [patient, practitionerRole],
-  },
-  {
-    name: 'Settings',
-    icon: IconSettings,
-    path: '/settings',
-    roles: [platformAdmin],
   },
   {
     name: 'Account',
-    icon: IconUserPlus,
     path: '/account',
-    roles: [], // to prevent creating nav button, but to allow breadcrumb to work
+    icon: IconUserPlus,
+    modes: [
+      WorkspaceModes.Patient,
+      WorkspaceModes.Work,
+      WorkspaceModes.Platform,
+    ],
+    hidden: true,
   },
 ];
+
+export function canOpenRoute(
+  route: Pick<NavPath, 'modes' | 'permission' | 'assignment'>,
+  workspace?: WorkspaceDto,
+) {
+  return (
+    !!workspace &&
+    route.modes.includes(workspace.mode) &&
+    (workspace.mode !== WorkspaceModes.Work ||
+      !route.permission ||
+      workspace.permissions.includes(route.permission)) &&
+    (!route.assignment || !!workspace.practitionerRoleId)
+  );
+}
+
+export function canOpenPath(path: string, workspace?: WorkspaceDto) {
+  const paths = navPaths.flatMap((row) => row.children ?? [row]);
+  const route = paths.find((row) => row.path === path);
+  if (route) return canOpenRoute(route, workspace);
+  if (path === '/account/edit' || path === '/forbidden' || path === '/login')
+    return true;
+  if (/^\/organization\/edit\/[^/]+$/.test(path))
+    return canOpenRoute(
+      {
+        modes: [WorkspaceModes.Work, WorkspaceModes.Platform],
+        permission: 'organizations.manage',
+      },
+      workspace,
+    );
+  if (/^\/organization\/view\/[^/]+$/.test(path)) return !!workspace;
+  if (/^\/appointments\/view\/[^/]+$/.test(path))
+    return canOpenRoute(
+      {
+        modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
+        permission: 'appointments.manage',
+      },
+      workspace,
+    );
+  if (/^\/ehr\/prescriptions\/view\/[^/]+$/.test(path))
+    return canOpenRoute(
+      {
+        modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
+        permission: 'clinical-records.read',
+      },
+      workspace,
+    );
+  return true;
+}
 
 export default navPaths;

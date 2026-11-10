@@ -1,7 +1,7 @@
 import { API_PATHS } from '@/constants';
 import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { useEncounter } from '_context/_encounter/encounterContext';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import {
@@ -30,7 +30,7 @@ export function PractitionerScheduleBar({
   organizationId: string;
   onError: (error?: AppNotificationType) => void;
 }) {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const filter = {
     date: toDefaultDateFormat(new Date()),
     practitionerRoleId,
@@ -73,7 +73,7 @@ function SessionStatus({
   filter: FilterSessionsForCurrentDayDto;
   onError: (error?: AppNotificationType) => void;
 }) {
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { isLoading: isLoading1, createQueryFunction } = useQueryFunction();
   const queryKey: ApiRequestOption = {
     path: API_PATHS.getCurrentOrUpcomingSession,

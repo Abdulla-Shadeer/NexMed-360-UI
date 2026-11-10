@@ -1,0 +1,386 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const ts = require('typescript');
+
+function loadSource(path, imports, globals = {}) {
+  const source = fs.readFileSync(path, 'utf8');
+  const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
+  const exports = {};
+  vm.runInNewContext(code, { exports, require: imports, ...globals });
+  return exports;
+}
+
+const { WorkspaceModes } = loadSource('src/_constants/workspaceModes.ts', () => ({}));
+const routes = loadSource('src/app/routeConfig.ts', name => name === '_constants/workspaceModes' ? { WorkspaceModes } : ({}));
+const work = { key: 'work:a', mode: WorkspaceModes.Work, organizationId: 'a', permissions: [] };
+const patient = { key: 'patient', mode: WorkspaceModes.Patient, permissions: [] };
+const platform = { key: 'platform', mode: WorkspaceModes.Platform, permissions: [] };
+
+test('work navigation keeps restricted pages visible but denies opening them', () => {
+  const entries = routes.default.filter(row => row.modes.includes(WorkspaceModes.Work)).flatMap(row => row.children ?? [row]);
+  assert.ok(entries.some(row => row.path === '/ehr/patient-ehrs'));
+  assert.ok(entries.some(row => row.path === '/organization/access-roles'));
+  assert.equal(routes.canOpenPath('/ehr/patient-ehrs', work), false);
+  assert.equal(routes.canOpenPath('/organization/access-roles', work), false);
+  assert.equal(routes.canOpenPath('/organization/your-organization', work), true);
+});
+
+test('one account can have different permissions at two organizations', () => {
+  const a = { ...work, permissions: ['clinical-records.read'] };
+  const b = { ...work, key: 'work:b', organizationId: 'b' };
+  assert.equal(routes.canOpenPath('/ehr/patient-ehrs', a), true);
+  assert.equal(routes.canOpenPath('/ehr/patient-ehrs', b), false);
+});
+
+test('clinical actions require a grant and a selected assignment', () => {
+  const clinician = { ...work, permissions: ['clinical-records.write', 'encounters.start'] };
+  assert.equal(routes.canOpenPath('/ehr/create', clinician), false);
+  assert.equal(routes.canOpenPath('/encounter', clinician), false);
+  assert.equal(routes.canOpenPath('/ehr/create', { ...clinician, practitionerRoleId: 'assignment' }), true);
+});
+
+test('patient history needs no organization grant and cannot open staff pages', () => {
+  assert.equal(routes.canOpenPath('/ehr/your-ehrs', patient), true);
+  assert.equal(routes.canOpenPath('/ehr/patient-ehrs', patient), false);
+  assert.equal(routes.canOpenPath('/patient/view', patient), false);
+  assert.equal(routes.canOpenPath('/appointments/create', patient), true);
+});
+
+test('platform administration does not open clinical pages', () => {
+  assert.equal(routes.canOpenPath('/organization/add', platform), true);
+  assert.equal(routes.canOpenPath('/ehr/patient-ehrs', platform), false);
+  assert.equal(routes.canOpenPath('/ehr/prescriptions/view/record', platform), false);
+});
+
+test('direct detail URLs use the same permission boundary', () => {
+  assert.equal(routes.canOpenPath('/organization/edit/a', work), false);
+  assert.equal(routes.canOpenPath('/appointments/view/booking', work), false);
+  assert.equal(routes.canOpenPath('/ehr/prescriptions/view/record', work), false);
+  assert.equal(routes.canOpenPath('/account/edit', work), true);
+});
+
+test('API calls capture the workspace and support query cancellation', async () => {
+  let selected = 'work:a';
+  const requests = [];
+  const hook = loadSource('src/_hooks/_api/useQueryFunction.ts', name => {
+    if (name === 'react') return { useState: () => [false, () => {}] };
+    if (name === '_context/_workspace/workspaceContext') return { useWorkspace: () => ({ workspace: { key: selected } }) };
+    if (name === '_utils/requestApi') return { requestApi: async (options, key, signal) => { requests.push({ options, key, signal }); return { isSuccess: true, data: [] }; } };
+    return {};
+  });
+  const first = hook.default().createQueryFunction({ path: '/Patient/Me', method: 'GET', accessToken: 'test-token' });
+  selected = 'work:b';
+  const second = hook.default().createQueryFunction({ path: '/Patient/Me', method: 'GET', accessToken: 'test-token' });
+  const controller = new AbortController();
+  await first({ signal: controller.signal });
+  await second();
+  assert.equal(requests[0].key, 'work:a');
+  assert.equal(requests[1].key, 'work:b');
+  controller.abort();
+  assert.equal(requests[0].signal.aborted, true);
+});
+
+function createHookHarness(path, imports, globals = {}) {
+  const slots = [];
+  const effects = [];
+  let cursor = 0;
+  const react = {
+    createContext: () => ({ Provider: Symbol('Provider') }),
+    useState(initial) {
+      const index = cursor++;
+      if (!(index in slots)) slots[index] = typeof initial === 'function' ? initial() : initial;
+      return [slots[index], value => { slots[index] = typeof value === 'function' ? value(slots[index]) : value; }];
+    },
+    useRef(initial) {
+      const index = cursor++;
+      if (!(index in slots)) slots[index] = { current: initial };
+      return slots[index];
+    },
+    useEffect(effect) {
+      const index = cursor++;
+      if (!(index in slots)) { slots[index] = true; effects.push(effect); }
+    },
+  };
+  const jsx = (type, props) => ({ type, props });
+  const module = loadSource(path, name => {
+    if (name === 'react') return react;
+    if (name === 'react/jsx-runtime') return { jsx, jsxs: jsx };
+    return imports(name);
+  }, globals);
+  return {
+    effects,
+    render(name, props = {}) { cursor = 0; return module[name](props); },
+  };
+}
+
+const tick = () => new Promise(resolve => setImmediate(resolve));
+
+function userHarness(savedToken, handler) {
+  const storage = new Map(savedToken ? [['accessToken', savedToken]] : []);
+  const requests = [];
+  const user = { id: 'account', personId: 'person', firstName: 'Sam' };
+  const harness = createHookHarness('src/_context/_user/userContext.tsx', name => {
+    if (name === '_utils/requestApi') return { requestApi: async options => {
+      requests.push(options);
+      if (handler) return handler(options);
+      return { isSuccess: true, data: options.path === '/Users/Login' ? { accessToken: 'new-token', user } : user };
+    } };
+    if (name === '@/constants') return { API_PATHS: { login: '/Users/Login', getUser: '/Users/GetUser' } };
+    if (name === '@tanstack/react-query') return { useQueryClient: () => ({ cancelQueries: async () => {}, clear() {} }) };
+    return {};
+  }, { localStorage: {
+    getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key),
+  } });
+  const context = () => harness.render('UserProvider').props.value;
+  context();
+  return { context, effects: harness.effects, requests, storage };
+}
+
+function workspaceHarness(choices, handler) {
+  const requests = [];
+  const listeners = new Map();
+  let clears = 0;
+  const harness = createHookHarness('src/_context/_workspace/workspaceContext.tsx', name => {
+    if (name === '_utils/requestApi') return { requestApi: async (options, key) => {
+      requests.push({ options, key });
+      if (handler) return handler(options, key);
+      return { isSuccess: true, data: options.path === '/Workspace' ? choices : choices.find(row => row.key === key) };
+    } };
+    if (name === '@tanstack/react-query') return { useQueryClient: () => ({ cancelQueries: async () => {}, clear() { clears++; } }) };
+    return {};
+  }, { window: { setInterval() { return 1; }, clearInterval() {}, addEventListener(name, fn) { listeners.set(name, fn); }, removeEventListener(name) { listeners.delete(name); } } });
+  const context = () => harness.render('WorkspaceStateProvider', { token: 'token' }).props.value;
+  context();
+  return { context, effects: harness.effects, requests, listeners, clears: () => clears };
+}
+
+test('login uses its returned basic user and does not call GetUser again', async () => {
+  const auth = userHarness();
+  await auth.context().loginUser({ email: 'test@example.test', password: 'test' });
+  assert.equal(auth.context().isLoggedIn, true);
+  assert.equal(auth.context().user.id, 'account');
+  assert.deepEqual(auth.requests.map(row => row.path), ['/Users/Login']);
+});
+
+test('restoring a login loads only the basic user', async () => {
+  const auth = userHarness('saved-token');
+  auth.effects[0]();
+  await tick();
+  assert.equal(auth.context().accessToken, 'saved-token');
+  assert.deepEqual(auth.requests.map(row => row.path), ['/Users/GetUser']);
+});
+
+test('logout prevents a pending login from restoring the account', async () => {
+  let finish;
+  const auth = userHarness(undefined, () => new Promise(resolve => { finish = resolve; }));
+  const pending = auth.context().loginUser({});
+  auth.context().logout();
+  finish({ isSuccess: true, data: { accessToken: 'old', user: { id: 'old' } } });
+  await pending;
+  assert.equal(auth.context().isLoggedIn, false);
+  assert.equal(auth.storage.get('accessToken'), undefined);
+});
+
+test('each sole workspace opens directly by loading its current details', async () => {
+  for (const only of [patient, platform, work]) {
+    const state = workspaceHarness([only]);
+    state.effects[0]();
+    await tick();
+    assert.equal(state.context().workspace.key, only.key);
+    assert.equal(state.context().isLoading, false);
+    assert.deepEqual(state.requests.map(row => row.options.path), ['/Workspace', '/Workspace/Current']);
+    assert.equal(state.requests[1].key, only.key);
+  }
+});
+
+test('several workspaces keep the chooser open and load only the chosen details', async () => {
+  const state = workspaceHarness([work, patient]);
+  state.effects[0]();
+  await tick();
+  assert.equal(state.context().workspace, undefined);
+  assert.equal(state.requests.length, 1);
+  await state.context().selectWorkspace('patient');
+  assert.equal(state.context().workspace.key, 'patient');
+  assert.equal(state.requests.length, 2);
+  assert.equal(state.requests[1].key, 'patient');
+});
+
+test('an account without workspaces stays on the no-access screen', async () => {
+  const state = workspaceHarness([]);
+  state.effects[0]();
+  await tick();
+  assert.equal(state.context().workspace, undefined);
+  assert.equal(state.context().workspaces.length, 0);
+  assert.equal(state.context().isLoading, false);
+});
+
+test('a slow selection cannot overwrite a newer workspace', async () => {
+  const pending = new Map();
+  const state = workspaceHarness([], (options, key) => new Promise(resolve => pending.set(key, resolve)));
+  const first = state.context().selectWorkspace('work:a');
+  await tick();
+  const second = state.context().selectWorkspace('patient');
+  await tick();
+  pending.get('patient')({ isSuccess: true, data: patient });
+  await second;
+  pending.get('work:a')({ isSuccess: true, data: work });
+  await first;
+  assert.equal(state.context().workspace.key, 'patient');
+});
+
+test('refreshing changed grants clears cached data and updates the current workspace', async () => {
+  let grants = ['patients.read'];
+  const state = workspaceHarness([work], async options => ({ isSuccess: true, data: options.path === '/Workspace' ? [work] : { ...work, permissions: grants } }));
+  state.effects.forEach(effect => effect());
+  await tick();
+  const previous = state.context().workspaceVersion;
+  grants = [];
+  await state.listeners.get('focus')();
+  assert.equal(state.context().workspace.permissions.length, 0);
+  assert.ok(state.context().workspaceVersion > previous);
+  assert.ok(state.clears() >= 2);
+});
+
+test('query results preserve false and zero without copying them into another state', () => {
+  for (const value of [false, 0]) {
+    const hook = loadSource('src/_hooks/_api/useAppQuery.ts', name => {
+      if (name === '_context/_workspace/workspaceContext') return { useWorkspace: () => ({ workspace: work }) };
+      if (name === '@tanstack/react-query') return { useQuery: options => { assert.equal(options.enabled, false); return { data: { data: value }, isFetching: false }; } };
+      if (name === './useQueryFunction') return { default: () => ({ createQueryFunction() {} }) };
+      return {};
+    });
+    assert.equal(hook.default({ path: '/test', method: 'GET' }, false).data, value);
+  }
+});
+
+test('HTTP requests encode filters and include the captured token and workspace', async () => {
+  let request;
+  const api = loadSource('src/_utils/requestApi.ts', name => name === '@/constants' ? { API_ENDPOINT: 'https://example.test/api/v1' } : {}, {
+    URL, Headers, Request, fetch: async value => { request = value; return new Response(JSON.stringify({ isSuccess: true, data: false })); },
+  });
+  const response = await api.requestApi({ path: '/test', method: 'GET', accessToken: 'token', queryParams: { name: 'Sam & Pat', omit: undefined } }, 'work:a');
+  assert.equal(response.data, false);
+  assert.equal(new URL(request.url).searchParams.get('name'), 'Sam & Pat');
+  assert.equal(new URL(request.url).searchParams.has('omit'), false);
+  assert.equal(request.headers.get('X-Workspace'), 'work:a');
+  assert.equal(request.headers.get('Authorization'), 'Bearer token');
+});
+
+test('server errors keep their useful description', async () => {
+  const api = loadSource('src/_utils/requestApi.ts', name => name === '@/constants' ? { API_ENDPOINT: 'https://example.test/api/v1' } : {}, {
+    URL, Headers, Request, fetch: async () => new Response(JSON.stringify({ isSuccess: false, error: { title: 'Request failed', description: 'Choose a location in your workspace.' } }), { status: 400 }),
+  });
+  await assert.rejects(api.requestApi({ path: '/test', method: 'GET' }), /Choose a location in your workspace/);
+});
+
+function element(tree, type) {
+  if (!tree) return undefined;
+  if (Array.isArray(tree)) return tree.map(child => element(child, type)).find(Boolean);
+  if (tree.type === type) return tree;
+  return element(tree.props?.children, type);
+}
+
+function selectorHarness(selected = work) {
+  const switched = [];
+  let loggedOut = false;
+  const harness = createHookHarness('src/_components/organization/workspaceSelector.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token', logout: () => { loggedOut = true; } }), useWorkspace: () => ({
+      workspace: selected, workspaces: [work, patient],
+      selectWorkspace: async key => { switched.push(key); }, logout: () => { loggedOut = true; },
+    }) };
+    if (name === '@/components/input') return { SelectInput: 'SelectInput' };
+    if (name === '@/components/buttons') return { SecondaryButton: 'SecondaryButton' };
+    if (name === '@/components/popup/confirmationDialog') return { default: 'ConfirmationDialog' };
+    return {};
+  });
+  return { render: () => harness.render('default'), switched, loggedOut: () => loggedOut };
+}
+
+test('switching waits for confirmation, and cancelling preserves the workspace', () => {
+  const selector = selectorHarness();
+  element(selector.render(), 'SelectInput').props.onSelect('patient');
+  assert.equal(selector.switched.length, 0);
+  element(selector.render(), 'ConfirmationDialog').props.onClose();
+  assert.equal(selector.switched.length, 0);
+  assert.equal(element(selector.render(), 'SelectInput').props.selected, 'work:a');
+  element(selector.render(), 'SelectInput').props.onSelect('patient');
+  element(selector.render(), 'ConfirmationDialog').props.onConfirm();
+  assert.equal(selector.switched[0], 'patient');
+});
+
+test('logout waits for confirmation, and cancelling keeps the user signed in', () => {
+  const selector = selectorHarness();
+  element(selector.render(), 'SecondaryButton').props.onClick();
+  assert.equal(selector.loggedOut(), false);
+  element(selector.render(), 'ConfirmationDialog').props.onClose();
+  assert.equal(selector.loggedOut(), false);
+  element(selector.render(), 'SecondaryButton').props.onClick();
+  element(selector.render(), 'ConfirmationDialog').props.onConfirm();
+  assert.equal(selector.loggedOut(), true);
+});
+
+test('an initial workspace choice and an unchanged selection need no switch confirmation', () => {
+  const initial = selectorHarness(null);
+  element(initial.render(), 'SelectInput').props.onSelect('patient');
+  assert.equal(initial.switched[0], 'patient');
+  assert.equal(element(initial.render(), 'ConfirmationDialog'), undefined);
+  const selected = selectorHarness();
+  element(selected.render(), 'SelectInput').props.onSelect('work:a');
+  assert.equal(element(selected.render(), 'ConfirmationDialog'), undefined);
+});
+
+function elements(tree, type) {
+  if (!tree) return [];
+  if (Array.isArray(tree)) return tree.flatMap(child => elements(child, type));
+  return [...(tree.type === type ? [tree] : []), ...elements(tree.props?.children, type)];
+}
+
+test('an organization administrator can add practitioners without clinical permissions', () => {
+  const harness = createHookHarness('src/app/organization/add-members/page.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({
+      accessToken: 'token', workspace: work, user: { organizationManagerProfile: { organizationId: 'a' } },
+      hasPermission: permission => permission === 'members.manage',
+    }) };
+    if (name === '@/hooks') return { useQueryFunction: () => ({ createQueryFunction() {}, isLoading: false }) };
+    if (name === '@/components/organization/addUserForm') return { default: 'AddUserForm' };
+    return {};
+  });
+  const view = harness.render('default');
+  assert.equal(element(view, 'fieldset').props.disabled, false);
+  assert.equal(element(view, 'AddUserForm').props.userType, 'practitionerRole');
+});
+
+test('role management can edit clinical roles without holding their clinical permissions', () => {
+  const harness = createHookHarness('src/app/organization/access-roles/page.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({
+      accessToken: 'token', workspace: work, hasPermission: permission => permission === 'roles.manage',
+    }) };
+    if (name === '@/hooks') return {
+      useQueryFunction: () => ({ createQueryFunction() {}, isLoading: false }),
+      useAppQuery: options => ({ data: options.path === '/Workspace/Roles'
+        ? [{ id: 'clinical-role', name: 'Clinician', permissions: ['clinical-records.read'] }]
+        : ['roles.manage', 'clinical-records.read'], isLoading: false }),
+    };
+    if (name === '_utils/access') return { permissionLabels: { 'clinical-records.read': 'Read medical records' } };
+    if (name === '@/components/input') return { CheckBoxInput: 'CheckBoxInput', Form: 'Form', TextInput: 'TextInput' };
+    if (name === '@/components/buttons') return { SecondaryButton: 'SecondaryButton' };
+    return {};
+  });
+  let view = harness.render('default');
+  const edit = elements(view, 'SecondaryButton').find(button => button.props.buttonText === 'Edit Role');
+  assert.equal(edit.props.disabled, false);
+  edit.props.onClick();
+  view = harness.render('default');
+  const permissions = element(view, 'CheckBoxInput');
+  assert.equal(permissions.props.disabled, false);
+  assert.equal(permissions.props.disabledItems, undefined);
+  assert.ok(permissions.props.checkedItems.includes('clinical-records.read'));
+});
+
+test('organization administrator management is restricted to platform mode', () => {
+  assert.equal(routes.canOpenPath('/organization/admins', platform), true);
+  assert.equal(routes.canOpenPath('/organization/admins', work), false);
+  assert.equal(routes.canOpenPath('/organization/admins', patient), false);
+});

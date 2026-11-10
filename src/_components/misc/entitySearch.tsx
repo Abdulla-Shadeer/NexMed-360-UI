@@ -5,7 +5,7 @@ import { IconChevronUpdown, IconSearch, IconTrash } from '../icons/icons';
 import ButtonSecondary from '../buttons/buttonSecondary';
 import { useQueryFunction } from '@/hooks';
 import { API_PATHS } from '@/constants';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import { AppNotificationType as AppNotificationType } from '_types/common';
 import AppNotification from './appNotification';
 import AppLoader from './loader';
@@ -25,7 +25,7 @@ const defaultDto: EntitySearchDto = {
 export default function EntitySearch({ open = true }: { open?: boolean }) {
   const [searchDto, setSearchDto] = useState<EntitySearchDto>(defaultDto);
   const [isOpen, setIsOpen] = useState(open);
-  const { accessToken } = useAuth();
+  const { accessToken } = useUser();
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [error, setError] = useState<AppNotificationType | undefined>(
     undefined,

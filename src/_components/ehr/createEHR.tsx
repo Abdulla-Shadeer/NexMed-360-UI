@@ -16,7 +16,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useAuth } from '_context';
+import { useUser, useWorkspace } from '_context';
 import {
   EncounterMeta,
   useEncounter,
@@ -34,11 +34,12 @@ const stepButtonStyle =
   'text-default text-left py-1 px-2 border-border-primary border-default cursor-pointer';
 
 export default function CreateEHR() {
-  const { accessToken, user } = useAuth();
+  const { accessToken } = useUser();
+  const { hasPermission, workspace } = useWorkspace();
   const { isActive, isLoading, meta } = useEncounter();
   const [defaultEHR, setDefaultEHR] = useState<AddClinicalRecordDto>({
     patientId: '',
-    practitionerRoleId: user?.practitionerRoleProfile?.id ?? '',
+    practitionerRoleId: workspace?.practitionerRoleId ?? '',
     diagnosis: '',
     visitDate: toDefaultDateFormat(new Date()),
   });
@@ -99,7 +100,10 @@ export default function CreateEHR() {
     if (isActive) {
       setDefaultEHR((prev) => ({
         ...prev!,
-        patientId: meta.patientData?.demographics?.id ?? '',
+        patientId:
+          meta.patientData?.demographics?.id ??
+          meta.appointmentData?.patientId ??
+          '',
       }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -193,17 +197,30 @@ export default function CreateEHR() {
               />
             )}
 
-            <CreatePrescription
-              defaultData={defaultPrescription}
-              onFormSubmit={(data) => {
-                setEHR((prev) => ({
-                  ...prev!,
-                  prescriptions: prev?.prescriptions
-                    ? prev?.prescriptions?.concat([data])
-                    : [data],
-                }));
-              }}
-            />
+            {!hasPermission('prescriptions.issue') && (
+              <p>
+                Adding prescriptions is disabled. You need permission to issue
+                prescriptions.
+              </p>
+            )}
+            <fieldset
+              disabled={!hasPermission('prescriptions.issue')}
+              className={
+                !hasPermission('prescriptions.issue') ? 'opacity-50' : ''
+              }
+            >
+              <CreatePrescription
+                defaultData={defaultPrescription}
+                onFormSubmit={(data) => {
+                  setEHR((prev) => ({
+                    ...prev!,
+                    prescriptions: prev?.prescriptions
+                      ? prev?.prescriptions?.concat([data])
+                      : [data],
+                  }));
+                }}
+              />
+            </fieldset>
           </div>
         )}
       </div>
@@ -271,7 +288,8 @@ function EhrInfo({
   onReset: () => void;
   onConfirm: () => void;
 }) {
-  const { user } = useAuth();
+  const { user } = useUser();
+  const { workspace } = useWorkspace();
   return (
     <div className="lg:w-[24%] md:w-fit sm:w-fit h-fit p-6 bg-panel-light border-default border-border-primary rounded-default flex flex-col gap-4 text-default text-black-secondary justify-between">
       <p className="text-title-small pb-1 border-b-default border-border-primary text-blue-secondary">
@@ -289,8 +307,8 @@ function EhrInfo({
       </p>
       <p>
         PractitionerRole:
-        {user?.practitionerRoleProfile ? (
-          <span className="font-semibold ml-1">{` ${user.practitionerRoleProfile?.firstName} ${user.practitionerRoleProfile?.lastName}`}</span>
+        {workspace?.practitionerRoleId ? (
+          <span className="font-semibold ml-1">{` ${user?.firstName} ${user?.lastName}`}</span>
         ) : (
           <span>~</span>
         )}
@@ -303,7 +321,7 @@ function EhrInfo({
           </span>
         ) : (
           <span className="font-semibold ml-1">
-            {user?.practitionerRoleProfile?.organizationName ?? '~'}
+            {workspace?.organizationName ?? '~'}
           </span>
         )}
       </p>

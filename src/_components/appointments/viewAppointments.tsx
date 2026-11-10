@@ -1,6 +1,7 @@
-import { API_PATHS, USER_ROLES } from '@/constants';
+import { WorkspaceModes } from '_constants/workspaceModes';
+import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
-import { useAuth } from '_context';
+import { useUser, useWorkspace } from '_context';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import {
   ViewAppointmentsFilterDto,
@@ -25,7 +26,8 @@ export default function ViewAppointments({
   type: 'own' | 'organization';
   title: string;
 }) {
-  const { accessToken, user } = useAuth();
+  const { accessToken } = useUser();
+  const { workspace } = useWorkspace();
   const [filter, setFilter] = useState<ViewAppointmentsFilterDto>({});
 
   const requestOptions = useMemo(() => {
@@ -66,7 +68,7 @@ export default function ViewAppointments({
     return (
       <Form title="Filter Appointments" action={handleSubmit}>
         {(type === 'organization' ||
-          user?.roles.includes(USER_ROLES.practitionerRole)) && (
+          workspace?.mode === WorkspaceModes.Work) && (
           <Field name="patientId">
             {(field) => (
               <TextInput
@@ -81,7 +83,7 @@ export default function ViewAppointments({
         )}
 
         {(type === 'organization' ||
-          user?.roles.includes(USER_ROLES.patient)) && (
+          workspace?.mode === WorkspaceModes.Patient) && (
           <Field name="practitionerRoleId">
             {(field) => (
               <TextInput

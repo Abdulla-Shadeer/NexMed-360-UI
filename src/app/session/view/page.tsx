@@ -1,4 +1,5 @@
 'use client';
+import { useWorkspace } from '_context/_workspace/workspaceContext';
 import QuickActionButton from '@/components/buttons/quickActionButton';
 import UpdatePractitionerScheduleForm from '@/components/practitionerSchedule/updatePractitionerSchedule';
 import AppIcon from '@/components/icons/appIcon';
@@ -18,7 +19,7 @@ import ConfirmationDialog from '@/components/popup/confirmationDialog';
 import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '_context';
+import { useUser } from '_context';
 import useQueryFunction, {
   ApiRequestOption,
 } from '_hooks/_api/useQueryFunction';
@@ -39,16 +40,17 @@ enum CurrentWindow {
 }
 
 export default function ViewSessionsPage() {
-  const { accessToken, user } = useAuth();
+  const { accessToken } = useUser();
+  const { workspace } = useWorkspace();
   const queryKey: ApiRequestOption = {
     path: API_PATHS.getPractitionerSchedules,
     method: 'GET',
     accessToken,
   };
-  if (user?.practitionerRoleProfile) {
+  if (workspace?.practitionerRoleId) {
     queryKey.queryParams = {
       ...(queryKey.queryParams as FilterPractitionerScheduleDto),
-      practitionerRoleId: user.practitionerRoleProfile.id,
+      practitionerRoleId: workspace?.practitionerRoleId,
     } as FilterPractitionerScheduleDto;
   }
 
@@ -73,7 +75,7 @@ export default function ViewSessionsPage() {
 
   function invalidateQueries() {
     setSessionToEdit(undefined);
-    queryClient.invalidateQueries({ exact: true, queryKey: [queryKey] });
+    queryClient.invalidateQueries({ exact: false, queryKey: [queryKey] });
   }
 
   async function updateSession(data: UpdatePractitionerScheduleDto) {

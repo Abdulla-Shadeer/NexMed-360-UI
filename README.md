@@ -34,3 +34,20 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+## Workspaces and access
+
+After login or a page refresh, an account with one available workspace opens it automatically. Accounts with several workspaces choose patient mode, organization work, a practitioner assignment, or platform administration. The selector lists only choices available to the current account. Manual workspace switches and logout use the shared confirmation dialog. Cancelling keeps the current workspace and session. Confirming a switch clears cached results and the current patient/encounter state.
+
+Navigation stays visible within the selected mode. A page that needs a missing permission shows the shared 403 view. Restricted actions are disabled with a short explanation. The API independently checks current permissions and organization ownership on every request.
+
+Organization members with the required grants can manage access roles under Organization > Access Roles and memberships under Organization > Manage Staff. Role managers can define clinical permission groups, and staff managers can assign them, without receiving those clinical permissions themselves. Platform administrators can choose additional initial grants when assigning an organization administrator.
+
+Run `npm run test:access` for workspace routes, request headers, automatic login entry, and switch/logout confirmation regressions, `npx tsc --noEmit` for types, and `npm run build` for the production build. Browser review should cover workspace switching, direct restricted URLs, revoked memberships, and patient history across two organizations.
+
+
+Platform administrators can view, update, and remove organization administrators under **Organization > Manage Organization Admins**. Organization deletion is also available there and on organization list/details actions. Confirmation is required. Shared accounts and other organizations are kept when administrator access is removed; organizations with patient registrations or care history cannot be deleted.
+
+
+The user and workspace providers have separate responsibilities. `UserProvider` keeps the basic account and token; login uses the user already returned by the login response, and page refresh calls `GetUser` once. `WorkspaceProvider` loads the small workspace list and fetches `Workspace/Current` for the selected key. Patient screens load `Patient/Me` on demand. `requestApi` handles HTTP and result errors; `useAppQuery` reads directly from the query cache. Staff screens use the selected workspace IDs instead of hidden defaults from user profiles.

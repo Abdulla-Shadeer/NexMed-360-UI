@@ -20,18 +20,11 @@ export interface ApiResultDto<T> {
 
 export interface ViewUserDto {
   personId: string;
-  practitionerRoleProfiles: ViewPractitionerRoleDto[];
-  memberships: ViewOrganizationMemberDto[];
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
-  roles: string[];
-  patientProfile?: ViewPatientDto;
-  practitionerRoleProfile?: ViewPractitionerRoleDto;
-  organizationMemberProfile?: ViewOrganizationMemberDto;
-  organizationManagerProfile?: ViewOrganizationManagerDto;
 }
 
 export interface LoginResponseDto {
@@ -168,7 +161,6 @@ export interface ViewOrganizationDto {
   district?: string;
   phone: string;
   grade?: string;
-  admins?: ViewUserDto[];
 }
 
 export interface ViewPractitionerRoleDto {
@@ -195,30 +187,6 @@ export interface ViewPatientDto {
   phoneNumber: string;
   birthDate: string;
   gender: string;
-}
-
-export interface ViewOrganizationManagerDto {
-  id: string;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  organizationId: string;
-  organizationName: string;
-}
-
-export interface ViewOrganizationMemberDto {
-  id: string;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  location?: string;
-  department?: string;
-  organizationId: string;
-  organizationName: string;
 }
 
 export interface CreateOrganizationDto {
@@ -250,6 +218,7 @@ export interface RegisterUserDto {
 }
 
 export interface CreateOrganizationManagerDto {
+  permissions?: string[];
   personalInformation: RegisterUserDto;
   organizationId: string;
 }
