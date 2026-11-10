@@ -1,10 +1,11 @@
 'use client';
-import { RadioInput } from '@/components/input';
+import { RadioInput, SelectInput } from '@/components/input';
 import AddUserForm from '@/components/organization/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
-import { useQueryFunction } from '@/hooks';
+import { useAppQuery, useQueryFunction } from '@/hooks';
+import { LocationDto } from '_types/access';
 import {
   AppNotificationType,
   CreatePractitionerRoleDto,
@@ -25,12 +26,31 @@ export default function AddMembersPage() {
     AppNotificationType | undefined
   >(undefined);
 
-  const canAdd =
-    !workspace?.isLocationRestricted && hasPermission('members.manage');
+  const canAdd = hasPermission('members.manage');
+  const [locationId, setLocationId] = useState('');
+  const {
+    data: locations,
+    error: locationError,
+    isLoading: locationsLoading,
+  } = useAppQuery<LocationDto[]>(
+    { path: '/Workspace/Locations', method: 'GET', accessToken },
+    canAdd,
+  );
+  const allLocations = 'all';
 
   async function dispatchRequest(
     data: CreatePractitionerRoleDto | CreateOrganizationMemberDto,
   ) {
+    if (workspace?.isLocationRestricted && !locationId) {
+      setNotification({
+        type: 'error',
+        title: 'Choose a location',
+        description:
+          'Choose a location within your workspace before adding staff.',
+      });
+      return;
+    }
+
     const request = createQueryFunction<ViewUserDto>({
       path:
         memberType === 'practitionerRole'
@@ -38,7 +58,7 @@ export default function AddMembersPage() {
           : API_PATHS.addOrganizationMember,
       method: 'POST',
       accessToken,
-      payload: data,
+      payload: { ...data, locationId: locationId || null },
     });
 
     try {
@@ -64,7 +84,8 @@ export default function AddMembersPage() {
 
   return (
     <div className="w-full flex flex-col gap-6">
-      {isLoading && <AppLoader />}
+      {(isLoading || locationsLoading) && <AppLoader />}
+      {locationError && <AppNotification notification={locationError} />}
       {notification && <AppNotification notification={notification} />}
       <h2 className="text-title px-1 py-2 bg-panel-light">Add Staff</h2>
       <RadioInput
@@ -86,11 +107,38 @@ export default function AddMembersPage() {
       />
       {!canAdd && (
         <p>
-          Choose your organization workspace to add staff. You need staff
-          management permission, not clinical permissions.
+          You need staff management permission to add staff in this workspace.
         </p>
       )}
-      <fieldset disabled={!canAdd} className={!canAdd ? 'opacity-50' : ''}>
+      <SelectInput
+        name="Location"
+        description={
+          workspace?.isLocationRestricted
+            ? 'Choose a location within your workspace. Existing staff keep their current location scope.'
+            : 'Choose a location or allow all organization locations. Existing staff keep their current location scope.'
+        }
+        required={!!workspace?.isLocationRestricted}
+        selected={
+          locationId || (workspace?.isLocationRestricted ? '' : allLocations)
+        }
+        onSelect={(value) => setLocationId(value === allLocations ? '' : value)}
+        options={[
+          ...(!workspace?.isLocationRestricted
+            ? [{ key: allLocations, value: 'All organization locations' }]
+            : []),
+          ...(locations ?? []).map((location) => ({
+            key: location.id,
+            value: location.name,
+          })),
+        ]}
+        disabled={!canAdd || isLoading || locationsLoading || !!locationError}
+        error=""
+        tw_width="w-full"
+      />
+      <fieldset
+        disabled={!canAdd || isLoading || locationsLoading || !!locationError}
+        className={!canAdd ? 'opacity-50' : ''}
+      >
         {memberType === 'practitionerRole' && (
           <AddUserForm
             userType="practitionerRole"

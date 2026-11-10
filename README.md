@@ -51,3 +51,6 @@ Platform administrators can view, update, and remove organization administrators
 
 
 The user and workspace providers have separate responsibilities. `UserProvider` keeps the basic account and token; login uses the user already returned by the login response, and page refresh calls `GetUser` once. `WorkspaceProvider` loads the small workspace list and fetches `Workspace/Current` for the selected key. Patient screens load `Patient/Me` on demand. `requestApi` handles HTTP and result errors; `useAppQuery` reads directly from the query cache. Staff screens use the selected workspace IDs instead of hidden defaults from user profiles.
+
+
+Add Staff uses the existing Location selector for both ordinary staff and practitioner assignments. It lists active locations available to the current workspace. Restricted managers must select a location; unrestricted managers can choose All organization locations. Existing staff keep their current scope. Shared access-role definitions still require unrestricted organization access.

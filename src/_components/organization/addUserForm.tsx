@@ -25,8 +25,6 @@ interface UserFormData {
   confirmPassword?: string;
   roleName?: string;
   specialty?: string;
-  location?: string;
-  department?: string;
   gender?: 'Male' | 'Female';
   birthDate?: string;
 }
@@ -95,8 +93,6 @@ export default function AddUserForm({
             phoneNumber: formData.phoneNumber,
             password: formData.password!,
           },
-          department: formData.department ?? '',
-          location: formData.location ?? '',
         };
         onFormSubmit(createOrganizationMemberDto);
         break;
@@ -328,44 +324,6 @@ export default function AddUserForm({
                 value={field.state.value ?? ''}
                 onChange={field.handleChange}
                 error=""
-              />
-            )}
-          </Field>
-        </>
-      ) : userType === 'organizationMember' ? (
-        <>
-          <Field
-            name="department"
-            validators={{
-              onChange: ({ value }) =>
-                !value ? 'Department required!' : undefined,
-            }}
-          >
-            {(field) => (
-              <TextInput
-                name={field.name}
-                value={field.state.value ?? ''}
-                onChange={field.handleChange}
-                required
-                error={field.state.meta.errorMap.onChange ?? ''}
-              />
-            )}
-          </Field>
-
-          <Field
-            name="location"
-            validators={{
-              onChange: ({ value }) =>
-                !value ? 'Location required!' : undefined,
-            }}
-          >
-            {(field) => (
-              <TextInput
-                name={field.name}
-                value={field.state.value ?? ''}
-                onChange={field.handleChange}
-                required
-                error={field.state.meta.errorMap.onChange ?? ''}
               />
             )}
           </Field>
