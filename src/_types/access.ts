@@ -14,7 +14,7 @@ export interface WorkspaceDto extends WorkspaceOptionDto {
   name: string;
   mode: WorkspaceMode;
   organizationId?: string;
-  membershipId?: string;
+  organizationMemberId?: string;
   patientId?: string;
   practitionerRoleId?: string;
   organizationName?: string;
@@ -28,7 +28,7 @@ export interface AccessRoleDto {
   permissions: string[];
 }
 
-export interface MembershipDto {
+export interface OrganizationMemberDto {
   id: string;
   userId: string;
   name: string;

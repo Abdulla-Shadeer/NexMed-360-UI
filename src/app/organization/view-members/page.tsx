@@ -4,7 +4,11 @@ import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { useAppQuery, useQueryFunction } from '@/hooks';
 import { useUser, useWorkspace } from '_context';
-import { AccessRoleDto, LocationDto, MembershipDto } from '_types/access';
+import {
+  AccessRoleDto,
+  LocationDto,
+  OrganizationMemberDto,
+} from '_types/access';
 import { AppNotificationType } from '@/types';
 import { Form, CheckBoxInput, SelectInput } from '@/components/input';
 import { SecondaryButton } from '@/components/buttons';
@@ -16,7 +20,7 @@ export default function ViewMembersPage() {
     data: members,
     error,
     isLoading,
-  } = useAppQuery<MembershipDto[]>({
+  } = useAppQuery<OrganizationMemberDto[]>({
     path: '/Workspace/Members',
     method: 'GET',
     accessToken,
@@ -81,7 +85,7 @@ function MemberForm({
   roles,
   locations,
 }: {
-  member: MembershipDto;
+  member: OrganizationMemberDto;
   roles: AccessRoleDto[];
   locations: LocationDto[];
 }) {
@@ -99,7 +103,7 @@ function MemberForm({
   async function save() {
     setNotification(undefined);
     try {
-      await createQueryFunction<MembershipDto>({
+      await createQueryFunction<OrganizationMemberDto>({
         path: `/Workspace/Members/${member.id}`,
         method: 'PUT',
         accessToken,

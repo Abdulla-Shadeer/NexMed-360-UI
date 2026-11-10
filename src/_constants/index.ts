@@ -25,8 +25,11 @@ const API_PATHS = {
   assignOrganizationManager: '/Organization/AssignAdmin',
   organizationAdministrators: (id: string) =>
     `/OrganizationAdministration/${id}/Administrators`,
-  organizationAdministrator: (organizationId: string, membershipId: string) =>
-    `/OrganizationAdministration/${organizationId}/Administrators/${membershipId}`,
+  organizationAdministrator: (
+    organizationId: string,
+    organizationMemberId: string,
+  ) =>
+    `/OrganizationAdministration/${organizationId}/Administrators/${organizationMemberId}`,
   deleteOrganization: (id: string) => `/OrganizationAdministration/${id}`,
   getOrganizationMembers: (organizationId: string) =>
     `/Organization/GetMembers/${organizationId}`,
