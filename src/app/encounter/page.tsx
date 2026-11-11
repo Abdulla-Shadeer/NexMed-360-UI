@@ -3,11 +3,9 @@
 import { CreateEHR } from '@/components/ehr';
 import PatientEHRs from '@/components/ehr/patientEhrs';
 import ViewPrescriptions from '@/components/ehr/viewPrescriptions';
-import { AppNotification } from '@/components/misc';
 import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
 import { useWorkspace } from '_context';
 import { useEncounter } from '_context/_encounter/encounterContext';
-import { AppNotificationType as AppNotificationType } from '_types/common';
 import { calculateAge } from '_utils/dateUtils';
 import { useState } from 'react';
 
@@ -23,12 +21,9 @@ export default function EncounterPage() {
   const [activeTab, setActiveTab] = useState<
     'demography' | 'ehrs' | 'prescriptions' | 'addEhr'
   >('demography');
-  const [notification, setNotification] = useState<
-    AppNotificationType | undefined
-  >(undefined);
+
   return (
     <div className="w-full h-full">
-      {notification && <AppNotification notification={notification} />}
       {!isActive && (
         <div className="w-full h-full flex items-center justify-center">
           <p className="text-display text-on-disabled text-center">
@@ -104,10 +99,7 @@ export default function EncounterPage() {
 
           {activeTab === 'ehrs' && meta.patientData?.demographics && (
             <div className="w-full ">
-              <PatientEHRs
-                patient={meta.patientData.demographics}
-                onNotification={(notification) => setNotification(notification)}
-              />
+              <PatientEHRs patient={meta.patientData.demographics} />
             </div>
           )}
 

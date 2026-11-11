@@ -3,13 +3,10 @@ import { WorkspaceModes } from '_constants/workspaceModes';
 
 import { API_PATHS } from '@/constants';
 import { useAppQuery } from '@/hooks';
-import {
-  AppNotificationType,
-  ViewClinicalRecordDto,
-  ViewPatientDto,
-} from '@/types';
+import { ViewClinicalRecordDto, ViewPatientDto } from '@/types';
 import { useUser, useWorkspace } from '_context';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { AppNotification } from '@/components/misc';
 import Paginator from '../misc/paginator';
 import AppLoader from '../misc/loader';
 import { toDefaultDateFormat, toDisplayDateTimeFormat } from '_utils/dateUtils';
@@ -19,13 +16,7 @@ import KeyValueData from '@/components/misc/keyValueData';
 import { SecondaryButton } from '../buttons';
 import { useRouter } from 'next/navigation';
 
-export default function PatientEHRs({
-  patient,
-  onNotification,
-}: {
-  patient: ViewPatientDto;
-  onNotification: (notification: AppNotificationType) => void;
-}) {
+export default function PatientEHRs({ patient }: { patient: ViewPatientDto }) {
   const { accessToken } = useUser();
   const { workspace } = useWorkspace();
   const queryKey = {
@@ -45,15 +36,22 @@ export default function PatientEHRs({
   >(undefined);
   const router = useRouter();
 
-  useEffect(() => {
-    if (error) {
-      onNotification(error);
-    }
-  }, [error, onNotification]);
+  const records = useMemo(
+    () =>
+      data
+        ? [...data].sort(
+            (left, right) =>
+              new Date(right.visitDate).getTime() -
+              new Date(left.visitDate).getTime(),
+          )
+        : undefined,
+    [data],
+  );
 
   return (
     <div className="w-full space-y-6 justify-between">
       {isLoading && <AppLoader />}
+      {error && <AppNotification notification={error} />}
       <div className="w-full flex flex-row justify-between items-center border-b-default border-border-primary pb-4">
         <h2 className="text-title">EHRs (Electronic Health Records)</h2>
         <RefreshData queryKey={queryKey as ApiRequestOption} />
@@ -70,11 +68,15 @@ export default function PatientEHRs({
               </p>
               <KeyValueData
                 _key="Patient"
-                value={`${patient.gender === 'Male' ? 'Mr. ' : 'Ms. '}${patient.firstName} ${patient.lastName}`}
+                value={`${patient.firstName} ${patient.lastName}`}
               />
               <KeyValueData
-                _key="PractitionerRole"
+                _key="Practitioner"
                 value={`${ehr.practitionerName}`}
+              />
+              <KeyValueData
+                _key="Source organization"
+                value={ehr.organizationName}
               />
               <KeyValueData _key="Diagnosis" value={ehr.diagnosis} />
               <KeyValueData
@@ -114,9 +116,9 @@ export default function PatientEHRs({
       ) : (
         <p>No data found!</p>
       )}
-      {data && (
+      {records && (
         <Paginator
-          data={data}
+          data={records}
           onPagination={(pageData) =>
             setCurrentPageData(pageData as ViewClinicalRecordDto[])
           }

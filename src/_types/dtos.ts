@@ -262,6 +262,7 @@ export interface ViewPrescriptionDto {
 
 export interface ViewClinicalRecordDto {
   id: string;
+  organizationName: string;
   patientId: string;
   patientName: string;
   practitionerRoleId: string;

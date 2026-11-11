@@ -169,7 +169,7 @@ const navPaths: NavPath[] = [
         permission: 'patients.register',
       },
       {
-        name: 'View Patient',
+        name: 'Patient Care',
         path: '/patient/view',
         icon: IconList,
         modes: [WorkspaceModes.Work],

@@ -65,3 +65,16 @@ A signed-in account without patient mode can use **Account > Enable patient acce
 Manual review: create a fresh patient account and sign in; reject a duplicate email; enable patient mode for a staff-only account; verify work grants remain; open Account with no selected workspace; refresh and switch modes; confirm existing patient history is unchanged. Email verification, welcome messages, invitations, and password recovery remain deferred.
 
 Verified on 11 November 2026: **42 UI tests passed** and the full production build passed TypeScript/lint. No live browser journey was run. Use `npm run test:access` and `npm run build` for the automated checks.
+
+
+## Patient Care without appointments
+
+**Patient > Patient Care** (`/patient/view`) searches permitted patients by name/email or opens a patient ID. It shows patient details and the selected work organization, then offers Clinical history and Add clinical record. The existing Create EHR route (`/ehr/create`) opens the same patient selection with record entry selected. Both reuse existing clinical APIs, forms, history cards, and prescription controls. History displays source organization and practitioner, newest records first.
+
+No booking, confirmation, arrival, session start, or encounter completion is required. The session toolbar is hidden on these two direct-care pages so it cannot automatically load/resume an appointment there. The existing appointment/session/encounter route remains available. Explicit patient selection overrides an active appointment context; changing patients clears the editor, and patient changes are locked during a save. Notes-only and prescription saves share one save/refresh path. Failed saves retain the draft. Record date/author come from the server.
+
+Patient lookup needs `patients.read`; history needs `clinical-records.read`; writing needs `clinical-records.write` and a practitioner workspace; prescribing separately needs `prescriptions.issue`. Disabled actions explain missing access. These do not grant access to another organization or patient. External FHIR records are still Phase 6; the full stored encounter lifecycle is deferred.
+
+Manual review: search/open a registered patient with no appointment or schedule; save notes only and then a record with prescriptions; confirm refreshed history/source labels and patient self-history; choose a different patient and check the draft clears; reject a wrong-organization patient; check missing grants; open direct care while an appointment encounter is active and confirm patient identity and appointment status remain correct.
+
+Verified on 11 November 2026: **56 UI tests passed**, and the production build passed TypeScript/lint. No live browser journey was run. Use `npm run test:access` and `npm run build` to repeat the automated checks.

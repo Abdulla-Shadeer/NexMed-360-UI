@@ -88,6 +88,7 @@ function createHookHarness(path, imports, globals = {}) {
   let cursor = 0;
   const react = {
     createContext: () => ({ Provider: Symbol('Provider') }),
+    useMemo: factory => factory(),
     useState(initial) {
       const index = cursor++;
       if (!(index in slots)) slots[index] = typeof initial === 'function' ? initial() : initial;
@@ -103,7 +104,7 @@ function createHookHarness(path, imports, globals = {}) {
       if (!(index in slots)) { slots[index] = true; effects.push(effect); }
     },
   };
-  const jsx = (type, props) => ({ type, props });
+  const jsx = (type, props, key) => ({ type, props, key });
   const module = loadSource(path, name => {
     if (name === 'react') return react;
     if (name === 'react/jsx-runtime') return { jsx, jsxs: jsx };
@@ -570,13 +571,14 @@ test('a rejected signup keeps the form and shows the API error', async () => {
   assert.equal(element(state.render(), 'AppNotification').props.notification.description, 'Please sign in instead.');
 });
 
-function appShell(pathname, isLoggedIn) {
+function appShell(pathname, isLoggedIn, selectedWorkspace) {
   const harness = createHookHarness('src/app/layout.tsx', name => {
-    if (name === '_context') return { useUser: () => ({ isLoggedIn, user: {} }), useWorkspace: () => ({ workspaces: [], workspaceVersion: 0 }) };
+    if (name === '_context') return { useUser: () => ({ isLoggedIn, user: {} }), useWorkspace: () => ({ workspace: selectedWorkspace, workspaces: [], workspaceVersion: 0 }) };
     if (name === '@tanstack/react-query') return { QueryClient: class {}, QueryClientProvider: 'QueryClientProvider' };
     if (name === 'next/navigation') return { usePathname: () => pathname };
     if (name === 'next/link') return { default: 'Link' };
     if (name === './login/page') return { default: 'Login' };
+    if (name === '@/components/practitionerSchedule/sessionStatusBar') return { PractitionerScheduleBar: 'PractitionerScheduleBar' };
     if (name === '@/approuteConfig') return { default: [], canOpenPath: () => true };
     return {};
   });
@@ -599,4 +601,224 @@ test('the account page remains reachable for a login with no workspaces', () => 
   const shell = appShell('/account', true);
   assert.equal(shell.type, 'main');
   assert.ok(shell.props.children.includes('Page content'));
+});
+
+
+const carePatient = { id: 'patient-b', firstName: 'Sam', lastName: 'Patient', birthDate: '1990-01-01', gender: 'Unknown' };
+const clinicalWork = { ...work, practitionerRoleId: 'my-assignment', organizationName: 'Clinic A' };
+
+function namedElement(tree, name) {
+  if (!tree) return;
+  if (Array.isArray(tree)) return tree.map(child => namedElement(child, name)).find(Boolean);
+  if (tree.type?.name === name) return tree;
+  return namedElement(tree.props?.children, name);
+}
+
+function clinicalEditorHarness(activeAppointment = false, failSave = false) {
+  const requests = [], invalidations = [], busy = [];
+  let saved = 0;
+  const harness = createHookHarness('src/_components/ehr/createEHR.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token', user: { firstName: 'Practitioner' } }), useWorkspace: () => ({ workspace: clinicalWork, hasPermission: () => true }) };
+    if (name === '_context/_encounter/encounterContext') return { useEncounter: () => ({ isActive: activeAppointment, meta: activeAppointment ? { appointmentData: { patientId: 'appointment-patient', bookingReference: 'appointment-a' } } : {} }) };
+    if (name === '@/hooks') return { useQueryFunction: () => ({ createQueryFunction: options => async () => { requests.push(options); if (failSave) throw new Error('Save failed'); return { isSuccess: true, data: { id: 'record' } }; } }) };
+    if (name === '@/constants') return { API_PATHS: { addClinicalRecord: '/Patient/AddClinicalRecord', getClinicalRecords: id => '/Patient/GetClinicalRecords/' + id } };
+    if (name === '@tanstack/react-query') return { useQueryClient: () => ({ invalidateQueries: async options => { invalidations.push(options); } }) };
+    if (name === '@/components/ehr/createEhrForm') return { default: 'CreateEhrForm' };
+    if (name === '@/components/ehr/createPrescriptionForm') return { default: 'CreatePrescription' };
+    if (name === '@/components/misc') return { AppNotification: 'AppNotification' };
+    if (name === '_utils/dateUtils') return { toDefaultDateFormat: () => '2026-11-11' };
+    return {};
+  });
+  return { render: () => harness.render('default', { patient: carePatient, onSaved: () => { saved++; }, onSavingChange: value => busy.push(value) }), requests, invalidations, busy, saved: () => saved };
+}
+
+test('an explicit patient takes precedence over an active appointment in the record editor', () => {
+  const state = clinicalEditorHarness(true);
+  const view = state.render();
+  assert.equal(element(view, 'CreateEhrForm').props.defaultData.patientId, 'patient-b');
+  assert.equal(namedElement(view, 'EhrInfo').props.patient.id, 'patient-b');
+  assert.equal(Object.keys(namedElement(view, 'EhrInfo').props.encounterMeta).length, 0);
+});
+
+test('notes-only saving uses the selected patient and assignment without appointment calls', async () => {
+  const state = clinicalEditorHarness(true);
+  await element(state.render(), 'CreateEhrForm').props.onSave({ patientId: 'wrong-patient', practitionerRoleId: 'wrong-author', diagnosis: 'Consultation', visitDate: '2026-11-11' });
+  assert.deepEqual(state.requests.map(row => row.path), ['/Patient/AddClinicalRecord']);
+  assert.equal(state.requests[0].payload.patientId, 'patient-b');
+  assert.equal(state.requests[0].payload.practitionerRoleId, 'my-assignment');
+  assert.equal(state.saved(), 1);
+  assert.deepEqual(state.busy, [true, false]);
+  assert.equal(state.invalidations[0].queryKey[0].path, '/Patient/GetClinicalRecords/patient-b');
+  assert.equal(state.invalidations[0].queryKey[1], 'work:a');
+});
+
+test('a record with prescriptions follows the same save and history refresh path', async () => {
+  const state = clinicalEditorHarness();
+  element(state.render(), 'CreateEhrForm').props.onFormSubmit({ patientId: 'patient-b', practitionerRoleId: 'my-assignment', diagnosis: 'Consultation', visitDate: '2026-11-11' });
+  const prescriptionForm = elements(state.render(), 'CreatePrescription').at(-1);
+  prescriptionForm.props.onFormSubmit({ medicineName: 'Synthetic medicine', dosage: 'Test', timesPerDay: 1, isLongTermUse: false });
+  await namedElement(state.render(), 'EhrInfo').props.onConfirm();
+  assert.equal(state.requests.length, 1);
+  assert.equal(state.requests[0].payload.prescriptions.length, 1);
+  assert.equal(state.saved(), 1);
+  assert.equal(state.invalidations.length, 1);
+});
+
+test('a failed record save keeps the draft and does not announce success or refresh history', async () => {
+  const state = clinicalEditorHarness(false, true);
+  element(state.render(), 'CreateEhrForm').props.onFormSubmit({ patientId: 'patient-b', diagnosis: 'Keep this note', visitDate: '2026-11-11' });
+  await namedElement(state.render(), 'EhrInfo').props.onConfirm();
+  const view = state.render();
+  assert.equal(namedElement(view, 'EhrInfo').props.ehr.diagnosis, 'Keep this note');
+  assert.equal(element(view, 'AppNotification').props.notification.type, 'error');
+  assert.equal(state.saved(), 0);
+  assert.equal(state.invalidations.length, 0);
+});
+
+test('the notes-only form action uses its current save choice immediately', () => {
+  const saved = [], prescriptions = [];
+  const harness = createHookHarness('src/_components/ehr/createEhrForm.tsx', name => {
+    if (name === '@tanstack/react-form') return { useForm: options => ({ Field: 'Field', Subscribe: 'Subscribe', reset() {}, handleSubmit: () => options.onSubmit({ value: options.defaultValues }) }) };
+    if (name === '../input') return { Form: 'Form' };
+    if (name === '../buttons') return { SecondaryButton: 'SecondaryButton' };
+    return {};
+  });
+  const render = () => harness.render('default', { defaultData: { patientId: 'patient-b', diagnosis: 'Note' }, onSave: data => saved.push(data), onFormSubmit: data => prescriptions.push(data) });
+  elements(render(), 'SecondaryButton').find(button => button.props.buttonText === 'Save without Prescriptions').props.onClick();
+  assert.equal(saved.length, 1);
+  assert.equal(prescriptions.length, 0);
+  elements(render(), 'SecondaryButton').find(button => button.props.buttonText === 'Add prescriptions (optional)').props.onClick();
+  element(render(), 'Form').props.action();
+  assert.equal(prescriptions.length, 1);
+});
+
+function patientCareHarness(grants, initialTab = 'history') {
+  const queries = [];
+  const harness = createHookHarness('src/_components/patient/patientCare.tsx', name => {
+    if (name === 'next/navigation') return { useSearchParams: () => ({ get: () => '' }) };
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({ workspace: clinicalWork, hasPermission: permission => grants.includes(permission) }) };
+    if (name === '@/hooks') return { useAppQuery: (options, enabled) => { queries.push({ options, enabled }); return { data: enabled ? { ...carePatient, id: options.path.split('/').at(-1) } : undefined }; } };
+    if (name === '@/constants') return { API_PATHS: { getPatient: id => '/Patient/Get/' + id } };
+    if (name === './patientSelector') return { default: 'PatientSelector' };
+    if (name === '@/components/ehr/createEHR') return { default: 'CreateEHR' };
+    if (name === '@/components/ehr/patientEhrs') return { default: 'PatientEHRs' };
+    if (name === '@/components/buttons') return { SecondaryButton: 'SecondaryButton' };
+    return {};
+  });
+  return { render: () => harness.render('default', { initialTab }), queries };
+}
+
+test('patient care needs clinical grants but no encounter, appointment, or schedule grant', () => {
+  const state = patientCareHarness(['patients.read', 'clinical-records.read', 'clinical-records.write']);
+  element(state.render(), 'PatientSelector').props.onSelect('patient-b');
+  assert.ok(element(state.render(), 'PatientEHRs'));
+  const add = elements(state.render(), 'SecondaryButton').find(button => button.props.buttonText === 'Add clinical record');
+  assert.equal(add.props.disabled, false);
+  add.props.onClick();
+  assert.equal(element(state.render(), 'CreateEHR').props.patient.id, 'patient-b');
+});
+
+test('patient care keeps history and record entry closed without their grants', () => {
+  const state = patientCareHarness(['patients.read']);
+  element(state.render(), 'PatientSelector').props.onSelect('patient-b');
+  const view = state.render();
+  assert.equal(element(view, 'PatientEHRs'), undefined);
+  assert.equal(element(view, 'CreateEHR'), undefined);
+  assert.ok(elements(view, 'SecondaryButton').filter(button => ['Clinical history', 'Add clinical record'].includes(button.props.buttonText)).every(button => button.props.disabled));
+});
+
+test('patient lookup is disabled without patient-read permission', () => {
+  const state = patientCareHarness(['clinical-records.read']);
+  assert.equal(element(state.render(), 'PatientSelector'), undefined);
+  assert.ok(state.queries.every(query => query.enabled === false));
+});
+
+test('choosing another patient clears the old editor and saving locks patient changes', () => {
+  const state = patientCareHarness(['patients.read', 'clinical-records.write'], 'record');
+  element(state.render(), 'PatientSelector').props.onSelect('patient-a');
+  element(state.render(), 'CreateEHR').props.onSavingChange(true);
+  let view = state.render();
+  assert.equal(elements(view, 'SecondaryButton').find(button => button.props.buttonText === 'Choose another patient').props.disabled, true);
+  element(view, 'CreateEHR').props.onSavingChange(false);
+  elements(state.render(), 'SecondaryButton').find(button => button.props.buttonText === 'Choose another patient').props.onClick();
+  assert.equal(element(state.render(), 'CreateEHR'), undefined);
+  element(state.render(), 'PatientSelector').props.onSelect('patient-b');
+  view = state.render();
+  assert.equal(element(view, 'CreateEHR').props.patient.id, 'patient-b');
+  assert.ok(view.props.children.some(child => child?.key === 'patient-b'));
+});
+
+function patientSelectorHarness(handler) {
+  const requests = [], selected = [];
+  const harness = createHookHarness('src/_components/patient/patientSelector.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }) };
+    if (name === '@/hooks') return { useQueryFunction: () => ({ createQueryFunction: options => async () => { requests.push(options); return handler ? handler(options) : { isSuccess: true, data: [carePatient] }; } }) };
+    if (name === '@/constants') return { API_PATHS: { entitySearch: '/Search/Entity' } };
+    if (name === '@/components/input') return { TextInput: 'TextInput', SelectInput: 'SelectInput', Form: 'Form' };
+    if (name === '@/components/buttons') return { SecondaryButton: 'SecondaryButton' };
+    return {};
+  });
+  return { render: () => harness.render('default', { onSelect: id => selected.push(id) }), requests, selected };
+}
+
+test('patient selection uses the scoped patient search and returns the chosen identity', async () => {
+  const state = patientSelectorHarness();
+  element(state.render(), 'TextInput').props.onChange(' Sam ');
+  await element(state.render(), 'Form').props.action();
+  assert.equal(state.requests[0].path, '/Search/Entity');
+  assert.equal(state.requests[0].payload.entity, 'patient');
+  assert.equal(state.requests[0].payload.input, 'Sam');
+  elements(state.render(), 'SecondaryButton').find(button => button.props.buttonText === 'Open patient').props.onClick();
+  assert.equal(state.selected[0], 'patient-b');
+});
+
+test('patient ID entry goes through the patient-details lookup without broad searching', async () => {
+  const state = patientSelectorHarness();
+  element(state.render(), 'SelectInput').props.onSelect('id');
+  element(state.render(), 'TextInput').props.onChange('patient-b');
+  await element(state.render(), 'Form').props.action();
+  assert.equal(state.requests.length, 0);
+  assert.equal(state.selected[0], 'patient-b');
+});
+
+test('an old patient search cannot repopulate results after the input changes', async () => {
+  let finish;
+  const state = patientSelectorHarness(() => new Promise(resolve => { finish = resolve; }));
+  element(state.render(), 'TextInput').props.onChange('Sam');
+  const pending = element(state.render(), 'Form').props.action();
+  element(state.render(), 'TextInput').props.onChange('Different person');
+  finish({ isSuccess: true, data: [carePatient] });
+  await pending;
+  assert.equal(elements(state.render(), 'SecondaryButton').filter(button => button.props.buttonText === 'Open patient').length, 0);
+});
+
+test('history shows the source organization and newest records first', () => {
+  const old = { id: 'old', visitDate: '2025-01-01', organizationName: 'Clinic A', practitionerName: 'Nurse A' };
+  const recent = { id: 'recent', visitDate: '2026-01-01', organizationName: 'Clinic B', practitionerName: 'Doctor B' };
+  const harness = createHookHarness('src/_components/ehr/patientEhrs.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({ workspace: patient }) };
+    if (name === '@/hooks') return { useAppQuery: options => { assert.equal(options.path, '/Patient/MyClinicalRecords'); return { data: [old, recent] }; } };
+    if (name === '_constants/workspaceModes') return { WorkspaceModes };
+    if (name === '../misc/paginator') return { default: 'Paginator' };
+    if (name === '@/components/misc/keyValueData') return { default: 'KeyValueData' };
+    if (name === 'next/navigation') return { useRouter: () => ({ push() {} }) };
+    if (name === '_utils/dateUtils') return { toDefaultDateFormat: () => 'date', toDisplayDateTimeFormat: () => 'date' };
+    return {};
+  });
+  const render = () => harness.render('default', { patient: carePatient });
+  const pager = element(render(), 'Paginator');
+  assert.equal(pager.props.data[0].id, 'recent');
+  pager.props.onPagination(pager.props.data);
+  const labels = elements(render(), 'KeyValueData');
+  assert.equal(labels.find(label => label.props._key === 'Source organization').props.value, 'Clinic B');
+  assert.equal(labels.find(label => label.props._key === 'Practitioner').props.value, 'Doctor B');
+});
+
+
+test('direct patient care does not load the session toolbar while the old encounter route keeps it', () => {
+  const workspace = { ...clinicalWork, permissions: ['encounters.start'] };
+  for (const path of ['/patient/view', '/ehr/create']) {
+    assert.equal(element(appShell(path, true, workspace), 'PractitionerScheduleBar'), undefined);
+  }
+  assert.ok(element(appShell('/encounter', true, workspace), 'PractitionerScheduleBar'));
 });

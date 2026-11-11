@@ -1,7 +1,7 @@
 'use client';
 
-import { CreateEHR } from '@/components/ehr';
+import PatientCare from '@/components/patient/patientCare';
 
 export default function AddEhrPage() {
-  return <CreateEHR />;
+  return <PatientCare initialTab="record" />;
 }

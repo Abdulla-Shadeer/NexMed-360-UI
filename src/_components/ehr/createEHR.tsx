@@ -26,19 +26,29 @@ import {
   AddClinicalRecordDto,
   AddPrescriptionDto,
   ViewClinicalRecordDto,
+  ViewPatientDto,
 } from '_types/dtos';
 import { toDefaultDateFormat } from '_utils/dateUtils';
 import { useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 const stepButtonStyle =
   'text-default text-left py-1 px-2 border-border-primary border-default cursor-pointer';
 
-export default function CreateEHR() {
+export default function CreateEHR({
+  patient,
+  onSaved,
+  onSavingChange,
+}: {
+  patient?: ViewPatientDto;
+  onSaved?: () => void;
+  onSavingChange?: (saving: boolean) => void;
+} = {}) {
   const { accessToken } = useUser();
   const { hasPermission, workspace } = useWorkspace();
   const { isActive, isLoading, meta } = useEncounter();
   const [defaultEHR, setDefaultEHR] = useState<AddClinicalRecordDto>({
-    patientId: '',
+    patientId: patient?.id ?? '',
     practitionerRoleId: workspace?.practitionerRoleId ?? '',
     diagnosis: '',
     visitDate: toDefaultDateFormat(new Date()),
@@ -62,41 +72,65 @@ export default function CreateEHR() {
   >(undefined);
   const { createQueryFunction } = useQueryFunction();
   const [isAddingEhr, setIsAddingEhr] = useState(false);
+  const [formVersion, setFormVersion] = useState(0);
+  const queryClient = useQueryClient();
 
-  async function createEHR() {
+  async function createEHR(data = EHR) {
+    if (!data || isAddingEhr) return;
     const create = createQueryFunction<ViewClinicalRecordDto>({
       path: API_PATHS.addClinicalRecord,
       method: 'POST',
       accessToken,
-      payload: EHR,
+      payload: {
+        ...data,
+        patientId: patient?.id ?? data.patientId,
+        practitionerRoleId: workspace?.practitionerRoleId,
+      },
     });
 
     try {
       setNotification(undefined);
       setIsAddingEhr(true);
+      onSavingChange?.(true);
 
       const res = await create();
       setNotification({
         type: 'success',
-        title: 'EHR Added Successfully!',
+        title: 'Clinical record saved',
         cause: `EHR Reference: ${res.data?.id}`,
       });
       setEHR(undefined);
       setStep('Create EHR');
+      setFormVersion((value) => value + 1);
+      await queryClient.invalidateQueries({
+        queryKey: [
+          {
+            path: API_PATHS.getClinicalRecords(patient?.id ?? data.patientId),
+            method: 'GET',
+            accessToken,
+          },
+          workspace?.key,
+        ],
+      });
+      onSaved?.();
     } catch (error) {
       const err = error as Error;
       setNotification({
         type: 'error',
-        title: 'Error creating EHR',
+        title: 'Could not save the clinical record',
         description: err.message,
         cause: err.cause ? (err.cause as string) : undefined,
       });
     } finally {
       setIsAddingEhr(false);
+      onSavingChange?.(false);
     }
   }
 
   useEffect(() => {
+    if (patient) return;
+    setEHR(undefined);
+    setStep('Create EHR');
     if (isActive) {
       setDefaultEHR((prev) => ({
         ...prev!,
@@ -107,11 +141,19 @@ export default function CreateEHR() {
       }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive]);
+  }, [
+    isActive,
+    patient?.id,
+    meta.patientData?.demographics?.id,
+    meta.appointmentData?.patientId,
+  ]);
 
   return (
-    <div className="w-full flex flex-row gap-[2%] flex-wrap lg:flex-nowrapb space-y-6">
-      {(isLoading || isAddingEhr) && <AppLoader />}
+    <fieldset
+      disabled={isAddingEhr}
+      className="w-full flex flex-row gap-[2%] flex-wrap lg:flex-nowrap space-y-6"
+    >
+      {((!patient && isLoading) || isAddingEhr) && <AppLoader />}
       {notification && <AppNotification notification={notification} />}
       <DialogWindow
         isOpen={isPrescriptionEditOpen}
@@ -123,7 +165,7 @@ export default function CreateEHR() {
         <CreatePrescription
           defaultData={prescriptionToEdit ?? defaultPrescription}
           onFormSubmit={(data) => {
-            // If the data is updated data of previous prescription, remove it and add updated one
+            // Replace the edited prescription in the current draft.
             setEHR((prev) => ({
               ...prev!,
               prescriptions: prev?.prescriptions
@@ -138,11 +180,13 @@ export default function CreateEHR() {
       {/* Left panel*/}
       <EhrInfo
         ehr={EHR}
-        encounterMeta={meta}
+        encounterMeta={patient ? {} : meta}
+        patient={patient}
         onReset={() => {
           setEHR(undefined);
           setStep('Create EHR');
           setNotification(undefined);
+          setFormVersion((value) => value + 1);
         }}
         onConfirm={() => createEHR()}
       />
@@ -162,15 +206,16 @@ export default function CreateEHR() {
         </div>
         {step === 'Create EHR' ? (
           <CreateEhrForm
+            key={`${defaultEHR.patientId}-${formVersion}`}
             defaultData={defaultEHR}
             onFormSubmit={(data) => {
               setEHR(data);
               setStep('Create Prescriptions');
             }}
-            onNotification={(notification) => setNotification(notification)}
+            onSave={(data) => createEHR(data)}
           />
         ) : (
-          // here should be a table of added prescriptions. if any of prescription set to edit, default data should be loaded with it
+          // Review the prescriptions before saving the clinical record.
           <div className="space-y-6">
             {EHR?.prescriptions && (
               <PrescriptionsTable
@@ -224,7 +269,7 @@ export default function CreateEHR() {
           </div>
         )}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -280,11 +325,13 @@ function PrescriptionsTable({
 function EhrInfo({
   ehr,
   encounterMeta,
+  patient,
   onConfirm,
   onReset,
 }: {
   ehr?: AddClinicalRecordDto;
   encounterMeta: EncounterMeta;
+  patient?: ViewPatientDto;
   onReset: () => void;
   onConfirm: () => void;
 }) {
@@ -297,7 +344,11 @@ function EhrInfo({
       </p>
       <p>
         Patient:
-        {encounterMeta.appointmentData && encounterMeta.patientData ? (
+        {patient ? (
+          <span className="font-semibold ml-1">
+            {patient.firstName} {patient.lastName}
+          </span>
+        ) : encounterMeta.appointmentData && encounterMeta.patientData ? (
           <span className="font-semibold ml-1">{` ${encounterMeta.patientData.demographics?.gender === 'Male' ? 'Mr.' : 'Ms.'} ${encounterMeta.appointmentData.patientName}`}</span>
         ) : ehr?.patientId ? (
           <span className="font-semibold ml-1">{ehr.patientId}</span>
@@ -306,7 +357,7 @@ function EhrInfo({
         )}
       </p>
       <p>
-        PractitionerRole:
+        Practitioner:
         {workspace?.practitionerRoleId ? (
           <span className="font-semibold ml-1">{` ${user?.firstName} ${user?.lastName}`}</span>
         ) : (

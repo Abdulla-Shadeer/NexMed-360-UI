@@ -46,12 +46,7 @@ export default function FindEhrPage() {
       {isLoading && <AppLoader />}
       {notification && <AppNotification notification={notification} />}
       <PatientIdForm onFormSubmit={(id) => fetchPatientData(id)} />
-      {patient && (
-        <PatientEHRs
-          patient={patient}
-          onNotification={(notification) => setNotification(notification)}
-        />
-      )}
+      {patient && <PatientEHRs patient={patient} />}
     </div>
   );
 }

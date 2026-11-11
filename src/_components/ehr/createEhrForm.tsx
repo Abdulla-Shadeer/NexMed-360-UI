@@ -1,16 +1,11 @@
 'use client';
 
 import { useForm } from '@tanstack/react-form';
-import { AddClinicalRecordDto, ViewClinicalRecordDto } from '_types/dtos';
+import { AddClinicalRecordDto } from '_types/dtos';
 import { DateInput, Form, TextInput } from '../input';
 import { SecondaryButton } from '../buttons';
 import { IconArrowRight, IconDocumentCheck, IconTrash } from '../icons/icons';
-import { useState } from 'react';
-import { useQueryFunction } from '@/hooks';
-import { AppNotificationType } from '_types/common';
-import { API_PATHS } from '@/constants';
-import { useUser } from '_context';
-import AppLoader from '../misc/loader';
+import { useRef } from 'react';
 
 /**
  * This will return partial `AddClinicalRecordDto` without `AddPrescriptionDto`.
@@ -18,50 +13,19 @@ import AppLoader from '../misc/loader';
 export default function CreateEhrForm({
   defaultData,
   onFormSubmit,
-  onNotification,
+  onSave,
 }: {
   defaultData?: AddClinicalRecordDto;
   onFormSubmit: (data: AddClinicalRecordDto) => void;
-  onNotification: (Notification: AppNotificationType) => void;
+  onSave: (data: AddClinicalRecordDto) => void;
 }) {
-  const [saveWithoutPrescriptions, setSaveWithoutPrescriptions] =
-    useState(false);
-  const { createQueryFunction, isLoading } = useQueryFunction();
-  const { accessToken } = useUser();
-
-  async function save(data: AddClinicalRecordDto) {
-    const save = createQueryFunction<ViewClinicalRecordDto>({
-      path: API_PATHS.addClinicalRecord,
-      method: 'POST',
-      accessToken,
-      payload: data,
-    });
-
-    try {
-      const savedData = await save();
-      onNotification({
-        type: 'success',
-        title: 'EHR Added Successfully!',
-        cause: `EHR Reference: ${savedData.data?.id}`,
-      });
-      reset(defaultData);
-      setSaveWithoutPrescriptions(false);
-    } catch (error) {
-      const err = error as Error;
-      onNotification({
-        type: 'error',
-        title: 'Error Saving EHR',
-        description: err.message,
-        cause: err.cause ? (err.cause as string) : '',
-      });
-    }
-  }
+  const saveWithoutPrescriptions = useRef(false);
 
   const { Field, Subscribe, reset, handleSubmit } = useForm({
     defaultValues: defaultData,
     onSubmit: ({ value }) => {
-      if (saveWithoutPrescriptions) {
-        save(value);
+      if (saveWithoutPrescriptions.current) {
+        onSave(value);
       } else {
         onFormSubmit(value);
       }
@@ -70,7 +34,6 @@ export default function CreateEhrForm({
 
   return (
     <div className="w-full">
-      {isLoading && <AppLoader />}
       <Form action={handleSubmit} title="Create EHR">
         <Field
           name="patientId"
@@ -123,22 +86,7 @@ export default function CreateEhrForm({
           )}
         </Field>
 
-        <Field
-          name="visitDate"
-          validators={{
-            onChange: ({ value }) =>
-              !value ? 'Visit Date is required!' : undefined,
-          }}
-        >
-          {(field) => (
-            <DateInput
-              name={field.name}
-              pickedDate={field.state.value}
-              onPick={field.handleChange}
-              error={field.state.meta.errorMap.onChange ?? ''}
-            />
-          )}
-        </Field>
+        <p>The record date and author are set when you save.</p>
 
         <Field name="followUpDate">
           {(field) => (
@@ -155,11 +103,13 @@ export default function CreateEhrForm({
           <div className="w-full inline-flex gap-6 flex-wrap">
             <SecondaryButton
               type="submit"
-              buttonText="Add Prescriptions"
+              buttonText="Add prescriptions (optional)"
               initialState="active"
               withIcon
               icon={IconArrowRight}
-              onClick={() => {}}
+              onClick={() => {
+                saveWithoutPrescriptions.current = false;
+              }}
             />
 
             <SecondaryButton
@@ -169,7 +119,7 @@ export default function CreateEhrForm({
               withIcon
               icon={IconDocumentCheck}
               onClick={() => {
-                setSaveWithoutPrescriptions(true);
+                saveWithoutPrescriptions.current = true;
                 handleSubmit();
               }}
             />
@@ -181,7 +131,7 @@ export default function CreateEhrForm({
               withIcon
               icon={IconTrash}
               onClick={() => {
-                setSaveWithoutPrescriptions(false);
+                saveWithoutPrescriptions.current = false;
                 reset(defaultData);
               }}
             />

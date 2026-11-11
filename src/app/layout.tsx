@@ -94,6 +94,8 @@ function AppLayout({ children }: { children: ReactNode }) {
       </div>
     );
   const allowed = canOpenPath(pathName, workspace);
+  const isPatientCarePage =
+    pathName === '/patient/view' || pathName === '/ehr/create';
   return (
     <div className="flex lg:flex-row flex-col lg:flex-nowrap min-h-screen w-full">
       <aside className="flex flex-col justify-between lg:w-[350px] lg:min-w-[350px] lg:min-h-screen lg:max-h-screen overflow-y-auto border-r border-border-primary p-6 bg-panel-light drop-shadow-default">
@@ -132,7 +134,8 @@ function AppLayout({ children }: { children: ReactNode }) {
             <Breadcrumb navPaths={navPaths} />
             {allowed ? (
               <>
-                {workspace.permissions.includes('encounters.start') &&
+                {!isPatientCarePage &&
+                  workspace.permissions.includes('encounters.start') &&
                   workspace.practitionerRoleId && (
                     <PractitionerScheduleBar
                       practitionerRoleId={workspace.practitionerRoleId}
