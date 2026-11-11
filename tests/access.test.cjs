@@ -345,8 +345,10 @@ test('an organization administrator can add practitioners without clinical permi
     }) };
     if (name === '@/hooks') return { useQueryFunction: () => ({ createQueryFunction() {}, isLoading: false }), useAppQuery: () => ({ data: [], isLoading: false }) };
     if (name === '@/components/organization/addUserForm') return { default: 'AddUserForm' };
+    if (name === '@/components/input') return { RadioInput: 'RadioInput' };
     return {};
   });
+  element(harness.render('default'), 'RadioInput').props.onChange('Practitioner assignment');
   const view = harness.render('default');
   assert.equal(element(view, 'fieldset').props.disabled, false);
   assert.equal(element(view, 'AddUserForm').props.userType, 'practitionerRole');
@@ -386,18 +388,18 @@ test('organization administrator management is restricted to platform mode', () 
 });
 
 
-function staffCreationHarness(restricted, canManage = true) {
+function staffCreationHarness(restricted, canManage = true, roles = [{ id: 'nursing', name: 'Nursing', permissions: ['clinical-records.read'] }]) {
   const requests = [];
   const workspace = { ...work, isLocationRestricted: restricted };
   const locations = [{ id: 'root', name: 'Clinic' }, { id: 'child', name: 'Room' }];
   const harness = createHookHarness('src/app/organization/add-members/page.tsx', name => {
-    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({ workspace, hasPermission: () => canManage }) };
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({ workspace, hasPermission: permission => canManage && permission === 'members.manage' }) };
     if (name === '@/hooks') return {
-      useAppQuery: (options, enabled) => { assert.equal(enabled, canManage); return { data: locations, isLoading: false }; },
+      useAppQuery: (options, enabled) => { assert.equal(enabled, canManage); return { data: options.path === '/Workspace/MemberRoles' ? roles : locations, isLoading: false }; },
       useQueryFunction: () => ({ isLoading: false, createQueryFunction: options => async () => { requests.push(options); return { isSuccess: true, data: {} }; } }),
     };
     if (name === '@/constants') return { API_PATHS: { addPractitionerRole: '/Organization/AddPractitionerRole', addOrganizationMember: '/Organization/AddOrganizationMember' } };
-    if (name === '@/components/input') return { SelectInput: 'SelectInput', RadioInput: 'RadioInput' };
+    if (name === '@/components/input') return { SelectInput: 'SelectInput', RadioInput: 'RadioInput', CheckBoxInput: 'CheckBoxInput' };
     if (name === '@/components/organization/addUserForm') return { default: 'AddUserForm' };
     if (name === '@/components/misc') return { AppNotification: 'AppNotification' };
     return {};
@@ -426,7 +428,7 @@ test('both practitioner and ordinary staff creation send the selected location',
   for (const ordinary of [false, true]) {
     const state = staffCreationHarness(true);
     element(state.render(), 'SelectInput').props.onSelect('child');
-    if (ordinary) element(state.render(), 'RadioInput').props.onChange('Organization staff');
+    if (!ordinary) element(state.render(), 'RadioInput').props.onChange('Practitioner assignment');
     await element(state.render(), 'AddUserForm').props.onFormSubmit({ organizationId: 'a', personalInformation: {} });
     assert.equal(state.requests[0].payload.locationId, 'child');
     assert.equal(state.requests[0].path, ordinary ? '/Organization/AddOrganizationMember' : '/Organization/AddPractitionerRole');
@@ -447,4 +449,43 @@ test('location access alone does not allow managing staff', () => {
   const state = staffCreationHarness(true, false);
   assert.equal(element(state.render(), 'fieldset').props.disabled, true);
   assert.equal(element(state.render(), 'SelectInput').props.disabled, true);
+});
+
+
+test('staff creation starts with generic membership and no selected access roles', () => {
+  const state = staffCreationHarness(false);
+  const view = state.render();
+  assert.equal(element(view, 'RadioInput').props.selectedItem, 'Member');
+  assert.equal(element(view, 'AddUserForm').props.userType, 'organizationMember');
+  assert.equal(element(view, 'CheckBoxInput').props.checkedItems.length, 0);
+  assert.equal(element(view, 'CheckBoxInput').props.disabled, false);
+  assert.equal(element(view, 'CheckBoxInput').props.disabledItems, undefined);
+});
+
+test('members and practitioner titles get only explicitly selected access roles', async () => {
+  for (const practitioner of [false, true]) {
+    for (const selected of [[], ['nursing']]) {
+      const state = staffCreationHarness(false);
+      element(state.render(), 'CheckBoxInput').props.onChange(selected);
+      if (practitioner) element(state.render(), 'RadioInput').props.onChange('Practitioner assignment');
+      await element(state.render(), 'AddUserForm').props.onFormSubmit({ organizationId: 'a', roleName: 'Nurse' });
+      assert.deepEqual(Array.from(state.requests[0].payload.accessRoleIds), selected);
+      assert.equal(state.requests[0].path, practitioner ? '/Organization/AddPractitionerRole' : '/Organization/AddOrganizationMember');
+      assert.equal(element(state.render(), 'CheckBoxInput').props.checkedItems.length, 0);
+    }
+  }
+});
+
+test('clearing staff creation also clears access role selections', () => {
+  const state = staffCreationHarness(false);
+  element(state.render(), 'CheckBoxInput').props.onChange(['nursing']);
+  element(state.render(), 'AddUserForm').props.onClear();
+  assert.equal(element(state.render(), 'CheckBoxInput').props.checkedItems.length, 0);
+});
+
+test('staff can be added without permissions when no access roles exist', async () => {
+  const state = staffCreationHarness(false, true, []);
+  assert.equal(element(state.render(), 'fieldset').props.disabled, false);
+  await element(state.render(), 'AddUserForm').props.onFormSubmit({ organizationId: 'a' });
+  assert.equal(state.requests[0].payload.accessRoleIds.length, 0);
 });

@@ -33,6 +33,7 @@ export default function AddUserForm({
   userType,
   onFormSubmit,
   organizationId,
+  onClear,
 }: {
   userType:
     | 'practitionerRole'
@@ -47,6 +48,7 @@ export default function AddUserForm({
       | CreateOrganizationMemberDto,
   ) => void;
   organizationId?: string;
+  onClear?: () => void;
 }) {
   const [defaultFormData, setDefaultFormData] = useState<
     UserFormData | undefined
@@ -124,7 +126,16 @@ export default function AddUserForm({
   }, [organizationId]);
 
   return (
-    <Form action={handleSubmit} title={`Add ${startCase(userType)}`}>
+    <Form
+      action={handleSubmit}
+      title={
+        userType === 'organizationMember'
+          ? 'Add Member'
+          : userType === 'practitionerRole'
+            ? 'Add Practitioner Assignment'
+            : `Add ${startCase(userType)}`
+      }
+    >
       {userType !== 'patient' && (
         <Field
           name="organizationId"
@@ -309,8 +320,8 @@ export default function AddUserForm({
           <Field name="roleName">
             {(field) => (
               <TextInput
-                name={field.name}
-                description="For example, Doctor, Nurse, or Care assistant"
+                name="Professional role"
+                description="For example, Nurse, Radiologist, or Care assistant"
                 value={field.state.value ?? ''}
                 onChange={field.handleChange}
                 error=""
@@ -336,7 +347,13 @@ export default function AddUserForm({
         <Subscribe>
           <SecondaryButton
             initialState="active"
-            buttonText={`Create ${startCase(userType)}`}
+            buttonText={
+              userType === 'organizationMember'
+                ? 'Create Member'
+                : userType === 'practitionerRole'
+                  ? 'Create Practitioner Assignment'
+                  : `Create ${startCase(userType)}`
+            }
             withIcon
             icon={IconUserPlus}
             onClick={() => {}}
@@ -348,7 +365,10 @@ export default function AddUserForm({
             buttonText="Clear"
             withIcon
             icon={IconTrash}
-            onClick={() => reset(defaultFormData)}
+            onClick={() => {
+              reset(defaultFormData);
+              onClear?.();
+            }}
             type="button"
           />
         </Subscribe>

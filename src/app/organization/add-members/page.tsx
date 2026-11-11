@@ -1,11 +1,11 @@
 'use client';
-import { RadioInput, SelectInput } from '@/components/input';
+import { CheckBoxInput, RadioInput, SelectInput } from '@/components/input';
 import AddUserForm from '@/components/organization/addUserForm';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
 import { useAppQuery, useQueryFunction } from '@/hooks';
-import { LocationDto } from '_types/access';
+import { AccessRoleDto, LocationDto } from '_types/access';
 import {
   AppNotificationType,
   CreatePractitionerRoleDto,
@@ -20,7 +20,7 @@ export default function AddMembersPage() {
   const { workspace, hasPermission } = useWorkspace();
   const [memberType, setMemberType] = useState<
     'practitionerRole' | 'organizationMember'
-  >('practitionerRole');
+  >('organizationMember');
   const { createQueryFunction, isLoading } = useQueryFunction();
   const [notification, setNotification] = useState<
     AppNotificationType | undefined
@@ -34,6 +34,15 @@ export default function AddMembersPage() {
     isLoading: locationsLoading,
   } = useAppQuery<LocationDto[]>(
     { path: '/Workspace/Locations', method: 'GET', accessToken },
+    canAdd,
+  );
+  const [accessRoleIds, setAccessRoleIds] = useState<string[]>([]);
+  const {
+    data: accessRoles,
+    error: rolesError,
+    isLoading: rolesLoading,
+  } = useAppQuery<AccessRoleDto[]>(
+    { path: '/Workspace/MemberRoles', method: 'GET', accessToken },
     canAdd,
   );
   const allLocations = 'all';
@@ -58,12 +67,13 @@ export default function AddMembersPage() {
           : API_PATHS.addOrganizationMember,
       method: 'POST',
       accessToken,
-      payload: { ...data, locationId: locationId || null },
+      payload: { ...data, locationId: locationId || null, accessRoleIds },
     });
 
     try {
       setNotification(undefined);
       await request();
+      setAccessRoleIds([]);
       setNotification({
         type: 'success',
         title:
@@ -84,17 +94,22 @@ export default function AddMembersPage() {
 
   return (
     <div className="w-full flex flex-col gap-6">
-      {(isLoading || locationsLoading) && <AppLoader />}
+      {(isLoading || locationsLoading || rolesLoading) && <AppLoader />}
       {locationError && <AppNotification notification={locationError} />}
+      {rolesError && <AppNotification notification={rolesError} />}
       {notification && <AppNotification notification={notification} />}
       <h2 className="text-title px-1 py-2 bg-panel-light">Add Staff</h2>
+      <p className="text-default">
+        Add a member for any employee, or a practitioner assignment for care
+        work. Access roles control permissions.
+      </p>
       <RadioInput
         name="Staff type"
-        selectItems={['Practitioner assignment', 'Organization staff']}
+        selectItems={['Member', 'Practitioner assignment']}
         selectedItem={
           memberType === 'practitionerRole'
             ? 'Practitioner assignment'
-            : 'Organization staff'
+            : 'Member'
         }
         onChange={(value) =>
           setMemberType(
@@ -135,8 +150,35 @@ export default function AddMembersPage() {
         error=""
         tw_width="w-full"
       />
+      {accessRoles?.length ? (
+        <CheckBoxInput
+          name="Access roles (optional)"
+          description="Select only the access this person needs. Leave empty to add no new permissions. Existing staff keep their roles."
+          checkItems={accessRoles.map((role) => ({
+            key: role.id,
+            value: role.name,
+          }))}
+          checkedItems={accessRoleIds}
+          onChange={setAccessRoleIds}
+          disabled={!canAdd || isLoading || rolesLoading || !!rolesError}
+          error=""
+          tw_width="w-full"
+        />
+      ) : !rolesLoading && !rolesError ? (
+        <p className="text-default">
+          No access roles are available. You can add the member without
+          permissions.
+        </p>
+      ) : null}
       <fieldset
-        disabled={!canAdd || isLoading || locationsLoading || !!locationError}
+        disabled={
+          !canAdd ||
+          isLoading ||
+          locationsLoading ||
+          rolesLoading ||
+          !!locationError ||
+          !!rolesError
+        }
         className={!canAdd ? 'opacity-50' : ''}
       >
         {memberType === 'practitionerRole' && (
@@ -146,6 +188,7 @@ export default function AddMembersPage() {
               dispatchRequest(data as CreatePractitionerRoleDto)
             }
             organizationId={workspace?.organizationId}
+            onClear={() => setAccessRoleIds([])}
           />
         )}
         {memberType === 'organizationMember' && (
@@ -155,6 +198,7 @@ export default function AddMembersPage() {
               dispatchRequest(data as CreateOrganizationMemberDto)
             }
             organizationId={workspace?.organizationId}
+            onClear={() => setAccessRoleIds([])}
           />
         )}
       </fieldset>

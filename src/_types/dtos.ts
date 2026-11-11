@@ -224,6 +224,7 @@ export interface CreateOrganizationManagerDto {
 }
 
 export interface CreatePractitionerRoleDto {
+  accessRoleIds?: string[];
   locationId?: string | null;
   roleName?: string;
   personalInformation: RegisterUserDto;
@@ -232,6 +233,7 @@ export interface CreatePractitionerRoleDto {
 }
 
 export interface CreateOrganizationMemberDto {
+  accessRoleIds?: string[];
   personalInformation: RegisterUserDto;
   organizationId: string;
   locationId?: string | null;
