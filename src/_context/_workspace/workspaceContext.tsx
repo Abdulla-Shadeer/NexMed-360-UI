@@ -21,6 +21,7 @@ interface WorkspaceContextValue {
   error?: AppNotificationType;
   hasPermission: (permission: string) => boolean;
   selectWorkspace: (key: string) => Promise<void>;
+  refreshWorkspaces: () => Promise<void>;
 }
 const WorkspaceContext = createContext<WorkspaceContextValue | undefined>(
   undefined,
@@ -98,6 +99,25 @@ export function WorkspaceStateProvider({
     }
   }
 
+  async function refreshWorkspaces() {
+    if (!token) return;
+    const id = ++activeRequest.current;
+    const available = (await choices()).data ?? [];
+    if (id !== activeRequest.current) return;
+    setWorkspaces(available);
+    const key = current.current?.key;
+    const nextKey = available.some((row) => row.key === key)
+      ? key
+      : available.length === 1
+        ? available[0].key
+        : undefined;
+    await replaceWorkspace(
+      nextKey ? (await resolve(nextKey)).data : undefined,
+      id,
+    );
+    setError(undefined);
+  }
+
   useEffect(() => {
     if (!token) return;
     const id = ++activeRequest.current;
@@ -168,6 +188,7 @@ export function WorkspaceStateProvider({
         isLoading,
         error,
         selectWorkspace,
+        refreshWorkspaces,
         hasPermission: (permission) =>
           workspace?.permissions.includes(permission) ?? false,
       }}

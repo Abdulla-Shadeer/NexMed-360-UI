@@ -489,3 +489,114 @@ test('staff can be added without permissions when no access roles exist', async 
   await element(state.render(), 'AddUserForm').props.onFormSubmit({ organizationId: 'a' });
   assert.equal(state.requests[0].payload.accessRoleIds.length, 0);
 });
+
+
+test('account access does not require a selected workspace', () => {
+  assert.equal(routes.canOpenPath('/account', undefined), true);
+  assert.equal(routes.canOpenPath('/account/edit', undefined), true);
+});
+
+test('refresh after activation opens a sole new patient workspace', async () => {
+  const available = [];
+  const state = workspaceHarness(available);
+  state.effects[0](); await tick();
+  available.push(patient);
+  await state.context().refreshWorkspaces();
+  assert.equal(state.context().workspace.key, 'patient');
+});
+
+test('activation refresh preserves a selected work workspace and adds patient mode', async () => {
+  const available = [work];
+  const state = workspaceHarness(available);
+  state.effects[0](); await tick();
+  available.push(patient);
+  await state.context().refreshWorkspaces();
+  assert.equal(state.context().workspace.key, 'work:a');
+  assert.equal(state.context().workspaces.length, 2);
+});
+
+function patientFormHarness(mode, failRefresh = false, failRequest = false) {
+  const requests = [];
+  let refreshes = 0;
+  const values = { firstName: 'Sam', lastName: 'Patient', email: 'sam@example.test', password: 'SyntheticTest1!', confirmPassword: 'SyntheticTest1!', birthDate: '2000-01-01', gender: 'Unknown' };
+  const harness = createHookHarness('src/_components/patient/patientAccessForm.tsx', name => {
+    if (name === '@tanstack/react-form') return { useForm: options => ({ Field: 'Field', handleSubmit: () => options.onSubmit({ value: values }), getFieldValue: key => values[key] }) };
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({ refreshWorkspaces: async () => { refreshes++; if (failRefresh) throw new Error('Unavailable'); } }) };
+    if (name === '_utils/requestApi') return { requestApi: async (...args) => { requests.push(args); if (failRequest) throw new Error('Please sign in instead.'); return { isSuccess: true, data: {} }; } };
+    if (name === '@/components/input') return { Form: 'Form' };
+    if (name === '@/components/misc') return { AppNotification: 'AppNotification' };
+    if (name === 'next/link') return { default: 'Link' };
+    return {};
+  });
+  return { render: () => harness.render('default', { mode }), requests, refreshes: () => refreshes };
+}
+
+test('public signup sends patient details and confirmation without a token or workspace', async () => {
+  const state = patientFormHarness('signup');
+  await element(state.render(), 'Form').props.action();
+  const [options, workspace] = state.requests[0];
+  assert.equal(options.path, '/Users/RegisterPatient');
+  assert.equal(options.accessToken, undefined);
+  assert.equal(workspace, undefined);
+  assert.equal(options.payload.confirmPassword, 'SyntheticTest1!');
+  assert.equal(options.payload.personalInformation.email, 'sam@example.test');
+  assert.equal(options.payload.organizationId, undefined);
+  assert.equal(state.refreshes(), 0);
+  assert.equal(element(state.render(), 'Link').props.href, '/login');
+});
+
+test('enablement sends only patient details with the current token and refreshes workspaces', async () => {
+  const state = patientFormHarness('enable');
+  await element(state.render(), 'Form').props.action();
+  const [options, workspace] = state.requests[0];
+  assert.equal(options.path, '/Patient/EnableAccess');
+  assert.equal(options.accessToken, 'token');
+  assert.equal(workspace, undefined);
+  assert.deepEqual(Object.keys(options.payload).sort(), ['birthDate', 'gender']);
+  assert.equal(state.refreshes(), 1);
+});
+
+test('a workspace refresh failure does not report a successful activation as failed', async () => {
+  const state = patientFormHarness('enable', true);
+  await element(state.render(), 'Form').props.action();
+  assert.equal(element(state.render(), 'AppNotification').props.notification.title, 'Patient access is enabled');
+  assert.equal(element(state.render(), 'Form'), undefined);
+});
+
+test('a rejected signup keeps the form and shows the API error', async () => {
+  const state = patientFormHarness('signup', false, true);
+  await element(state.render(), 'Form').props.action();
+  assert.ok(element(state.render(), 'Form'));
+  assert.equal(element(state.render(), 'AppNotification').props.notification.description, 'Please sign in instead.');
+});
+
+function appShell(pathname, isLoggedIn) {
+  const harness = createHookHarness('src/app/layout.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ isLoggedIn, user: {} }), useWorkspace: () => ({ workspaces: [], workspaceVersion: 0 }) };
+    if (name === '@tanstack/react-query') return { QueryClient: class {}, QueryClientProvider: 'QueryClientProvider' };
+    if (name === 'next/navigation') return { usePathname: () => pathname };
+    if (name === 'next/link') return { default: 'Link' };
+    if (name === './login/page') return { default: 'Login' };
+    if (name === '@/approuteConfig') return { default: [], canOpenPath: () => true };
+    return {};
+  });
+  const root = harness.render('default', { children: 'Page content' });
+  function find(tree) {
+    if (!tree) return;
+    if (Array.isArray(tree)) return tree.map(find).find(Boolean);
+    if (tree.type?.name === 'AppLayout') return tree;
+    return find(tree.props?.children);
+  }
+  return find(root).type({ children: 'Page content' });
+}
+
+test('the app shell shows public signup instead of replacing it with login', () => {
+  assert.equal(appShell('/signup', false).props.children, 'Page content');
+  assert.equal(appShell('/patient/add', false).type, 'Login');
+});
+
+test('the account page remains reachable for a login with no workspaces', () => {
+  const shell = appShell('/account', true);
+  assert.equal(shell.type, 'main');
+  assert.ok(shell.props.children.includes('Page content'));
+});

@@ -62,7 +62,17 @@ function AppLayout({ children }: { children: ReactNode }) {
   const [notification, setNotification] = useState<AppNotificationType>();
   useEffect(() => setNotification(undefined), [workspaceVersion]);
   if (isLoading) return <AppLoader />;
-  if (!isLoggedIn) return <Login />;
+  if (!isLoggedIn) return pathName === '/signup' ? <>{children}</> : <Login />;
+  if (!workspace && pathName.startsWith('/account'))
+    return (
+      <main className="min-h-screen w-full max-w-4xl mx-auto p-6 space-y-6">
+        <Link href="/" className="text-blue-secondary">
+          Open workspaces
+        </Link>
+        <WorkspaceSelector />
+        {children}
+      </main>
+    );
   if (!workspace)
     return (
       <div className="min-h-screen w-full flex items-center justify-center p-6 bg-panel-light">
@@ -74,6 +84,12 @@ function AppLayout({ children }: { children: ReactNode }) {
           <p className="text-default">Choose how you want to use NexMed360.</p>
           {error && <AppNotification notification={error} />}
           <WorkspaceSelector />
+          <Link
+            href="/account"
+            className="text-blue-secondary hover:text-blue-primary"
+          >
+            Open your account or enable patient access
+          </Link>
         </div>
       </div>
     );

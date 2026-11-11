@@ -54,3 +54,14 @@ The user and workspace providers have separate responsibilities. `UserProvider` 
 
 
 Add Staff uses the existing Location selector for both ordinary staff and practitioner assignments. It lists active locations available to the current workspace. Restricted managers must select a location; unrestricted managers can choose All organization locations. Existing staff keep their current scope. Shared access-role definitions still require unrestricted organization access. Add Staff defaults to generic Member; practitioner professional titles do not grant permissions. The optional access-role picker starts empty and uses the existing checkbox component. Leaving it empty adds no permissions, and staff can be created without role templates. Selected organization roles are added to existing staff access without removing their current roles. Successful creation and Clear reset the role selection.
+
+
+## Patient signup and patient access
+
+Login links to `/signup`, which uses existing form/input/button components. A fresh signup collects patient details and password confirmation, creates a patient-only account, and offers Continue to login. An existing email returns an instruction to sign in; signup never attaches an existing account or patient by email.
+
+A signed-in account without patient mode can use **Account > Enable patient access**. Account remains reachable from the workspace chooser even when the account has no workspaces. Only birth date and gender are sent; the server resolves the account identity. Success refreshes the workspace list without another login. A current work workspace stays selected; if patient mode is the only available choice, it opens automatically. Manual switching still uses the shared confirmation dialog. An enabled account does not show the activation form again.
+
+Manual review: create a fresh patient account and sign in; reject a duplicate email; enable patient mode for a staff-only account; verify work grants remain; open Account with no selected workspace; refresh and switch modes; confirm existing patient history is unchanged. Email verification, welcome messages, invitations, and password recovery remain deferred.
+
+Verified on 11 November 2026: **42 UI tests passed** and the full production build passed TypeScript/lint. No live browser journey was run. Use `npm run test:access` and `npm run build` for the automated checks.

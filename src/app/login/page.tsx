@@ -3,6 +3,7 @@ import { Form, TextInput } from '@/components/input';
 import BgImage from '../../../public/loginBg.jpeg';
 import AppLogo from '../../../public/AppLogo.png';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useForm } from '@tanstack/react-form';
 import ButtonSecondary from '@/components/buttons/buttonSecondary';
 import { IconLogin } from '@/components/icons/icons';
@@ -58,61 +59,69 @@ export default function Login() {
           <p className="text-small">© 2025- Shadeer Abdullah</p>
         </div>
         <div className="lg:w-[50%] md:w-full sm:w-full bg-transparent flex items-center justify-center py-14">
-          <Form action={handleSubmit} direction="col">
-            <Field
-              name="email"
-              validators={{
-                onChange: ({ value }) =>
-                  !value ? 'Email is required!' : undefined,
-              }}
-            >
-              {(field) => {
-                return (
-                  <TextInput
-                    type="email"
-                    name={field.name}
-                    required={true}
-                    onChange={(value) => field.handleChange(value)}
-                    value={field.state.value}
-                    error={field.state.meta.errorMap.onChange ?? ''}
-                  />
-                );
-              }}
-            </Field>
+          <div className="space-y-6">
+            <Form action={handleSubmit} direction="col">
+              <Field
+                name="email"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value ? 'Email is required!' : undefined,
+                }}
+              >
+                {(field) => {
+                  return (
+                    <TextInput
+                      type="email"
+                      name={field.name}
+                      required={true}
+                      onChange={(value) => field.handleChange(value)}
+                      value={field.state.value}
+                      error={field.state.meta.errorMap.onChange ?? ''}
+                    />
+                  );
+                }}
+              </Field>
 
-            <Field
-              name="password"
-              validators={{
-                onChange: ({ value }) =>
-                  !value ? 'Password is required!' : undefined,
-              }}
-            >
-              {(field) => {
-                return (
-                  <TextInput
-                    type="password"
-                    name={field.name}
-                    required={true}
-                    onChange={(value) => field.handleChange(value)}
-                    value={field.state.value}
-                    error={field.state.meta.errorMap.onChange ?? ''}
-                  />
-                );
-              }}
-            </Field>
+              <Field
+                name="password"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value ? 'Password is required!' : undefined,
+                }}
+              >
+                {(field) => {
+                  return (
+                    <TextInput
+                      type="password"
+                      name={field.name}
+                      required={true}
+                      onChange={(value) => field.handleChange(value)}
+                      value={field.state.value}
+                      error={field.state.meta.errorMap.onChange ?? ''}
+                    />
+                  );
+                }}
+              </Field>
 
-            <Subscribe>
-              <ButtonSecondary
-                type="submit"
-                initialState="active"
-                buttonText="Login"
-                withIcon
-                icon={IconLogin}
-                onClick={() => {}}
-                tw="w-full"
-              />
-            </Subscribe>
-          </Form>
+              <Subscribe>
+                <ButtonSecondary
+                  type="submit"
+                  initialState="active"
+                  buttonText="Login"
+                  withIcon
+                  icon={IconLogin}
+                  onClick={() => {}}
+                  tw="w-full"
+                />
+              </Subscribe>
+            </Form>
+            <Link
+              href="/signup"
+              className="text-blue-secondary hover:text-blue-primary"
+            >
+              Create patient account
+            </Link>
+          </div>
         </div>
       </div>
     </main>

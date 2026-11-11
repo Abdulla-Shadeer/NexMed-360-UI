@@ -3,13 +3,16 @@ import AppIcon from '@/components/icons/appIcon';
 import { IconEdit, IconLogout } from '@/components/icons/icons';
 import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
 import ConfirmationDialog from '@/components/popup/confirmationDialog';
-import { useUser } from '_context';
+import { useUser, useWorkspace } from '_context';
+import PatientAccessForm from '@/components/patient/patientAccessForm';
+import { WorkspaceModes } from '_constants/workspaceModes';
 import { ConfirmationDialogContext } from '_types/common';
 import Link from 'next/link';
 import { useState } from 'react';
 
 export default function Account() {
   const { user, logout } = useUser();
+  const { workspaces } = useWorkspace();
   const [confirmationContext, setConfirmationContext] = useState<
     ConfirmationDialogContext | undefined
   >(undefined);
@@ -53,6 +56,9 @@ export default function Account() {
         </Link>
       </div>
       {unknownObjectRenderer(user!, 'Account Information')}
+      {!workspaces.some((choice) => choice.mode === WorkspaceModes.Patient) && (
+        <PatientAccessForm mode="enable" />
+      )}
     </div>
   );
 }

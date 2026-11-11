@@ -41,6 +41,8 @@ export type {
   CreatePractitionerRoleDto,
   CreateOrganizationMemberDto,
   CreatePatientDto,
+  RegisterPatientDto,
+  EnablePatientAccessDto,
   ViewClinicalRecordDto,
   ViewPrescriptionDto,
   AddClinicalRecordDto,

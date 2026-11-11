@@ -410,3 +410,15 @@ export interface UpdatePractitionerScheduleDto {
   occurrences: SessionOccurrenceDto[];
   isActive: boolean;
 }
+
+export interface RegisterPatientDto {
+  personalInformation: RegisterUserDto;
+  confirmPassword: string;
+  birthDate: string;
+  gender: string;
+}
+
+export interface EnablePatientAccessDto {
+  birthDate?: string;
+  gender?: string;
+}

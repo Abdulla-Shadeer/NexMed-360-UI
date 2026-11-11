@@ -233,6 +233,7 @@ export function canOpenRoute(
 }
 
 export function canOpenPath(path: string, workspace?: WorkspaceDto) {
+  if (path === '/account' || path === '/account/edit') return true;
   const paths = navPaths.flatMap((row) => row.children ?? [row]);
   const route = paths.find((row) => row.path === path);
   if (route) return canOpenRoute(route, workspace);
