@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { WorkspaceModes } from '_constants/workspaceModes';
 import { useUser, useWorkspace } from '_context';
 import { ConfirmationDialogContext } from '@/types';
 import { SelectInput } from '@/components/input';
@@ -9,7 +10,12 @@ import ConfirmationDialog from '@/components/popup/confirmationDialog';
 
 export default function WorkspaceSelector() {
   const { logout } = useUser();
-  const { workspace, workspaces, selectWorkspace } = useWorkspace();
+  const {
+    workspace,
+    workspaces,
+    selectWorkspace,
+    selectPractitionerAssignment,
+  } = useWorkspace();
   const [confirmation, setConfirmation] = useState<ConfirmationDialogContext>();
 
   function confirmSwitch(key: string) {
@@ -26,6 +32,23 @@ export default function WorkspaceSelector() {
       onConfirm: () => {
         setConfirmation(undefined);
         void selectWorkspace(key);
+      },
+      onClose: () => setConfirmation(undefined),
+    });
+  }
+
+  function confirmAssignment(id: string) {
+    if (id === workspace?.practitionerRoleId) return;
+    if (!workspace?.practitionerRoleId) {
+      void selectPractitionerAssignment(id);
+      return;
+    }
+    setConfirmation({
+      message:
+        'Change clinical assignment? This will close the current patient or encounter.',
+      onConfirm: () => {
+        setConfirmation(undefined);
+        void selectPractitionerAssignment(id);
       },
       onClose: () => setConfirmation(undefined),
     });
@@ -66,12 +89,27 @@ export default function WorkspaceSelector() {
         }
         description={
           workspaces.length > 1
-            ? 'Choose your patient account, organization, or practitioner assignment.'
+            ? 'Choose an organization Work mode, Patient mode, or Platform Admin mode.'
             : undefined
         }
         error=""
         tw_width="w-full"
       />
+      {workspace?.mode === WorkspaceModes.Work &&
+        workspace.practitionerAssignments?.length > 1 && (
+          <SelectInput
+            name="Clinical assignment"
+            description="Choose your assignment for clinical work. Your organization permissions stay the same."
+            options={workspace.practitionerAssignments.map((row) => ({
+              key: row.id,
+              value: row.name,
+            }))}
+            selected={workspace.practitionerRoleId ?? ''}
+            onSelect={confirmAssignment}
+            error=""
+            tw_width="w-full"
+          />
+        )}
       {!workspaces.length && (
         <p className="text-small text-on-disabled">
           No workspace is available. Ask your administrator for access.

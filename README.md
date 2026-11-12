@@ -38,7 +38,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Workspaces and access
 
-After login or a page refresh, an account with one available workspace opens it automatically. Accounts with several workspaces choose patient mode, organization work, a practitioner assignment, or platform administration. The selector lists only choices available to the current account. Manual workspace switches and logout use the shared confirmation dialog. Cancelling keeps the current workspace and session. Confirming a switch clears cached results and the current patient/encounter state.
+After login or a page refresh, an account with one available workspace opens it automatically. Accounts with several workspaces choose Patient mode, one Work mode per organization, or Platform Admin mode. Access roles and practitioner assignments do not create additional workspace entries. The selector lists only choices available to the current account. Manual workspace switches and logout use the shared confirmation dialog. Cancelling keeps the current workspace and session. Confirming a switch clears cached results and the current patient/encounter state.
 
 Navigation stays visible within the selected mode. A page that needs a missing permission shows the shared 403 view. Restricted actions are disabled with a short explanation. The API independently checks current permissions and organization ownership on every request.
 
@@ -73,8 +73,19 @@ Verified on 11 November 2026: **42 UI tests passed** and the full production bui
 
 No booking, confirmation, arrival, session start, or encounter completion is required. The session toolbar is hidden on these two direct-care pages so it cannot automatically load/resume an appointment there. The existing appointment/session/encounter route remains available. Explicit patient selection overrides an active appointment context; changing patients clears the editor, and patient changes are locked during a save. Notes-only and prescription saves share one save/refresh path. Failed saves retain the draft. Record date/author come from the server.
 
-Patient lookup needs `patients.read`; history needs `clinical-records.read`; writing needs `clinical-records.write` and a practitioner workspace; prescribing separately needs `prescriptions.issue`. Disabled actions explain missing access. These do not grant access to another organization or patient. External FHIR records are still Phase 6; the full stored encounter lifecycle is deferred.
+Patient lookup needs `patients.read`; history needs `clinical-records.read`; writing needs `clinical-records.write` and an active owned clinical assignment within Work mode; prescribing separately needs `prescriptions.issue`. Disabled actions explain missing access. These do not grant access to another organization or patient. External FHIR records are still Phase 6; the full stored encounter lifecycle is deferred.
 
 Manual review: search/open a registered patient with no appointment or schedule; save notes only and then a record with prescriptions; confirm refreshed history/source labels and patient self-history; choose a different patient and check the draft clears; reject a wrong-organization patient; check missing grants; open direct care while an appointment encounter is active and confirm patient identity and appointment status remain correct.
 
 Verified on 11 November 2026: **56 UI tests passed**, and the production build passed TypeScript/lint. No live browser journey was run. Use `npm run test:access` and `npm run build` to repeat the automated checks.
+
+
+## Workspace and form corrections
+
+Work mode uses the distinct union of the account's assigned access-role permissions for that organization only. Patient mode opens only patient pages/components and own-patient data. The existing mode/permission gates remain. A sole clinical assignment is automatic; a separate Clinical assignment control appears inside Work mode only when there are several genuinely different choices. Changing it uses confirmation and clears cached/patient/encounter state without changing organization permissions. Refresh preserves only a still-permitted choice. Equivalent old duplicate assignments are one clinical choice, not separate workspaces.
+
+The shared user form now awaits a true success/failure result from every caller. Success clears personal, password, professional-role, and specialty fields while retaining the organization; Add Staff also clears role/location selections. Failure retains entered data. The form disables controls while pending and ignores rapid repeat submissions. The API also rejects duplicate practitioner assignments with a clear error, so replaying an old request cannot silently create another assignment or add grants.
+
+Review your reported case: create a Nurse assignment, confirm the form clears, replay the same request and expect 409, assign its access roles through Manage Staff, then log in. The account sees one organization Work mode; Patient mode appears only if it has a Patient profile. No Nurse/access-role workspace entries appear. Confirm clinical writing works from Work mode and Patient mode cannot open staff pages. With multiple genuine clinical assignments, selection changes authorship context while work permissions stay the same.
+
+Verified on 11 November 2026: **62 UI tests passed** and the full production build passed TypeScript/lint. No live browser was run. Use `npm run test:access` and `npm run build` for verification. The API README records the server checks and the unrun PostgreSQL concurrency case. Existing duplicate records were preserved rather than deleted from the database.

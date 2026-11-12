@@ -294,6 +294,7 @@ function selectorHarness(selected = work) {
     if (name === '@/components/input') return { SelectInput: 'SelectInput' };
     if (name === '@/components/buttons') return { SecondaryButton: 'SecondaryButton' };
     if (name === '@/components/popup/confirmationDialog') return { default: 'ConfirmationDialog' };
+    if (name === '_constants/workspaceModes') return { WorkspaceModes };
     return {};
   });
   return { render: () => harness.render('default'), switched, loggedOut: () => loggedOut };
@@ -821,4 +822,89 @@ test('direct patient care does not load the session toolbar while the old encoun
     assert.equal(element(appShell(path, true, workspace), 'PractitionerScheduleBar'), undefined);
   }
   assert.ok(element(appShell('/encounter', true, workspace), 'PractitionerScheduleBar'));
+});
+
+
+function staffFormHarness(handler) {
+  const resets = [], calls = [];
+  let cleared = 0;
+  const values = { organizationId: 'a', firstName: 'Sam', lastName: 'Nurse', email: 'nurse@example.test', password: 'SyntheticTest1!', confirmPassword: 'SyntheticTest1!', roleName: 'Nurse', specialty: 'Ward' };
+  const harness = createHookHarness('src/_components/organization/addUserForm.tsx', name => {
+    if (name === '@tanstack/react-form') return { useForm: options => ({ Field: 'Field', Subscribe: 'Subscribe', reset: data => resets.push(data), getFieldValue: key => values[key], handleSubmit: () => options.onSubmit({ value: values }) }) };
+    if (name === '@/components/input') return { Form: 'Form' };
+    if (name === 'lodash') return { startCase: value => value };
+    return {};
+  });
+  const render = () => harness.render('default', { userType: 'practitionerRole', organizationId: 'a', onClear: () => { cleared++; }, onFormSubmit: async data => { calls.push(data); return handler ? handler(data) : true; } });
+  return { render, calls, resets, cleared: () => cleared };
+}
+
+test('staff creation awaits success and clears personal and practitioner fields while retaining the organization', async () => {
+  let finish;
+  const form = staffFormHarness(() => new Promise(resolve => { finish = resolve; }));
+  const pending = element(form.render(), 'Form').props.action();
+  assert.equal(form.resets.length, 0);
+  assert.equal(element(form.render(), 'fieldset').props.disabled, true);
+  finish(true); await pending;
+  assert.equal(form.resets.length, 1);
+  assert.equal(form.resets[0].organizationId, 'a');
+  assert.equal(form.resets[0].email, undefined);
+  assert.equal(form.resets[0].password, undefined);
+  assert.equal(form.resets[0].roleName, undefined);
+  assert.equal(form.cleared(), 1);
+  assert.equal(element(form.render(), 'fieldset').props.disabled, false);
+});
+
+test('a rejected staff creation retains the form and selected access roles', async () => {
+  const form = staffFormHarness(async () => false);
+  await element(form.render(), 'Form').props.action();
+  assert.equal(form.resets.length, 0);
+  assert.equal(form.cleared(), 0);
+});
+
+test('rapid duplicate clicks submit the staff creation request only once', async () => {
+  let finish;
+  const form = staffFormHarness(() => new Promise(resolve => { finish = resolve; }));
+  const action = element(form.render(), 'Form').props.action;
+  const first = action();
+  await action();
+  assert.equal(form.calls.length, 1);
+  finish(true); await first;
+});
+
+test('a single clinical assignment does not add a workspace or another selector', () => {
+  const selector = selectorHarness({ ...work, practitionerRoleId: 'nurse', practitionerAssignments: [{ id: 'nurse', name: 'Nurse' }] });
+  const inputs = elements(selector.render(), 'SelectInput');
+  assert.equal(inputs.length, 1);
+  assert.equal(inputs[0].props.name, 'Workspace');
+  assert.deepEqual(Array.from(inputs[0].props.options, row => row.key), ['work:a', 'patient']);
+});
+
+test('clinical context changes preserve the organization key and permissions', async () => {
+  const organization = { ...work, permissions: ['clinical-records.read'], practitionerAssignments: [{ id: 'nurse', name: 'Nurse' }, { id: 'assistant', name: 'Care assistant' }] };
+  const state = workspaceHarness([organization, patient]);
+  state.effects[0](); await tick();
+  await state.context().selectWorkspace('work:a');
+  await state.context().selectPractitionerAssignment('nurse');
+  assert.equal(state.context().workspace.key, 'work:a');
+  assert.equal(state.context().workspace.practitionerRoleId, 'nurse');
+  assert.deepEqual(Array.from(state.context().workspace.permissions), ['clinical-records.read']);
+  assert.equal(state.context().workspaces.length, 2);
+  const version = state.context().workspaceVersion;
+  await state.context().selectPractitionerAssignment('foreign');
+  assert.equal(state.context().workspaceVersion, version);
+  assert.equal(state.context().workspace.practitionerRoleId, 'nurse');
+});
+
+test('workspace refresh preserves a permitted clinical choice and clears a revoked choice', async () => {
+  let assignments = [{ id: 'nurse', name: 'Nurse' }, { id: 'assistant', name: 'Care assistant' }];
+  const state = workspaceHarness([work], options => ({ isSuccess: true, data: options.path === '/Workspace' ? [work] : { ...work, practitionerAssignments: assignments } }));
+  state.effects[0](); state.effects[1](); await tick();
+  await state.context().selectPractitionerAssignment('nurse');
+  await state.listeners.get('focus')();
+  assert.equal(state.context().workspace.practitionerRoleId, 'nurse');
+  assignments = [{ id: 'assistant', name: 'Care assistant' }];
+  await state.listeners.get('focus')();
+  assert.equal(state.context().workspace.practitionerRoleId, undefined);
+  assert.equal(state.context().workspace.mode, WorkspaceModes.Work);
 });

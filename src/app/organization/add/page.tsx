@@ -84,6 +84,7 @@ export default function AddOrganization() {
         title: 'Admin User Assigned!',
         description: `Admin ID: ${response.data?.id}`,
       });
+      return true;
     } catch (error) {
       const err = error as Error;
       setNotification({
@@ -92,6 +93,7 @@ export default function AddOrganization() {
         description: err.message,
         cause: err.cause ? (err.cause as string) : undefined,
       });
+      return false;
     }
   }
 
@@ -128,9 +130,9 @@ export default function AddOrganization() {
       {step === 'two' && (
         <AddUserForm
           userType="organizationManager"
-          onFormSubmit={(data) => {
-            dispatchAssignAdmin(data as CreateOrganizationManagerDto);
-          }}
+          onFormSubmit={(data) =>
+            dispatchAssignAdmin(data as CreateOrganizationManagerDto)
+          }
           organizationId={createdOrganizationId}
         />
       )}

@@ -17,6 +17,7 @@ export interface WorkspaceDto extends WorkspaceOptionDto {
   organizationMemberId?: string;
   patientId?: string;
   practitionerRoleId?: string;
+  practitionerAssignments: { id: string; name: string }[];
   organizationName?: string;
   isLocationRestricted: boolean;
   permissions: string[];

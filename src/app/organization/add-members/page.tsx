@@ -57,7 +57,7 @@ export default function AddMembersPage() {
         description:
           'Choose a location within your workspace before adding staff.',
       });
-      return;
+      return false;
     }
 
     const request = createQueryFunction<ViewUserDto>({
@@ -81,6 +81,7 @@ export default function AddMembersPage() {
             ? 'Practitioner assignment added'
             : 'Staff member added',
       });
+      return true;
     } catch (error) {
       const err = error as Error;
       setNotification({
@@ -89,6 +90,7 @@ export default function AddMembersPage() {
         description: err.message,
         cause: err.cause ? (err.cause as string) : '',
       });
+      return false;
     }
   }
 
@@ -188,7 +190,10 @@ export default function AddMembersPage() {
               dispatchRequest(data as CreatePractitionerRoleDto)
             }
             organizationId={workspace?.organizationId}
-            onClear={() => setAccessRoleIds([])}
+            onClear={() => {
+              setAccessRoleIds([]);
+              setLocationId('');
+            }}
           />
         )}
         {memberType === 'organizationMember' && (
@@ -198,7 +203,10 @@ export default function AddMembersPage() {
               dispatchRequest(data as CreateOrganizationMemberDto)
             }
             organizationId={workspace?.organizationId}
-            onClear={() => setAccessRoleIds([])}
+            onClear={() => {
+              setAccessRoleIds([]);
+              setLocationId('');
+            }}
           />
         )}
       </fieldset>

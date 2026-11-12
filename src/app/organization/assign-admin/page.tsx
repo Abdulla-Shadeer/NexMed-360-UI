@@ -41,6 +41,7 @@ export default function AssignAdminPage() {
         title: 'Success!',
         description: 'Admin user assigned.',
       });
+      return true;
     } catch (error) {
       const err = error as Error;
       setNotification({
@@ -49,6 +50,7 @@ export default function AssignAdminPage() {
         description: err.message,
         cause: err.cause ? (err.cause as string) : '',
       });
+      return false;
     }
   }
 

@@ -101,8 +101,8 @@ export default function PatientCare({
           {!canRead && <p>You need permission to read clinical history.</p>}
           {!canWrite && (
             <p>
-              Adding records needs a practitioner workspace and permission to
-              write clinical records.
+              Adding records needs an active clinical assignment and permission
+              to write clinical records.
             </p>
           )}
           {tab === 'history' && canRead && <PatientEHRs patient={patient} />}

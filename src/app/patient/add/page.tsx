@@ -31,6 +31,7 @@ export default function AddPatientPage() {
         type: 'success',
         title: 'Added new Patient!',
       });
+      return true;
     } catch (error) {
       const err = error as Error;
       setNotification({
@@ -39,6 +40,7 @@ export default function AddPatientPage() {
         description: err.message,
         cause: err.cause ? (err.cause as string) : '',
       });
+      return false;
     }
   }
 

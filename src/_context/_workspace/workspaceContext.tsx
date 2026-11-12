@@ -22,6 +22,7 @@ interface WorkspaceContextValue {
   hasPermission: (permission: string) => boolean;
   selectWorkspace: (key: string) => Promise<void>;
   refreshWorkspaces: () => Promise<void>;
+  selectPractitionerAssignment: (id: string) => Promise<void>;
 }
 const WorkspaceContext = createContext<WorkspaceContextValue | undefined>(
   undefined,
@@ -58,11 +59,27 @@ export function WorkspaceStateProvider({
       method: 'GET',
       accessToken: token,
     });
-  const resolve = (key: string) =>
-    requestApi<WorkspaceDto>(
+  async function resolve(key: string) {
+    const result = await requestApi<WorkspaceDto>(
       { path: '/Workspace/Current', method: 'GET', accessToken: token },
       key,
     );
+    const selected = current.current;
+    const next = result.data;
+    // Preserve a clinical choice only while the server still permits it.
+    if (
+      next &&
+      selected?.key === key &&
+      next.practitionerAssignments?.some(
+        (row) => row.id === selected.practitionerRoleId,
+      )
+    )
+      return {
+        ...result,
+        data: { ...next, practitionerRoleId: selected.practitionerRoleId },
+      };
+    return result;
+  }
   const showError = (err: unknown) =>
     setError({
       type: 'error',
@@ -97,6 +114,14 @@ export function WorkspaceStateProvider({
     } finally {
       if (id === activeRequest.current) setIsLoading(false);
     }
+  }
+
+  async function selectPractitionerAssignment(id: string) {
+    const selected = current.current;
+    if (!selected?.practitionerAssignments?.some((row) => row.id === id))
+      return;
+    const requestId = ++activeRequest.current;
+    await replaceWorkspace({ ...selected, practitionerRoleId: id }, requestId);
   }
 
   async function refreshWorkspaces() {
@@ -189,6 +214,7 @@ export function WorkspaceStateProvider({
         error,
         selectWorkspace,
         refreshWorkspaces,
+        selectPractitionerAssignment,
         hasPermission: (permission) =>
           workspace?.permissions.includes(permission) ?? false,
       }}
