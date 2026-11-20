@@ -53,6 +53,7 @@ function AppLayout({ children }: { children: ReactNode }) {
   const {
     workspace,
     workspaceVersion,
+    workspaces,
     isLoading: workspaceLoading,
     error: workspaceError,
   } = useWorkspace();
@@ -61,7 +62,8 @@ function AppLayout({ children }: { children: ReactNode }) {
   const pathName = usePathname();
   const [notification, setNotification] = useState<AppNotificationType>();
   useEffect(() => setNotification(undefined), [workspaceVersion]);
-  if (isLoading) return <AppLoader />;
+  if (isLoading && !(pathName === '/signup' && !isLoggedIn))
+    return <AppLoader />;
   if (!isLoggedIn) return pathName === '/signup' ? <>{children}</> : <Login />;
   if (!workspace && pathName.startsWith('/account'))
     return (
@@ -79,9 +81,13 @@ function AppLayout({ children }: { children: ReactNode }) {
         <div className="w-full max-w-2xl space-y-6 border-default border-border-primary rounded-default p-8 bg-background drop-shadow-default">
           <Image src={AppLogo} alt="NexMed360" className="w-64" />
           <h1 className="text-title pb-4 border-b-default border-border-primary">
-            Choose your workspace
+            {workspaces.length ? 'Choose your workspace' : 'Account home'}
           </h1>
-          <p className="text-default">Choose how you want to use NexMed360.</p>
+          <p className="text-default">
+            {workspaces.length
+              ? 'Choose how you want to use NexMed360.'
+              : 'Open your account to enable patient access.'}
+          </p>
           {error && <AppNotification notification={error} />}
           <WorkspaceSelector />
           <Link

@@ -13,6 +13,7 @@ import { toDefaultDateFormat, toDisplayDateTimeFormat } from '_utils/dateUtils';
 import { ApiRequestOption } from '_hooks/_api/useQueryFunction';
 import RefreshData from '../misc/refresh';
 import KeyValueData from '@/components/misc/keyValueData';
+import ExpandableCard from '@/components/misc/expandableCard';
 import { SecondaryButton } from '../buttons';
 import { useRouter } from 'next/navigation';
 
@@ -35,6 +36,7 @@ export default function PatientEHRs({ patient }: { patient: ViewPatientDto }) {
     ViewClinicalRecordDto[] | undefined
   >(undefined);
   const router = useRouter();
+  const [expandedId, setExpandedId] = useState<string>();
 
   const records = useMemo(
     () =>
@@ -57,15 +59,17 @@ export default function PatientEHRs({ patient }: { patient: ViewPatientDto }) {
         <RefreshData queryKey={queryKey as ApiRequestOption} />
       </div>
       {currentPageData && currentPageData?.length > 0 ? (
-        <div className="flex flex-row flex-wrap gap-6">
+        <div className="space-y-4">
           {currentPageData.map((ehr) => (
-            <div
+            <ExpandableCard
               key={ehr.id}
-              className="w-[373px] bg-background border-default border-border-primary rounded-default p-6 space-y-3 drop-shadow-default"
+              title={`Clinical record · ${toDefaultDateFormat(new Date(ehr.visitDate))}`}
+              description={`Source: ${ehr.organizationName} · ${ehr.practitionerName}${ehr.isShared ? ' · Shared, read only' : ''}`}
+              open={expandedId === ehr.id}
+              onToggle={() =>
+                setExpandedId(expandedId === ehr.id ? undefined : ehr.id)
+              }
             >
-              <p className="text-title text-blue-secondary pb-2 mb-6 border-b-default border-border-primary text-center">
-                {toDefaultDateFormat(new Date(ehr.visitDate))}
-              </p>
               <KeyValueData
                 _key="Patient"
                 value={`${patient.firstName} ${patient.lastName}`}
@@ -119,7 +123,7 @@ export default function PatientEHRs({ patient }: { patient: ViewPatientDto }) {
                   tw="w-full"
                 />
               )}
-            </div>
+            </ExpandableCard>
           ))}
         </div>
       ) : (

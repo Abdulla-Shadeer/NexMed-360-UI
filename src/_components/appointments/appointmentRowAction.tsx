@@ -165,7 +165,7 @@ export default function AppointmentRowActions({
                 }}
                 disabled={
                   workspace?.mode !== WorkspaceModes.Work ||
-                  !hasPermission('appointments.manage')
+                  !hasPermission('appointments.manage-organization')
                 }
                 title="Confirming appointments needs appointment management permission in work mode."
               >
@@ -196,7 +196,7 @@ export default function AppointmentRowActions({
                 }}
                 disabled={
                   workspace?.mode !== WorkspaceModes.Patient &&
-                  !hasPermission('appointments.manage')
+                  !hasPermission('appointments.manage-organization')
                 }
                 title="Cancel your own appointment in patient mode, or use appointment management permission in work mode."
               >

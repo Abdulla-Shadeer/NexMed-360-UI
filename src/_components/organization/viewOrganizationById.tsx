@@ -7,7 +7,7 @@ import { useUser, useWorkspace } from '_context';
 import { ViewOrganizationDto } from '_types/dtos';
 import Link from 'next/link';
 import AppIcon from '../icons/appIcon';
-import { IconArrowLeft, IconEdit } from '../icons/icons';
+import { IconArrowLeft, IconEdit, IconShieldCheck } from '../icons/icons';
 import { AppNotification } from '../misc';
 import AppLoader from '../misc/loader';
 import { unknownObjectRenderer } from '../misc/unknownObjectRenderer';
@@ -40,12 +40,11 @@ export function ViewOrganizationById({ id }: { id: string }) {
         <RefreshData queryKey={queryKey} />
         {data && workspace?.mode === WorkspaceModes.Platform && (
           <>
-            <Link
-              href={`/organization/admins?id=${id}`}
-              className="text-default text-blue-secondary underline"
-            >
-              Manage Administrators
-            </Link>
+            <QuickActionButton
+              text="Manage Administrators"
+              icon={IconShieldCheck}
+              onClick={() => router.push(`/organization/admins?id=${id}`)}
+            />
             <DeleteOrganizationButton
               organizationId={id}
               organizationName={data.name}

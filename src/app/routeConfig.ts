@@ -35,7 +35,7 @@ const navPaths: NavPath[] = [
     path: '/frontOffice',
     icon: IconComputerDesktop,
     modes: [WorkspaceModes.Work],
-    permission: 'appointments.manage',
+    permission: 'appointments.manage-organization',
   },
   {
     name: 'Encounter',
@@ -99,6 +99,13 @@ const navPaths: NavPath[] = [
         permission: 'members.manage',
       },
       {
+        name: 'Locations',
+        path: '/organization/locations',
+        icon: IconBuildingOffice,
+        modes: [WorkspaceModes.Work],
+        permission: 'organizations.manage',
+      },
+      {
         name: 'Access Roles',
         path: '/organization/access-roles',
         icon: IconShieldCheck,
@@ -117,14 +124,29 @@ const navPaths: NavPath[] = [
         path: '/session/create',
         icon: IconPlusCircle,
         modes: [WorkspaceModes.Work],
-        permission: 'schedules.manage',
+        permission: 'schedules.manage-organization',
       },
       {
-        name: 'Your Sessions',
+        name: 'My sessions',
+        path: '/session/my',
+        icon: IconCalendarDays,
+        modes: [WorkspaceModes.Work],
+        ownPermission: 'schedules.read-own',
+      },
+      {
+        name: 'Session history',
+        path: '/session/history',
+        icon: IconClock,
+        modes: [WorkspaceModes.Work],
+        permission: 'schedules.read-organization,schedules.manage-organization',
+        ownPermission: 'schedules.read-own',
+      },
+      {
+        name: 'Organization sessions',
         path: '/session/view',
         icon: IconCalendarDays,
         modes: [WorkspaceModes.Work],
-        permission: 'schedules.manage',
+        permission: 'schedules.read-organization,schedules.manage-organization',
       },
     ],
   },
@@ -134,25 +156,26 @@ const navPaths: NavPath[] = [
     modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
     children: [
       {
-        name: 'Your Appointments',
+        name: 'My appointments',
         path: '/appointments/your-appointments',
         icon: IconDocumentList,
         modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
-        permission: 'appointments.manage',
+        ownPermission: 'appointments.read-own',
       },
       {
-        name: 'Organization Appointments',
+        name: 'Organization appointments',
         path: '/appointments/organization-appointments',
         icon: IconList,
         modes: [WorkspaceModes.Work],
-        permission: 'appointments.manage',
+        permission:
+          'appointments.read-organization,appointments.manage-organization',
       },
       {
         name: 'Create Appointment',
         path: '/appointments/create',
         icon: IconPlusCircle,
         modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
-        permission: 'appointments.manage',
+        permission: 'appointments.manage-organization',
       },
     ],
   },
@@ -226,15 +249,23 @@ const navPaths: NavPath[] = [
 ];
 
 export function canOpenRoute(
-  route: Pick<NavPath, 'modes' | 'permission' | 'assignment'>,
+  route: Pick<NavPath, 'modes' | 'permission' | 'ownPermission' | 'assignment'>,
   workspace?: WorkspaceDto,
 ) {
+  const permissions = workspace?.permissions ?? [];
+  const canReadOwn =
+    !!route.ownPermission &&
+    permissions.includes(route.ownPermission) &&
+    !!workspace?.practitionerAssignments?.length;
   return (
     !!workspace &&
     route.modes.includes(workspace.mode) &&
     (workspace.mode !== WorkspaceModes.Work ||
-      !route.permission ||
-      workspace.permissions.includes(route.permission)) &&
+      (!route.permission && !route.ownPermission) ||
+      route.permission
+        ?.split(',')
+        .some((permission) => permissions.includes(permission)) ||
+      canReadOwn) &&
     (!route.assignment || !!workspace.practitionerRoleId)
   );
 }
@@ -259,7 +290,9 @@ export function canOpenPath(path: string, workspace?: WorkspaceDto) {
     return canOpenRoute(
       {
         modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
-        permission: 'appointments.manage',
+        permission:
+          'appointments.read-organization,appointments.manage-organization',
+        ownPermission: 'appointments.read-own',
       },
       workspace,
     );

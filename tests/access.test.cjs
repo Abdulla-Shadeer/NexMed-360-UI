@@ -517,20 +517,21 @@ test('activation refresh preserves a selected work workspace and adds patient mo
   assert.equal(state.context().workspaces.length, 2);
 });
 
-function patientFormHarness(mode, failRefresh = false, failRequest = false) {
-  const requests = [];
+function patientFormHarness(mode, failRefresh = false, failRequest = false, failLogin = false) {
+  const requests = [], logins = [], navigations = [];
   let refreshes = 0;
   const values = { firstName: 'Sam', lastName: 'Patient', email: 'sam@example.test', password: 'SyntheticTest1!', confirmPassword: 'SyntheticTest1!', birthDate: '2000-01-01', gender: 'Unknown' };
   const harness = createHookHarness('src/_components/patient/patientAccessForm.tsx', name => {
     if (name === '@tanstack/react-form') return { useForm: options => ({ Field: 'Field', handleSubmit: () => options.onSubmit({ value: values }), getFieldValue: key => values[key] }) };
-    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({ refreshWorkspaces: async () => { refreshes++; if (failRefresh) throw new Error('Unavailable'); } }) };
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token', loginUser: async value => { logins.push(value); return !failLogin; } }), useWorkspace: () => ({ refreshWorkspaces: async () => { refreshes++; if (failRefresh) throw new Error('Unavailable'); } }) };
     if (name === '_utils/requestApi') return { requestApi: async (...args) => { requests.push(args); if (failRequest) throw new Error('Please sign in instead.'); return { isSuccess: true, data: {} }; } };
     if (name === '@/components/input') return { Form: 'Form' };
     if (name === '@/components/misc') return { AppNotification: 'AppNotification' };
+    if (name === 'next/navigation') return { useRouter: () => ({ replace: path => navigations.push(path) }) };
     if (name === 'next/link') return { default: 'Link' };
     return {};
   });
-  return { render: () => harness.render('default', { mode }), requests, refreshes: () => refreshes };
+  return { render: () => harness.render('default', { mode }), requests, logins, navigations, refreshes: () => refreshes };
 }
 
 test('public signup sends patient details and confirmation without a token or workspace', async () => {
@@ -544,7 +545,8 @@ test('public signup sends patient details and confirmation without a token or wo
   assert.equal(options.payload.personalInformation.email, 'sam@example.test');
   assert.equal(options.payload.organizationId, undefined);
   assert.equal(state.refreshes(), 0);
-  assert.equal(element(state.render(), 'Link').props.href, '/login');
+  assert.equal(state.logins[0].email, 'sam@example.test');
+  assert.deepEqual(state.navigations, ['/']);
 });
 
 test('enablement sends only patient details with the current token and refreshes workspaces', async () => {
@@ -606,7 +608,7 @@ test('the account page remains reachable for a login with no workspaces', () => 
 
 
 const carePatient = { id: 'patient-b', firstName: 'Sam', lastName: 'Patient', birthDate: '1990-01-01', gender: 'Unknown' };
-const clinicalWork = { ...work, practitionerRoleId: 'my-assignment', organizationName: 'Clinic A' };
+const clinicalWork = { ...work, practitionerRoleId: 'my-assignment', practitionerAssignments: [{ id: 'my-assignment', name: 'Nurse' }], organizationName: 'Clinic A' };
 
 function namedElement(tree, name) {
   if (!tree) return;
@@ -1013,4 +1015,187 @@ test('patient visibility defaults to true and false survives the clinical save',
   assert.equal(element(state.render(), 'CreateEhrForm').props.defaultData.isPatientVisible, true);
   await element(state.render(), 'CreateEhrForm').props.onSave({ patientId: 'patient-b', diagnosis: 'Private note', visitDate: '2026-11-17', isPatientVisible: false });
   assert.equal(state.requests[0].payload.isPatientVisible, false);
+});
+
+test('signup login failure keeps one sign-in fallback and never repeats registration', async () => {
+  const state = patientFormHarness('signup', false, false, true);
+  await element(state.render(), 'Form').props.action();
+  assert.equal(state.requests.length, 1);
+  assert.equal(state.logins.length, 1);
+  assert.equal(state.navigations.length, 0);
+  assert.equal(element(state.render(), 'Form'), undefined);
+  assert.equal(elements(state.render(), 'Link').length, 1);
+  assert.equal(element(state.render(), 'Link').props.href, '/login');
+});
+
+test('own read permissions open own views without opening organization views or management pages', () => {
+  const reader = { ...clinicalWork, permissions: ['appointments.read-own', 'schedules.read-own'] };
+  assert.equal(routes.canOpenPath('/appointments/your-appointments', reader), true);
+  assert.equal(routes.canOpenPath('/appointments/view/appointment', reader), true);
+  assert.equal(routes.canOpenPath('/session/my', reader), true);
+  assert.equal(routes.canOpenPath('/session/history', reader), true);
+  assert.equal(routes.canOpenPath('/session/view', reader), false);
+  assert.equal(routes.canOpenPath('/session/create', reader), false);
+  assert.equal(routes.canOpenPath('/appointments/organization-appointments', reader), false);
+  assert.equal(routes.canOpenPath('/organization/locations', reader), false);
+  assert.equal(routes.canOpenPath('/organization/locations', { ...work, permissions: ['organizations.manage'] }), true);
+});
+
+test('expandable cards keep content unmounted while collapsed', () => {
+  const harness = createHookHarness('src/_components/misc/expandableCard.tsx', () => ({}));
+  let toggles = 0;
+  const props = { title: 'Staff', description: 'staff@example.test · 2 permissions', open: false, onToggle: () => toggles++, children: 'Permission form' };
+  let view = harness.render('default', props);
+  assert.equal(element(view, 'button').props['aria-expanded'], false);
+  assert.equal(view.props.children.includes('Permission form'), false);
+  element(view, 'button').props.onClick(); assert.equal(toggles, 1);
+  view = harness.render('default', { ...props, open: true });
+  assert.equal(element(view, 'button').props['aria-expanded'], true);
+});
+
+test('staff list starts collapsed and opening another row closes the previous one', () => {
+  const members = ['one', 'two'].map(id => ({ id, userId: id, name: id, email: `${id}@example.test`, accessRoleIds: ['a', 'b'] }));
+  const harness = createHookHarness('src/app/organization/view-members/page.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }) };
+    if (name === '@/hooks') return { useAppQuery: options => ({ data: options.path.endsWith('/Members') ? members : options.path.endsWith('/MemberRoles') ? [{ id: 'a', permissions: ['patients.read'] }, { id: 'b', permissions: ['patients.read', 'clinical-records.read'] }] : [] }) };
+    if (name === '@/components/misc/expandableCard') return { default: 'ExpandableCard' };
+    return {};
+  });
+  let rows = elements(harness.render('default'), 'ExpandableCard');
+  assert.ok(rows.every(row => !row.props.open));
+  assert.match(rows[0].props.description, /2 permissions/);
+  rows[0].props.onToggle(); rows = elements(harness.render('default'), 'ExpandableCard');
+  assert.equal(rows[0].props.open, true);
+  rows[1].props.onToggle(); rows = elements(harness.render('default'), 'ExpandableCard');
+  assert.equal(rows[0].props.open, false); assert.equal(rows[1].props.open, true);
+});
+
+function sessionListHarness(ownOnly, canManage) {
+  const queries = [];
+  const harness = createHookHarness('src/_components/practitionerSchedule/sessionList.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({ workspace: clinicalWork, hasPermission: () => canManage }) };
+    if (name === '@/constants') return { API_PATHS: { getPractitionerSchedules: '/PractitionerSchedule/Get' } };
+    if (name === '@/hooks') return { useAppQuery: options => { queries.push(options); return { data: [{ id: 'session', practitionerName: 'Test Practitioner', practitionerRole: 'Nurse', organizationName: 'Clinic', occurrences: ['AllDays'], startTime: '09:00', endTime: '10:00', isActive: true }] }; }, useQueryFunction: () => ({}) };
+    if (name === '@tanstack/react-query') return { useQueryClient: () => ({}) };
+    if (name === '@/components/buttons') return { SecondaryButton: 'SecondaryButton' };
+    if (name === '_utils/dateUtils') return { to12HourFormat: value => value };
+    return {};
+  });
+  return { render: () => harness.render('default', { ownOnly }), queries };
+}
+
+test('organization session view stays organization-wide for managers with practitioner profiles', () => {
+  const state = sessionListHarness(false, true);
+  const view = state.render();
+  assert.equal(state.queries[0].queryParams.ownOnly, false);
+  assert.equal(state.queries[0].queryParams.practitionerRoleId, undefined);
+  assert.ok(elements(view, 'SecondaryButton').some(button => button.props.buttonText === 'Edit'));
+});
+
+test('own session reader sees no management actions', () => {
+  const state = sessionListHarness(true, false);
+  assert.equal(elements(state.render(), 'SecondaryButton').length, 0);
+  assert.equal(state.queries[0].queryParams.ownOnly, true);
+});
+
+test('session changes refresh current status and history with workspace-aware query keys', async () => {
+  const invalidations = [];
+  const harness = createHookHarness('src/_components/practitionerSchedule/sessionStatusBar.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }) };
+    if (name === '@/hooks') return { useAppQuery: () => ({ data: { isCurrent: false, sessionId: 'session', startTime: '09:00', endTime: '10:00' } }), useQueryFunction: () => ({ createQueryFunction: () => async () => ({ data: {} }) }) };
+    if (name === '@/constants') return { API_PATHS: { getCurrentOrUpcomingSession: '/PractitionerSchedule/GetCurrentOrUpcoming', startPractitionerSchedule: id => `/PractitionerSchedule/Start/${id}` } };
+    if (name === '@tanstack/react-query') return { useQueryClient: () => ({ invalidateQueries: options => invalidations.push(options) }) };
+    if (name === '_context/_encounter/encounterContext') return { useEncounter: () => ({ tryContinueEncounter() {} }) };
+    if (name === '../popup/confirmationDialog') return { default: 'ConfirmationDialog' };
+    if (name === '../buttons') return { SecondaryButton: 'SecondaryButton' };
+    if (name === '_utils/dateUtils') return { toDefaultDateFormat: () => '2030-01-01', to12HourFormat: value => value };
+    return {};
+  });
+  function renderStatus() {
+    const root = harness.render('PractitionerScheduleBar', { practitionerRoleId: 'mine', organizationId: 'org', onError() {} });
+    const status = namedElement(root, 'SessionStatus');
+    return status.type(status.props);
+  }
+  const view = renderStatus();
+  const start = elements(view, 'SecondaryButton').find(button => /start/i.test(button.props.buttonText));
+  start.props.onClick();
+  element(renderStatus(), 'ConfirmationDialog').props.onConfirm();
+  await tick();
+  assert.equal(invalidations[0].predicate({ queryKey: [{ path: '/PractitionerSchedule/GetCurrentOrUpcoming' }, 'work:org'] }), true);
+  assert.equal(invalidations[0].predicate({ queryKey: [{ path: '/PractitionerSchedule/GetHistory' }, 'work:org'] }), true);
+  assert.equal(invalidations[0].predicate({ queryKey: [{ path: '/Patient/Me' }, 'patient'] }), false);
+});
+
+function visibleMenu(selected, groupName) {
+  const harness = createHookHarness('src/_components/buttons/navButton.tsx', name => {
+    if (name === '_context') return { useWorkspace: () => ({ workspace: selected }) };
+    if (name === '@/approuteConfig') return { canOpenRoute: routes.canOpenRoute };
+    if (name === 'next/navigation') return { usePathname: () => '/' };
+    if (name === 'next/link') return { default: 'Link' };
+    if (name === '@/components/buttons') return { PrimaryButton: 'PrimaryButton' };
+    return {};
+  });
+  const menu = harness.render('default', { navPath: routes.default.find(row => row.name === groupName) });
+  return menu ? Array.from(menu.props.dropdownButtons, link => element(link, 'PrimaryButton').props.buttonText) : [];
+}
+
+test('administrators without practitioner assignments only see authorized organization views', () => {
+  const admin = { ...work, permissions: ['appointments.manage-organization', 'schedules.manage-organization', 'appointments.read-own', 'schedules.read-own'], practitionerAssignments: [] };
+  assert.deepEqual(visibleMenu(admin, 'Appointments'), ['Organization appointments', 'Create Appointment']);
+  assert.deepEqual(visibleMenu(admin, 'Sessions'), ['Create', 'Session history', 'Organization sessions']);
+  assert.equal(routes.canOpenPath('/appointments/your-appointments', admin), false);
+  assert.equal(routes.canOpenPath('/session/my', admin), false);
+  const managerWithProfile = { ...admin, practitionerAssignments: clinicalWork.practitionerAssignments, permissions: ['appointments.manage-organization', 'schedules.manage-organization'] };
+  assert.equal(routes.canOpenPath('/appointments/your-appointments', managerWithProfile), false);
+  assert.equal(routes.canOpenPath('/session/my', managerWithProfile), false);
+});
+
+test('organization viewers can read lists and appointment details without creation or personal views', () => {
+  const viewer = { ...work, permissions: ['appointments.read-organization', 'schedules.read-organization'] };
+  assert.deepEqual(visibleMenu(viewer, 'Appointments'), ['Organization appointments']);
+  assert.deepEqual(visibleMenu(viewer, 'Sessions'), ['Session history', 'Organization sessions']);
+  assert.equal(routes.canOpenPath('/appointments/view/appointment', viewer), true);
+  assert.equal(routes.canOpenPath('/appointments/create', viewer), false);
+  assert.equal(routes.canOpenPath('/session/create', viewer), false);
+});
+
+test('personal lists use available assignments without requiring a selected assignment', () => {
+  const practitioner = { ...clinicalWork, practitionerRoleId: undefined, permissions: ['appointments.read-own', 'schedules.read-own'] };
+  assert.deepEqual(visibleMenu(practitioner, 'Appointments'), ['My appointments']);
+  assert.deepEqual(visibleMenu(practitioner, 'Sessions'), ['My sessions', 'Session history']);
+  assert.equal(routes.canOpenPath('/appointments/your-appointments', practitioner), true);
+  assert.equal(routes.canOpenPath('/session/my', practitioner), true);
+  const both = { ...practitioner, permissions: [...practitioner.permissions, 'appointments.read-organization', 'schedules.read-organization'] };
+  assert.deepEqual(visibleMenu(both, 'Appointments'), ['My appointments', 'Organization appointments']);
+  assert.deepEqual(visibleMenu(both, 'Sessions'), ['My sessions', 'Session history', 'Organization sessions']);
+});
+
+test('patients see personal appointments and unauthorized work menus disappear', () => {
+  assert.deepEqual(visibleMenu(patient, 'Appointments'), ['My appointments', 'Create Appointment']);
+  assert.deepEqual(visibleMenu(patient, 'Sessions'), []);
+  assert.deepEqual(visibleMenu(work, 'Appointments'), []);
+  assert.deepEqual(visibleMenu(work, 'Sessions'), []);
+});
+
+test('session history only offers the views the user can access', () => {
+  let selected = { ...work, permissions: ['schedules.read-organization'] };
+  const queries = [];
+  const harness = createHookHarness('src/app/session/history/page.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({ workspace: selected, hasPermission: permission => selected.permissions.includes(permission) }) };
+    if (name === '@/constants') return { API_PATHS: { getPractitionerScheduleHistory: '/PractitionerSchedule/GetHistory' } };
+    if (name === '@/hooks') return { useAppQuery: options => { queries.push(options); return { data: [] }; } };
+    if (name === '@/components/input') return { SelectInput: 'SelectInput', DateInput: 'DateInput' };
+    return {};
+  });
+  let view = harness.render('default');
+  assert.equal(element(view, 'SelectInput'), undefined);
+  assert.equal(queries.at(-1).queryParams.ownOnly, false);
+  selected = { ...clinicalWork, permissions: ['schedules.read-own', 'schedules.read-organization'] };
+  element(harness.render('default'), 'SelectInput').props.onSelect('own');
+  harness.render('default');
+  assert.equal(queries.at(-1).queryParams.ownOnly, true);
+  selected = { ...work, permissions: ['schedules.read-organization'] };
+  view = harness.render('default');
+  assert.equal(element(view, 'SelectInput'), undefined);
+  assert.equal(queries.at(-1).queryParams.ownOnly, false);
 });

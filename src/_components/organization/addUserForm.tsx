@@ -10,7 +10,13 @@ import {
 import { startCase } from 'lodash';
 import { useState, useEffect, useRef } from 'react';
 import { SecondaryButton } from '@/components/buttons';
-import { Form, TextInput, RadioInput, DateInput } from '@/components/input';
+import {
+  Form,
+  TextInput,
+  RadioInput,
+  DateInput,
+  CheckBoxInput,
+} from '@/components/input';
 import { IconUserPlus, IconTrash } from '@/components/icons/icons';
 import OrganizationSelecter from './organizationSelector';
 import { Divider } from '@/components/misc';
@@ -25,6 +31,7 @@ interface UserFormData {
   confirmPassword?: string;
   roleName?: string;
   specialty?: string;
+  acceptsAppointments?: boolean;
   gender?: 'Male' | 'Female';
   birthDate?: string;
 }
@@ -89,6 +96,7 @@ export default function AddUserForm({
             },
             roleName: formData.roleName?.trim() || 'Practitioner',
             specialty: formData.specialty ?? '',
+            acceptsAppointments: formData.acceptsAppointments ?? false,
           };
           success = await onFormSubmit(createPractitionerRoleDto);
           break;
@@ -335,6 +343,19 @@ export default function AddUserForm({
           </>
         ) : userType === 'practitionerRole' ? (
           <>
+            <Field name="acceptsAppointments">
+              {(field) => (
+                <CheckBoxInput
+                  name="Appointment bookings"
+                  checkItems={['Accept appointments']}
+                  checkedItems={
+                    field.state.value ? ['Accept appointments'] : []
+                  }
+                  onChange={(items) => field.handleChange(items.length > 0)}
+                  error=""
+                />
+              )}
+            </Field>
             <Field name="roleName">
               {(field) => (
                 <TextInput

@@ -23,7 +23,7 @@ interface UserContextValue {
   isLoggedIn: boolean;
   isLoading: boolean;
   error?: AppNotificationType;
-  loginUser: (dto: LoginUserDto) => Promise<void>;
+  loginUser: (dto: LoginUserDto) => Promise<boolean>;
   logout: () => void;
   refetchUser: () => Promise<void>;
 }
@@ -53,16 +53,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
         method: 'POST',
         payload: dto,
       });
-      if (id !== requestId.current) return;
+      if (id !== requestId.current) return false;
       await queryClient.cancelQueries();
-      if (id !== requestId.current) return;
+      if (id !== requestId.current) return false;
       queryClient.clear();
       const account = result.data!;
       localStorage.setItem('accessToken', account.accessToken);
       setUser(account.user);
       setAccessToken(account.accessToken);
+      return true;
     } catch (err) {
       if (id === requestId.current) showError(err);
+      return false;
     } finally {
       if (id === requestId.current) setIsLoading(false);
     }

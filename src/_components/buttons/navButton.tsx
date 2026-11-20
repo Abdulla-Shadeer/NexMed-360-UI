@@ -3,14 +3,17 @@ import Link from 'next/link';
 import { PrimaryButton } from '@/components/buttons';
 import { usePathname } from 'next/navigation';
 import { useWorkspace } from '_context';
+import { canOpenRoute } from '@/approuteConfig';
 
 export default function NavButton({ navPath }: { navPath: NavPath }) {
   const path = usePathname();
 
   const { workspace } = useWorkspace();
   const children = navPath.children?.filter(
-    (child) => workspace && child.modes.includes(workspace.mode),
+    (child) => !child.hidden && canOpenRoute(child, workspace),
   );
+  if (!canOpenRoute(navPath, workspace) || (children && children.length === 0))
+    return null;
   const button = (route: NavPath) => (
     <Link key={route.path} href={route.path || '#'} className="w-full">
       <PrimaryButton

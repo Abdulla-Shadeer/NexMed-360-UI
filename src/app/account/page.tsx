@@ -5,6 +5,8 @@ import { unknownObjectRenderer } from '@/components/misc/unknownObjectRenderer';
 import ConfirmationDialog from '@/components/popup/confirmationDialog';
 import { useUser, useWorkspace } from '_context';
 import PatientAccessForm from '@/components/patient/patientAccessForm';
+import { CheckBoxInput } from '@/components/input';
+import KeyValueData from '@/components/misc/keyValueData';
 import { WorkspaceModes } from '_constants/workspaceModes';
 import { ConfirmationDialogContext } from '_types/common';
 import Link from 'next/link';
@@ -12,7 +14,8 @@ import { useState } from 'react';
 
 export default function Account() {
   const { user, logout } = useUser();
-  const { workspaces } = useWorkspace();
+  const { workspaces, workspace } = useWorkspace();
+  const [showPatientAccess, setShowPatientAccess] = useState(false);
   const [confirmationContext, setConfirmationContext] = useState<
     ConfirmationDialogContext | undefined
   >(undefined);
@@ -56,8 +59,40 @@ export default function Account() {
         </Link>
       </div>
       {unknownObjectRenderer(user!, 'Account Information')}
+      {workspace?.mode === WorkspaceModes.Work && (
+        <div className="my-6 p-6 space-y-3 bg-panel-light border-default border-border-primary rounded-default">
+          <KeyValueData
+            _key="Organization"
+            value={workspace.organizationName ?? ''}
+          />
+          <KeyValueData
+            _key="Access roles"
+            value={
+              workspace.accessRoleNames?.join(', ') ||
+              'No access roles assigned'
+            }
+          />
+          <KeyValueData
+            _key="Practitioner role"
+            value={
+              workspace.practitionerAssignments.find(
+                (row) => row.id === workspace.practitionerRoleId,
+              )?.name ?? 'No clinical assignment selected'
+            }
+          />
+        </div>
+      )}
       {!workspaces.some((choice) => choice.mode === WorkspaceModes.Patient) && (
-        <PatientAccessForm mode="enable" />
+        <div className="mt-6 p-6 space-y-6 bg-panel-light border-default border-border-primary rounded-default">
+          <CheckBoxInput
+            name="Patient access"
+            checkItems={['Enable patient access']}
+            checkedItems={showPatientAccess ? ['Enable patient access'] : []}
+            onChange={(items) => setShowPatientAccess(items.length > 0)}
+            error=""
+          />
+          {showPatientAccess && <PatientAccessForm mode="enable" />}
+        </div>
       )}
     </div>
   );

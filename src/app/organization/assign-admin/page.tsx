@@ -74,7 +74,7 @@ export default function AssignAdminPage() {
                   'organizations.manage',
                   'members.manage',
                   'roles.manage',
-                  'schedules.manage',
+                  'schedules.manage-organization',
                 ].includes(value),
             )
             .map(([key, value]) => ({ key, value }))}

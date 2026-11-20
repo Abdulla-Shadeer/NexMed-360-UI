@@ -228,6 +228,7 @@ export default function CreateAppointmentPage() {
           {step === CreationSteps.choosePractitionerRole ? (
             <div className="w-full space-y-6">
               <PractitionerRoleSearch
+                forBooking
                 onPractitionerRoleSelect={(practitionerRole) =>
                   setCreationMeta((prev) => ({
                     ...prev,

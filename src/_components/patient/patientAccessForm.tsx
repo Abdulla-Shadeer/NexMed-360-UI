@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from '@tanstack/react-form';
 import { Form, TextInput, DateInput, RadioInput } from '@/components/input';
@@ -28,7 +29,8 @@ export default function PatientAccessForm({
 }: {
   mode: 'signup' | 'enable';
 }) {
-  const { accessToken } = useUser();
+  const { accessToken, loginUser } = useUser();
+  const router = useRouter();
   const { refreshWorkspaces } = useWorkspace();
   const [notification, setNotification] = useState<AppNotificationType>();
   const [isLoading, setIsLoading] = useState(false);
@@ -73,6 +75,21 @@ export default function PatientAccessForm({
           payload: mode === 'signup' ? signup : details,
         });
         setComplete(true);
+        if (mode === 'signup') {
+          const signedIn = await loginUser({
+            email: value.email,
+            password: value.password,
+          });
+          if (signedIn) {
+            router.replace('/');
+            return;
+          }
+          setNotification({
+            type: 'success',
+            title: 'Your account is ready. Please sign in to continue.',
+          });
+          return;
+        }
         if (mode === 'enable') {
           try {
             await refreshWorkspaces();
@@ -89,9 +106,7 @@ export default function PatientAccessForm({
         setNotification({
           type: 'success',
           title:
-            mode === 'signup'
-              ? 'Your patient account is ready. Please sign in.'
-              : 'Patient access is enabled. Choose patient mode from your workspaces.',
+            'Patient access is enabled. Choose patient mode from your workspaces.',
         });
       } catch (error) {
         setNotification({
@@ -111,12 +126,14 @@ export default function PatientAccessForm({
   return (
     <div className="w-full space-y-6">
       {notification && <AppNotification notification={notification} />}
-      {complete ? (
+      {complete && isLoading ? (
+        <p>Please wait...</p>
+      ) : complete ? (
         <Link
           href={mode === 'signup' ? '/login' : '/'}
           className="text-blue-secondary hover:text-blue-primary"
         >
-          {mode === 'signup' ? 'Continue to login' : 'Open workspaces'}
+          {mode === 'signup' ? 'Sign in' : 'Open workspaces'}
         </Link>
       ) : (
         <fieldset disabled={isLoading}>
@@ -203,6 +220,14 @@ export default function PatientAccessForm({
             />
           </Form>
         </fieldset>
+      )}
+      {mode === 'signup' && !complete && (
+        <Link
+          href="/login"
+          className="text-blue-secondary hover:text-blue-primary"
+        >
+          Already have an account? Sign in
+        </Link>
       )}
     </div>
   );

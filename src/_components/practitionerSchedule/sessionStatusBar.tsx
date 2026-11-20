@@ -84,7 +84,6 @@ function SessionStatus({
   const { data, error, isLoading } =
     useAppQuery<ViewCurrentOrNextSessionDto>(queryKey);
   const [timeLeft, setTimeLeft] = useState<string | undefined>(undefined);
-  const [timerId, setTimerId] = useState<NodeJS.Timeout | undefined>(undefined);
   const queryClient = useQueryClient();
   const { tryContinueEncounter } = useEncounter();
   const [confirmationContext, setConfirmationContext] = useState<
@@ -99,6 +98,7 @@ function SessionStatus({
   }, [error]);
 
   useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval> | undefined;
     if (data?.isCurrent) {
       // remaining time calculation
       const [endHrString, endMntString] = data.endTime.split(':');
@@ -117,7 +117,7 @@ function SessionStatus({
         0,
       );
 
-      const intervalId = setInterval(() => {
+      intervalId = setInterval(() => {
         const differentInMillis =
           scheduledEndTime.getTime() - new Date().getTime();
         const minutes = (differentInMillis / 1000 / 60).toFixed(2);
@@ -125,7 +125,6 @@ function SessionStatus({
           `${Math.floor(parseInt(minutes, 10) / 60)} Hours ${Math.ceil(parseInt(minutes, 10) % 60)} Minutes`,
         );
       }, 1000);
-      setTimerId(intervalId);
 
       // try continue encounter if any
       if (data.lastKnownAppointmentId) {
@@ -133,14 +132,16 @@ function SessionStatus({
       }
     }
 
-    return () => clearInterval(timerId);
+    return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.isCurrent]);
+  }, [data?.isCurrent, data?.sessionId]);
 
   function refetchCurrentOrNextSession() {
     queryClient.invalidateQueries({
-      exact: true,
-      queryKey: [queryKey],
+      predicate: (query) =>
+        (query.queryKey[0] as ApiRequestOption | undefined)?.path?.startsWith(
+          '/PractitionerSchedule/',
+        ) === true,
     });
   }
 

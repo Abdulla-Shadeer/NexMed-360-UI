@@ -48,7 +48,6 @@ function OrganizationTable({
   const columnHelper = createColumnHelper<ViewOrganizationDto>();
 
   const { workspace } = useWorkspace();
-  const [showClipboardNote, setShowClipboardNote] = useState(false);
 
   function renderOrganizationRowActions(row: Row<ViewOrganizationDto>) {
     return (
@@ -93,19 +92,6 @@ function OrganizationTable({
               />
             </>
           )}
-
-          <button
-            className="w-fit text-default text-left text-blue-secondary hover:text-blue-primary p-0 pb-1 border-b-2 border-border-primary border-dashed cursor-pointer"
-            onClick={() => {
-              window.navigator.clipboard.writeText(row.original.id);
-              setShowClipboardNote(true);
-              setTimeout(() => {
-                setShowClipboardNote(false);
-              }, 2000);
-            }}
-          >
-            Copy ID
-          </button>
         </>
       </TableRowActions>
     );
@@ -149,11 +135,6 @@ function OrganizationTable({
 
   return (
     <div className="w-full">
-      {showClipboardNote && (
-        <p className="text-default text-green-primary fixed bottom-4 right-4 p-2 bg-panel-light border-default border-border-primary rounded-default">
-          Copied to clipboard!
-        </p>
-      )}
       <CustomTable tableData={table} title="Organizations" />
     </div>
   );

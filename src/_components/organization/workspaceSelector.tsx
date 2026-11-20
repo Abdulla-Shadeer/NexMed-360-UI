@@ -79,6 +79,20 @@ export default function WorkspaceSelector() {
           onClose={confirmation.onClose}
         />
       )}
+      {workspace?.mode === WorkspaceModes.Work && (
+        <div className="text-small text-black-secondary space-y-1">
+          <p>
+            Access roles:{' '}
+            {workspace.accessRoleNames?.join(', ') || 'None assigned'}
+          </p>
+          <p>
+            Practitioner role:{' '}
+            {workspace.practitionerAssignments?.find(
+              (row) => row.id === workspace.practitionerRoleId,
+            )?.name || 'No clinical assignment selected'}
+          </p>
+        </div>
+      )}
       <SelectInput
         name="Workspace"
         options={workspaces.map((row) => ({ key: row.key, value: row.name }))}

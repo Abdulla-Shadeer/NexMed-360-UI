@@ -164,6 +164,7 @@ export interface ViewOrganizationDto {
 }
 
 export interface ViewPractitionerRoleDto {
+  acceptsAppointments: boolean;
   practitionerId: string;
   roleName: string;
   id: string;
@@ -224,6 +225,7 @@ export interface CreateOrganizationManagerDto {
 }
 
 export interface CreatePractitionerRoleDto {
+  acceptsAppointments?: boolean;
   accessRoleIds?: string[];
   locationId?: string | null;
   roleName?: string;
@@ -298,12 +300,17 @@ export interface AddPrescriptionDto {
 }
 
 export interface SearchPractitionerRoleDto {
+  forBooking?: boolean;
+  date?: string;
   name?: string;
   email?: string;
   specialty?: string;
 }
 
 export interface ViewPractitionerScheduleDto {
+  practitionerName: string;
+  practitionerRole: string;
+  locationName?: string;
   id: string;
   practitionerRoleId: string;
   startTime: string;

@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 import { SecondaryButton } from '../buttons';
 import QuickActionButton from '../buttons/quickActionButton';
-import { Form, TextInput } from '../input';
+import { DateInput, Form, TextInput } from '../input';
 import {
   IconSearch,
   IconTrash,
@@ -22,7 +22,9 @@ import AppLoader from '../misc/loader';
 export default function PractitionerRoleSearch({
   onPractitionerRoleSelect,
   onError,
+  forBooking = false,
 }: {
+  forBooking?: boolean;
   onPractitionerRoleSelect: (docto?: ViewPractitionerRoleDto) => void;
   onError: (error: AppNotificationType) => void;
 }) {
@@ -41,7 +43,7 @@ export default function PractitionerRoleSearch({
       path: API_PATHS.practitionerRoleSearch,
       method: 'POST',
       accessToken,
-      payload: data,
+      payload: { ...data, forBooking },
     });
 
     try {
@@ -73,7 +75,19 @@ export default function PractitionerRoleSearch({
     <div className="w-full flex flex-col gap-6">
       {isLoading && <AppLoader />}
       {inputError && <p className="w-full text-red-primary">{inputError}</p>}
-      <Form action={handleSubmit} title="Search PractitionerRole">
+      <Form action={handleSubmit} title="Find practitioner">
+        {forBooking && (
+          <Field name="date">
+            {(field) => (
+              <DateInput
+                name="Appointment date (optional)"
+                pickedDate={field.state.value ?? ''}
+                onPick={field.handleChange}
+                error=""
+              />
+            )}
+          </Field>
+        )}
         <Field name="name">
           {(field) => (
             <TextInput

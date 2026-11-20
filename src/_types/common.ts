@@ -6,6 +6,7 @@ export interface NavPath {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   modes: import('./access').WorkspaceMode[];
   permission?: string;
+  ownPermission?: string;
   assignment?: boolean;
   hidden?: boolean;
   children?: NavPath[];

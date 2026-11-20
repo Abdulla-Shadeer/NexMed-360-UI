@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import ExpandableCard from '@/components/misc/expandableCard';
 import { ViewPrescriptionDto } from '_types/dtos';
 import { toDefaultDateFormat, toDisplayDateTimeFormat } from '_utils/dateUtils';
 import KeyValueData from '../misc/keyValueData';
@@ -9,22 +11,19 @@ export default function ViewPrescriptions({
 }: {
   prescriptions: ViewPrescriptionDto[];
 }) {
+  const [expandedId, setExpandedId] = useState<string>();
   return (
-    <div className="w-full flex flex-row flex-wrap gap-6">
+    <div className="w-full space-y-4">
       {prescriptions.map((item) => (
-        <div
+        <ExpandableCard
           key={item.id}
-          className="w-[373px] space-y-3 p-6 border-default border-border-primary rounded-default bg-background drop-shadow-default"
+          title={`${item.medicineName} — ${item.isActive ? 'Active' : 'Inactive'}`}
+          description={`${toDefaultDateFormat(new Date(item.issuedOn))} · Source: ${item.issuedAtOrganization} · ${item.issuedByPractitioner}`}
+          open={expandedId === item.id}
+          onToggle={() =>
+            setExpandedId(expandedId === item.id ? undefined : item.id)
+          }
         >
-          <p className="w-full text-title text-blue-secondary pb-2 border-b-2 border-dashed border-border-primary inline-flex justify-between items-center">
-            {`Issued On: ${toDefaultDateFormat(new Date(item.issuedOn))}`}
-
-            <span
-              className={`w-fit px-3 py-1 text-title-small uppercase text-center rounded-large border-default ${item.isActive ? 'bg-green-100 text-green-primary border-green-primary' : 'bg-disabled text-on-disabled border-border-primary'}`}
-            >
-              {item.isActive ? 'Active' : 'Inactive'}
-            </span>
-          </p>
           <KeyValueData _key="Medicine" value={item.medicineName} />
           <KeyValueData _key="Dosage" value={item.dosage} />
           <KeyValueData
@@ -40,7 +39,7 @@ export default function ViewPrescriptions({
             _key="Issued On"
             value={toDisplayDateTimeFormat(new Date(item.issuedOn))}
           />
-        </div>
+        </ExpandableCard>
       ))}
     </div>
   );

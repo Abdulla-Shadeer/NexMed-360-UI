@@ -24,7 +24,7 @@ export default function ViewAppointmentCard({
       </div>
       <KeyValueData _key="Patient" value={appointment.patientName} />
       <KeyValueData
-        _key="PractitionerRole"
+        _key="Practitioner"
         value={`${appointment.practitionerName} (${appointment.practitionerSpecialty})`}
       />
       <KeyValueData _key="Booked By" value={appointment.createdByUserName} />

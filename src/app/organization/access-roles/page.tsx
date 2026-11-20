@@ -7,6 +7,7 @@ import { AppNotificationType } from '@/types';
 import { permissionLabels } from '_utils/access';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
+import ExpandableCard from '@/components/misc/expandableCard';
 import { Form, TextInput, CheckBoxInput } from '@/components/input';
 import { SecondaryButton } from '@/components/buttons';
 import {
@@ -39,6 +40,7 @@ export default function AccessRolesPage() {
     accessToken,
   });
   const { createQueryFunction, isLoading } = useQueryFunction();
+  const [expandedId, setExpandedId] = useState<string>();
   const [editing, setEditing] = useState<AccessRoleDto>();
   const [name, setName] = useState('');
   const [permissions, setPermissions] = useState<string[]>([]);
@@ -106,17 +108,19 @@ export default function AccessRolesPage() {
           Create permission groups for this organization. Managing permissions
           does not give you clinical access.
         </p>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="space-y-4">
           {roles?.map((role) => {
             const allowed = !restricted;
             return (
-              <div
+              <ExpandableCard
                 key={role.id}
-                className="border-default border-border-primary rounded-default p-6 bg-panel-light flex flex-col gap-4"
+                title={role.name}
+                description={`${new Set(role.permissions).size} permissions`}
+                open={expandedId === role.id}
+                onToggle={() =>
+                  setExpandedId(expandedId === role.id ? undefined : role.id)
+                }
               >
-                <h2 className="text-title pb-3 border-b-default border-border-primary">
-                  {role.name}
-                </h2>
                 <ul className="text-default space-y-2 flex-1">
                   {role.permissions.length ? (
                     role.permissions.map((value) => (
@@ -155,7 +159,7 @@ export default function AccessRolesPage() {
                       : 'Choose an organization workspace to edit shared roles.'}
                   </p>
                 )}
-              </div>
+              </ExpandableCard>
             );
           })}
         </div>

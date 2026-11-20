@@ -12,6 +12,7 @@ import { SecondaryButton } from '@/components/buttons';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import KeyValueData from '@/components/misc/keyValueData';
+import ExpandableCard from '@/components/misc/expandableCard';
 import ConfirmationDialog from '@/components/popup/confirmationDialog';
 import { toDefaultDateFormat, toDisplayDateTimeFormat } from '_utils/dateUtils';
 
@@ -34,6 +35,7 @@ export default function RecordSharingRequests({
     isPatient || (isWork && hasPermission('clinical-records.read'));
   const canRequest =
     isWork && canRead && !!workspace?.practitionerRoleId && !!patientId;
+  const [expandedId, setExpandedId] = useState<string>();
   const [purpose, setPurpose] = useState('');
   const [recordFromDate, setRecordFromDate] = useState('');
   const [recordToDate, setRecordToDate] = useState('');
@@ -241,13 +243,17 @@ export default function RecordSharingRequests({
               ? 'Expired'
               : request.status;
           return (
-            <div
+            <ExpandableCard
               key={request.id}
-              className="p-6 space-y-3 border-default border-border-primary rounded-default bg-panel-light"
+              title={`${request.organizationName} — ${status}`}
+              description={`${!isPatient ? `${request.patientName} · ` : ''}${request.practitionerName} (${request.practitionerRole}) · Access expires ${toDisplayDateTimeFormat(new Date(request.expiresAt))}`}
+              open={expandedId === request.id}
+              onToggle={() =>
+                setExpandedId(
+                  expandedId === request.id ? undefined : request.id,
+                )
+              }
             >
-              <h3 className="text-title-small">
-                {request.organizationName} — {status}
-              </h3>
               {!isPatient && (
                 <KeyValueData _key="Patient" value={request.patientName} />
               )}
@@ -319,7 +325,7 @@ export default function RecordSharingRequests({
                   onClick={() => setDecision({ request, action: 'revoke' })}
                 />
               )}
-            </div>
+            </ExpandableCard>
           );
         })}
       </div>

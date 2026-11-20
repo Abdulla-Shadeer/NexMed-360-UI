@@ -21,6 +21,7 @@ export interface WorkspaceDto extends WorkspaceOptionDto {
   organizationName?: string;
   isLocationRestricted: boolean;
   permissions: string[];
+  accessRoleNames?: string[];
 }
 
 export interface AccessRoleDto {
@@ -50,6 +51,7 @@ export interface OrganizationAdministratorDto {
   email?: string;
   isActive: boolean;
   permissions: string[];
+  accessRoleNames?: string[];
 }
 
 export interface OrganizationAdministratorsDto {

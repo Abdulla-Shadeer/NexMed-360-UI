@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import ExpandableCard from '@/components/misc/expandableCard';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
@@ -59,6 +60,7 @@ export default function OrganizationAdminsPage() {
 }
 
 function Administrators({ organizationId }: { organizationId: string }) {
+  const [expandedId, setExpandedId] = useState<string>();
   const { accessToken } = useUser();
   const { data, error, isLoading } = useAppQuery<OrganizationAdministratorsDto>(
     {
@@ -95,11 +97,21 @@ function Administrators({ organizationId }: { organizationId: string }) {
             </p>
           )}
           {data.administrators.map((admin) => (
-            <AdministratorForm
-              key={admin.id + JSON.stringify(admin)}
-              organizationId={organizationId}
-              admin={admin}
-            />
+            <ExpandableCard
+              key={admin.id}
+              title={admin.name}
+              description={`${admin.email || 'No email address'} · ${new Set(admin.permissions).size} permissions`}
+              open={expandedId === admin.id}
+              onToggle={() =>
+                setExpandedId(expandedId === admin.id ? undefined : admin.id)
+              }
+            >
+              <AdministratorForm
+                key={JSON.stringify(admin)}
+                organizationId={organizationId}
+                admin={admin}
+              />
+            </ExpandableCard>
           ))}
         </>
       )}

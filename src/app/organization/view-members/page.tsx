@@ -1,5 +1,7 @@
 'use client';
 import { useState } from 'react';
+import ExpandableCard from '@/components/misc/expandableCard';
+import PractitionerBookingSettings from '@/components/organization/practitionerBookingSettings';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { useAppQuery, useQueryFunction } from '@/hooks';
@@ -15,6 +17,7 @@ import { SecondaryButton } from '@/components/buttons';
 import { IconCheckCircle } from '@/components/icons/icons';
 
 export default function ViewMembersPage() {
+  const [expandedId, setExpandedId] = useState<string>();
   const { accessToken } = useUser();
   const {
     data: members,
@@ -69,12 +72,18 @@ export default function ViewMembersPage() {
       {roles &&
         locations &&
         members?.map((member) => (
-          <MemberForm
+          <ExpandableCard
             key={member.id}
-            member={member}
-            roles={roles}
-            locations={locations}
-          />
+            title={member.name}
+            description={`${member.email || 'No email address'} · ${new Set(roles.filter((role) => member.accessRoleIds.includes(role.id)).flatMap((role) => role.permissions)).size} permissions`}
+            open={expandedId === member.id}
+            onToggle={() =>
+              setExpandedId(expandedId === member.id ? undefined : member.id)
+            }
+          >
+            <MemberForm member={member} roles={roles} locations={locations} />
+            <PractitionerBookingSettings userId={member.userId} />
+          </ExpandableCard>
         ))}
     </div>
   );

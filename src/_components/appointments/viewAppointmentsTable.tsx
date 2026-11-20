@@ -30,7 +30,7 @@ export default function ViewAppointmentsTable({
       }),
       columnHelper.accessor('practitionerName', {
         cell: (info) => info.getValue(),
-        header: 'PractitionerRole',
+        header: 'Practitioner',
       }),
       columnHelper.accessor('organizationName', {
         cell: (info) => info.getValue(),

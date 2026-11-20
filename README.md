@@ -109,3 +109,32 @@ Manual review after applying the API migration:
 6. Save a new record with Show in patient portal unticked: the source organization can read it, while patient/shared history excludes it. Turn no permissions on implicitly.
 
 Verified on 17 November 2026: **70 UI regressions passed** and the production build passed TypeScript/lint. No live browser/API/database journey was run. The API README records migration and backend verification details. Review `recordSharingRequests.tsx` → Patient Care integration → route gates/API paths → visibility checkbox/history labels → tests. FHIR remains separate upcoming work.
+
+## Portal access and UI behavior
+
+Patient signup uses the existing branded form and automatically signs in. A sole workspace opens directly; multiple modes show the selector; accounts without modes open Account home. Failed automatic login leaves one sign-in option without repeating registration. Account reveals Enable patient access through a toggle. Account and workspace details show assigned access-role names and the selected professional assignment.
+
+Personal staff appointment/session views require the matching own-read permission plus a practitioner assignment in the selected organization. They include all permitted assignments without requiring one to be selected. Organization views require `appointments.read-organization` / `schedules.read-organization` or the matching `appointments.manage-organization` / `schedules.manage-organization` permission. Only management grants allow changes. Patient mode shows its linked appointments. Unauthorized menu entries and empty groups are hidden; direct pages use the same rules. Session history offers My/Organization choices only when both are allowed.
+
+Session lists and edit screens show practitioner, professional role, organization, and location. Starting, ending, or cancelling a session refreshes current status, lists, and history. History shows stored dates, status, times, and encounter counts; detailed encounter history remains deferred.
+
+Organization > Locations supports view/add/edit with type, parent, address, and active status. It requires organization management permission and unrestricted scope. Staff creation and Manage Staff offer Accept appointments for professional assignments, initially off. Booking search filters eligible assignments and can check date-specific slot availability. Professional titles do not decide eligibility or permissions.
+
+The shared `ExpandableCard` wraps administrator/staff lists, sharing requests, clinical records, prescriptions, access roles, locations, sessions, and session history. Each list starts collapsed and allows one open item. Headers keep identifying details, status, dates, and source organizations visible where relevant; expanding shows existing details and actions. Existing confirmation dialogs are reused. Organization details uses the standard Manage Administrators quick action; organization rows omit Copy ID.
+
+### Setup and manual checks
+
+Apply the API's `AddPractitionerBookingEligibility` and `RenameOrganizationManagementPermissions` migrations to the checked development target before running the updated app. Enable Accept appointments for intended assignments and explicitly assign own-read or organization-read permissions where needed. See the API README for migration commands.
+
+1. Sign up a patient and check automatic login, workspace routing, and the failed-login fallback. Check the patient-access toggle on Account.
+2. Expand administrator/staff and other information lists. Check one open item, retained actions, and sharing approval/rejection/revocation confirmations.
+3. Add/edit locations; try a foreign parent, a cycle, and a restricted manager.
+4. Enable booking for an assignment. Check that opted-out assignments cannot be booked, including by submitting a known slot ID.
+5. Compare an administrator without practitioner assignments, a practitioner with own-read grants, a user with both own/organization grants, an organization read-only viewer, and Patient mode. Check menus, direct pages, API boundaries, and absence of unauthorized editing.
+6. Start/end/cancel a session and check immediate refresh. Check inclusive history dates, clinical-record pagination, and the existing consent flow.
+
+### Recorded verification
+
+On 20 November 2026, **82 UI tests, TypeScript, and lint passed** after the permission changes. A production build passed earlier in this implementation, before the final permission changes. No live browser/API/database journey was run. API tests and PostgreSQL verification limits are documented in the API README.
+
+The next implementation is the bounded FHIR exchange in the refactor plan.
