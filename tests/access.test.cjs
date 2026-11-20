@@ -908,3 +908,109 @@ test('workspace refresh preserves a permitted clinical choice and clears a revok
   assert.equal(state.context().workspace.practitionerRoleId, undefined);
   assert.equal(state.context().workspace.mode, WorkspaceModes.Work);
 });
+
+test('sharing requests allow patient mode and permitted work mode only', () => {
+  assert.equal(routes.canOpenPath('/ehr/sharing', patient), true);
+  assert.equal(routes.canOpenPath('/ehr/sharing', work), false);
+  assert.equal(routes.canOpenPath('/ehr/sharing', { ...work, permissions: ['clinical-records.read'] }), true);
+  assert.equal(routes.canOpenPath('/ehr/sharing', platform), false);
+});
+
+function sharingHarness({ selected = patient, rows = [], handler, selectedPatient, grants = ['clinical-records.read'] } = {}) {
+  const requests = [], invalidations = [], queries = [];
+  const paths = {
+    recordSharing: '/RecordSharing',
+    decideRecordSharing: id => `/RecordSharing/${id}/Decision`,
+    revokeRecordSharing: id => `/RecordSharing/${id}/Revoke`,
+  };
+  const harness = createHookHarness('src/_components/patient/recordSharingRequests.tsx', name => {
+    if (name === '_context') return { useUser: () => ({ accessToken: 'token' }), useWorkspace: () => ({ workspace: selected, hasPermission: value => grants.includes(value) }) };
+    if (name === '@/constants') return { API_PATHS: paths, WorkspaceModes };
+    if (name === '@/hooks') return {
+      useAppQuery: (options, enabled) => { queries.push({ options, enabled }); return { data: enabled ? rows : undefined }; },
+      useQueryFunction: () => ({ createQueryFunction: options => async () => { requests.push(options); return handler ? handler(options) : { isSuccess: true, data: true }; } }),
+    };
+    if (name === '@tanstack/react-query') return { useQueryClient: () => ({ invalidateQueries: async options => invalidations.push(options) }) };
+    if (name === '@/components/input') return { Form: 'Form', TextAreaInput: 'TextAreaInput', DateInput: 'DateInput' };
+    if (name === '@/components/buttons') return { SecondaryButton: 'SecondaryButton' };
+    if (name === '@/components/misc') return { AppNotification: 'AppNotification' };
+    if (name === '@/components/popup/confirmationDialog') return { default: 'ConfirmationDialog' };
+    if (name === '_utils/dateUtils') return { toDefaultDateFormat: value => value.toISOString().slice(0, 10), toDisplayDateTimeFormat: value => value.toISOString() };
+    return {};
+  });
+  return { render: () => harness.render('default', { patientId: selectedPatient }), requests, invalidations, queries };
+}
+
+const sharingRow = { id: 'request-a', patientId: 'patient-b', patientName: 'Synthetic Patient', organizationName: 'Receiving clinic', practitionerName: 'Synthetic Practitioner', practitionerRole: 'Nurse', purpose: 'Continuing care', status: 'Pending', expiresAt: '2099-01-01T23:59:59Z' };
+
+test('requesting access requires a clinical grant, professional assignment, and selected patient', () => {
+  assert.equal(element(sharingHarness({ selected: work, selectedPatient: 'patient-b' }).render(), 'Form'), undefined);
+  assert.equal(element(sharingHarness({ selected: clinicalWork, selectedPatient: 'patient-b', grants: [] }).render(), 'Form'), undefined);
+  assert.ok(element(sharingHarness({ selected: clinicalWork, selectedPatient: 'patient-b' }).render(), 'Form'));
+  assert.equal(element(sharingHarness({ selected: patient, selectedPatient: 'patient-b' }).render(), 'Form'), undefined);
+});
+
+test('sharing form sends the selected patient and assignment and keeps failed drafts', async () => {
+  const state = sharingHarness({ selected: clinicalWork, selectedPatient: 'patient-b', handler: async () => { throw new Error('Try again'); } });
+  element(state.render(), 'TextAreaInput').props.onChange('Care review');
+  await element(state.render(), 'Form').props.action();
+  assert.equal(state.requests[0].path, '/RecordSharing');
+  assert.equal(state.requests[0].payload.patientId, 'patient-b');
+  assert.equal(state.requests[0].payload.practitionerRoleId, 'my-assignment');
+  assert.equal(element(state.render(), 'TextAreaInput').props.value, 'Care review');
+  assert.equal(state.invalidations.length, 0);
+});
+
+test('duplicate request submissions are blocked and a successful request clears the draft', async () => {
+  let finish;
+  const state = sharingHarness({ selected: clinicalWork, selectedPatient: 'patient-b', handler: () => new Promise(resolve => { finish = resolve; }) });
+  element(state.render(), 'TextAreaInput').props.onChange('Care review');
+  const submit = element(state.render(), 'Form').props.action;
+  const first = submit();
+  await submit();
+  assert.equal(state.requests.length, 1);
+  finish({ isSuccess: true, data: 'request-a' });
+  await first;
+  assert.equal(element(state.render(), 'TextAreaInput').props.value, '');
+  assert.equal(state.invalidations[0].queryKey[1], 'work:a');
+});
+
+test('patient approval waits for confirmation and sends only the decision', async () => {
+  const state = sharingHarness({ rows: [sharingRow] });
+  elements(state.render(), 'SecondaryButton').find(row => row.props.buttonText === 'Approve').props.onClick();
+  assert.equal(state.requests.length, 0);
+  let dialog = element(state.render(), 'ConfirmationDialog');
+  assert.match(dialog.props.message, /Receiving clinic/);
+  assert.match(dialog.props.message, /Future records are excluded/);
+  dialog.props.onClose();
+  assert.equal(state.requests.length, 0);
+  elements(state.render(), 'SecondaryButton').find(row => row.props.buttonText === 'Approve').props.onClick();
+  await element(state.render(), 'ConfirmationDialog').props.onConfirm();
+  assert.equal(state.requests[0].path, '/RecordSharing/request-a/Decision');
+  assert.equal(state.requests[0].payload.approve, true);
+  assert.deepEqual(Object.keys(state.requests[0].payload), ['approve']);
+  assert.equal(state.invalidations[0].queryKey[1], 'patient');
+});
+
+test('rejection and revocation use their intended endpoints', async () => {
+  for (const [status, button, suffix, approval] of [['Pending', 'Reject', 'Decision', false], ['Approved', 'Revoke access', 'Revoke', undefined]]) {
+    const state = sharingHarness({ rows: [{ ...sharingRow, status }] });
+    elements(state.render(), 'SecondaryButton').find(row => row.props.buttonText === button).props.onClick();
+    await element(state.render(), 'ConfirmationDialog').props.onConfirm();
+    assert.equal(state.requests[0].path, `/RecordSharing/request-a/${suffix}`);
+    assert.equal(state.requests[0].payload?.approve, approval);
+  }
+});
+
+test('expired requests cannot be approved and patient inbox does not send a supplied patient filter', () => {
+  const state = sharingHarness({ rows: [{ ...sharingRow, expiresAt: '2000-01-01T00:00:00Z' }], selectedPatient: 'other-patient' });
+  assert.equal(elements(state.render(), 'SecondaryButton').find(row => row.props.buttonText === 'Approve'), undefined);
+  assert.equal(state.queries[0].options.queryParams, undefined);
+});
+
+test('patient visibility defaults to true and false survives the clinical save', async () => {
+  const state = clinicalEditorHarness();
+  assert.equal(element(state.render(), 'CreateEhrForm').props.defaultData.isPatientVisible, true);
+  await element(state.render(), 'CreateEhrForm').props.onSave({ patientId: 'patient-b', diagnosis: 'Private note', visitDate: '2026-11-17', isPatientVisible: false });
+  assert.equal(state.requests[0].payload.isPatientVisible, false);
+});

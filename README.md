@@ -75,7 +75,7 @@ No booking, confirmation, arrival, session start, or encounter completion is req
 
 Patient lookup needs `patients.read`; history needs `clinical-records.read`; writing needs `clinical-records.write` and an active owned clinical assignment within Work mode; prescribing separately needs `prescriptions.issue`. Disabled actions explain missing access. These do not grant access to another organization or patient. External FHIR records are still Phase 6; the full stored encounter lifecycle is deferred.
 
-Manual review: search/open a registered patient with no appointment or schedule; save notes only and then a record with prescriptions; confirm refreshed history/source labels and patient self-history; choose a different patient and check the draft clears; reject a wrong-organization patient; check missing grants; open direct care while an appointment encounter is active and confirm patient identity and appointment status remain correct.
+Manual review: search/open a registered patient with no appointment or schedule; save notes only and then a record with prescriptions; confirm refreshed history/source labels and patient self-history; choose a different patient and check the draft clears; find other-organization patients while keeping their clinical records private until approval; check missing grants; open direct care while an appointment encounter is active and confirm patient identity and appointment status remain correct.
 
 Verified on 11 November 2026: **56 UI tests passed**, and the production build passed TypeScript/lint. No live browser journey was run. Use `npm run test:access` and `npm run build` to repeat the automated checks.
 
@@ -89,3 +89,23 @@ The shared user form now awaits a true success/failure result from every caller.
 Review your reported case: create a Nurse assignment, confirm the form clears, replay the same request and expect 409, assign its access roles through Manage Staff, then log in. The account sees one organization Work mode; Patient mode appears only if it has a Patient profile. No Nurse/access-role workspace entries appear. Confirm clinical writing works from Work mode and Patient mode cannot open staff pages. With multiple genuine clinical assignments, selection changes authorship context while work permissions stay the same.
 
 Verified on 11 November 2026: **62 UI tests passed** and the full production build passed TypeScript/lint. No live browser was run. Use `npm run test:access` and `npm run build` for verification. The API README records the server checks and the unrun PostgreSQL concurrency case. Existing duplicate records were preserved rather than deleted from the database.
+
+
+## Shared patient discovery and record sharing
+
+Patient Care now searches the shared patient index across organizations. Results show identifying demographics only, with at most 30 matches; select the correct patient using their name, birth date, and Patient ID. Existing patients are reused rather than registered again. The record editor has a checked-by-default **Show in patient portal** option. This is separate from permission for another organization to read the record.
+
+Staff with `clinical-records.read` and an active selected practitioner assignment can send a request from **Patient Care > Clinical history > Record sharing requests**. Enter purpose, optional clinical-record dates, and an access expiry (default 30 days). Patients use **Medical Records > Sharing Requests** to approve, reject, or revoke through the existing confirmation dialog. The request shows verified practitioner name/role/email and receiving organization/contact. Work mode can also view the organization's sent requests on this page.
+
+Shared history/prescriptions use the existing screens, show source organization and author, and are labelled read only. Only published records recorded before approval and within the requested dates are included. Expiry and revocation are checked on backend reads. Cached data already viewed cannot be recalled. A patient without an active portal account receives a clear unsupported-activation message; no account is claimed by matching an email.
+
+Manual review after applying the API migration:
+
+1. Use a patient with a portal account and published records at organization A; include a hidden record and a prescription.
+2. At organization B, find that patient by name/email/ID. Check that their A records and direct prescription URLs are unavailable before approval.
+3. With an active practitioner assignment and clinical-read permission at B, send a dated request with purpose and expiry.
+4. In the patient's Patient mode, open Sharing Requests, inspect requester/scope, and approve. At B, refresh clinical history and verify only eligible A records/prescriptions appear, labelled with their source. Source records must remain unchanged.
+5. Revoke in Patient mode, then refresh B's history/detail/prescription pages: shared access stops. Repeat with rejection, expired access, another patient, another organization, and missing permissions. A newly created/backdated record must remain outside an older approval.
+6. Save a new record with Show in patient portal unticked: the source organization can read it, while patient/shared history excludes it. Turn no permissions on implicitly.
+
+Verified on 17 November 2026: **70 UI regressions passed** and the production build passed TypeScript/lint. No live browser/API/database journey was run. The API README records migration and backend verification details. Review `recordSharingRequests.tsx` → Patient Care integration → route gates/API paths → visibility checkbox/history labels → tests. FHIR remains separate upcoming work.

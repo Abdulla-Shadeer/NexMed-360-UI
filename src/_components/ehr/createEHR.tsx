@@ -51,6 +51,7 @@ export default function CreateEHR({
     patientId: patient?.id ?? '',
     practitionerRoleId: workspace?.practitionerRoleId ?? '',
     diagnosis: '',
+    isPatientVisible: true,
     visitDate: toDefaultDateFormat(new Date()),
   });
   const [defaultPrescription] = useState<AddPrescriptionDto>({

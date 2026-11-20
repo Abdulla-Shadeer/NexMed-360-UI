@@ -78,6 +78,15 @@ export default function PatientEHRs({ patient }: { patient: ViewPatientDto }) {
                 _key="Source organization"
                 value={ehr.organizationName}
               />
+              {ehr.isShared && (
+                <p className="text-blue-secondary">
+                  Shared with patient approval. Read only.
+                </p>
+              )}
+              {workspace?.mode === WorkspaceModes.Work &&
+                !ehr.isPatientVisible && (
+                  <p>Not shown in the patient portal.</p>
+                )}
               <KeyValueData _key="Diagnosis" value={ehr.diagnosis} />
               <KeyValueData
                 _key="Practitioner Note"

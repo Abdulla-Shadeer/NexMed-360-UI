@@ -2,7 +2,7 @@
 
 import { useForm } from '@tanstack/react-form';
 import { AddClinicalRecordDto } from '_types/dtos';
-import { DateInput, Form, TextInput } from '../input';
+import { CheckBoxInput, DateInput, Form, TextInput } from '../input';
 import { SecondaryButton } from '../buttons';
 import { IconArrowRight, IconDocumentCheck, IconTrash } from '../icons/icons';
 import { useRef } from 'react';
@@ -87,6 +87,21 @@ export default function CreateEhrForm({
         </Field>
 
         <p>The record date and author are set when you save.</p>
+
+        <Field name="isPatientVisible">
+          {(field) => (
+            <CheckBoxInput
+              name="Patient visibility"
+              checkItems={[{ key: 'visible', value: 'Show in patient portal' }]}
+              checkedItems={field.state.value !== false ? ['visible'] : []}
+              onChange={(values) =>
+                field.handleChange(values.includes('visible'))
+              }
+              error=""
+              description="This does not share the record with other organizations."
+            />
+          )}
+        </Field>
 
         <Field name="followUpDate">
           {(field) => (

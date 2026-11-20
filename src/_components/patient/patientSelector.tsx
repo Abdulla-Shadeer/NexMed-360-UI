@@ -101,7 +101,13 @@ export default function PatientSelector({
           onClick={() => {}}
         />
       </Form>
-      {results?.length === 0 && <p>No matching patients in your workspace.</p>}
+      {results?.length === 0 && <p>No matching patients found.</p>}
+      {results && (
+        <p>
+          Showing up to 30 matches. Check the name, birth date, and Patient ID
+          before selecting. Refine your search if needed.
+        </p>
+      )}
       {results && (
         <div className="w-full flex flex-wrap gap-6">
           {results.map((patient) => (

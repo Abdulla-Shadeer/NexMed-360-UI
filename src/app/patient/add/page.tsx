@@ -1,6 +1,7 @@
 'use client';
 
 import AddUserForm from '@/components/organization/addUserForm';
+import Link from 'next/link';
 import { AppNotification } from '@/components/misc';
 import AppLoader from '@/components/misc/loader';
 import { API_PATHS } from '@/constants';
@@ -48,6 +49,13 @@ export default function AddPatientPage() {
     <div>
       {isLoading && <AppLoader />}
       {notification && <AppNotification notification={notification} />}
+      <p className="mb-6">
+        Already registered?{' '}
+        <Link href="/patient/view" className="text-blue-primary underline">
+          Find the existing patient
+        </Link>{' '}
+        and use their Patient ID instead of creating another account.
+      </p>
       <AddUserForm
         userType="patient"
         onFormSubmit={(data) => handleFormSubmit(data as CreatePatientDto)}

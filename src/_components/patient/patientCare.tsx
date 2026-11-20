@@ -13,6 +13,7 @@ import { SecondaryButton } from '@/components/buttons';
 import PatientEHRs from '@/components/ehr/patientEhrs';
 import CreateEHR from '@/components/ehr/createEHR';
 import PatientSelector from './patientSelector';
+import RecordSharingRequests from './recordSharingRequests';
 
 export default function PatientCare({
   initialTab = 'history',
@@ -80,7 +81,7 @@ export default function PatientCare({
             <KeyValueData _key="Gender" value={patient.gender} />
             <KeyValueData _key="Patient ID" value={patient.id} />
             <KeyValueData
-              _key="Working organization"
+              _key="Selected organization"
               value={workspace?.organizationName ?? ''}
             />
           </div>
@@ -105,7 +106,12 @@ export default function PatientCare({
               to write clinical records.
             </p>
           )}
-          {tab === 'history' && canRead && <PatientEHRs patient={patient} />}
+          {tab === 'history' && canRead && (
+            <>
+              <PatientEHRs patient={patient} />
+              <RecordSharingRequests patientId={patient.id} />
+            </>
+          )}
           {tab === 'record' && canWrite && (
             <CreateEHR
               patient={patient}

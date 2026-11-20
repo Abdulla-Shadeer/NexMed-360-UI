@@ -196,6 +196,13 @@ const navPaths: NavPath[] = [
         permission: 'clinical-records.read',
       },
       {
+        name: 'Sharing Requests',
+        path: '/ehr/sharing',
+        icon: IconShieldCheck,
+        modes: [WorkspaceModes.Patient, WorkspaceModes.Work],
+        permission: 'clinical-records.read',
+      },
+      {
         name: 'Create Record',
         path: '/ehr/create',
         icon: IconPlusCircle,

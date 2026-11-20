@@ -262,6 +262,9 @@ export interface ViewPrescriptionDto {
 
 export interface ViewClinicalRecordDto {
   id: string;
+  organizationId: string;
+  isShared: boolean;
+  isPatientVisible: boolean;
   organizationName: string;
   patientId: string;
   patientName: string;
@@ -275,6 +278,7 @@ export interface ViewClinicalRecordDto {
 }
 
 export interface AddClinicalRecordDto {
+  isPatientVisible?: boolean;
   practitionerRoleId: string;
   patientId: string;
   diagnosis: string;
