@@ -138,3 +138,9 @@ Apply the API's `AddPractitionerBookingEligibility` and `RenameOrganizationManag
 On 20 November 2026, **82 UI tests, TypeScript, and lint passed** after the permission changes. A production build passed earlier in this implementation, before the final permission changes. No live browser/API/database journey was run. API tests and PostgreSQL verification limits are documented in the API README.
 
 The next implementation is the bounded FHIR exchange in the refactor plan.
+
+## FHIR foundation: plan step 1
+
+Prescription responses include Status and Intent. Existing expandable prescription cards show the actual status (including Unknown) and order type instead of deriving every label from IsActive. The server keeps Active/Order as the local creation defaults, so the creation form needs no new workflow or selectors. Sharing response types accept an external partner recipient, and requester email wording is now Practitioner contact.
+
+Apply the API's AddFhirExchangeFoundation migration to the checked development database before running the updated API/UI. Partner authentication, external search, and external record retrieval belong to later plan steps. Review the existing prescription history and patient sharing inbox. Recorded on 21 November 2026: **83 UI tests, TypeScript, and lint passed**; no live browser journey was run.

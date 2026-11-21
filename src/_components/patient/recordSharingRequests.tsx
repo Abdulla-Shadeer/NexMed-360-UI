@@ -262,7 +262,7 @@ export default function RecordSharingRequests({
                 value={`${request.practitionerName} (${request.practitionerRole})`}
               />
               <KeyValueData
-                _key="Practitioner email"
+                _key="Practitioner contact"
                 value={request.practitionerEmail || '~'}
               />
               <KeyValueData

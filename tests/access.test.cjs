@@ -1199,3 +1199,19 @@ test('session history only offers the views the user can access', () => {
   assert.equal(element(view, 'SelectInput'), undefined);
   assert.equal(queries.at(-1).queryParams.ownOnly, false);
 });
+
+test('prescription history displays the actual status and intent for an inactive item', () => {
+  const harness = createHookHarness('src/_components/ehr/viewPrescriptions.tsx', name => {
+    if (name === 'lodash') return require('lodash');
+    if (name === '@/components/misc/expandableCard') return { default: 'ExpandableCard' };
+    if (name === '../misc/keyValueData') return { default: 'KeyValueData' };
+    if (name === '_utils/dateUtils') return { toDefaultDateFormat: () => 'date', toDisplayDateTimeFormat: () => 'date' };
+    return {};
+  });
+  const view = harness.render('default', { prescriptions: [{ id: 'rx', medicineName: 'Synthetic medicine', issuedOn: '2026-11-21',
+    issuedAtOrganization: 'Hospital', issuedByPractitioner: 'Nurse', timesPerDay: 1, isActive: false, status: 'Unknown', intent: 'Order' }] });
+  assert.equal(element(view, 'ExpandableCard').props.title, 'Synthetic medicine — Unknown');
+  const details = elements(view, 'KeyValueData');
+  assert.equal(details.find(row => row.props._key === 'Status').props.value, 'Unknown');
+  assert.equal(details.find(row => row.props._key === 'Type').props.value, 'Order');
+});

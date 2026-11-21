@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { startCase } from 'lodash';
 import ExpandableCard from '@/components/misc/expandableCard';
 import { ViewPrescriptionDto } from '_types/dtos';
 import { toDefaultDateFormat, toDisplayDateTimeFormat } from '_utils/dateUtils';
@@ -17,7 +18,7 @@ export default function ViewPrescriptions({
       {prescriptions.map((item) => (
         <ExpandableCard
           key={item.id}
-          title={`${item.medicineName} — ${item.isActive ? 'Active' : 'Inactive'}`}
+          title={`${item.medicineName} — ${startCase(item.status)}`}
           description={`${toDefaultDateFormat(new Date(item.issuedOn))} · Source: ${item.issuedAtOrganization} · ${item.issuedByPractitioner}`}
           open={expandedId === item.id}
           onToggle={() =>
@@ -25,6 +26,8 @@ export default function ViewPrescriptions({
           }
         >
           <KeyValueData _key="Medicine" value={item.medicineName} />
+          <KeyValueData _key="Status" value={startCase(item.status)} />
+          <KeyValueData _key="Type" value={startCase(item.intent)} />
           <KeyValueData _key="Dosage" value={item.dosage} />
           <KeyValueData
             _key="Times per Day"

@@ -260,6 +260,8 @@ export interface ViewPrescriptionDto {
   duration?: string;
   notes?: string;
   isActive: boolean;
+  status: string;
+  intent: string;
 }
 
 export interface ViewClinicalRecordDto {

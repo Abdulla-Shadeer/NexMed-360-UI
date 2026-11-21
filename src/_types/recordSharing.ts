@@ -2,7 +2,8 @@ export interface RecordSharingRequestDto {
   id: string;
   patientId: string;
   patientName: string;
-  receivingOrganizationId: string;
+  receivingOrganizationId?: string | null;
+  receivingPartnerId?: string | null;
   organizationName: string;
   organizationContact: string;
   practitionerName: string;
